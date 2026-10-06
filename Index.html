@@ -110,7 +110,7 @@
             
             <div class="position-relative mb-3">
               <div class="input-group input-group-lg">
-                <input type="text" id="searchKeyword" class="form-control senior-input" placeholder="Ketik NIP / Nama Anggota..." oninput="handleLiveSearchInput()" onkeypress="handleSearchEnter(event)" autocomplete="off">
+                <input type="text" id="searchKeyword" class="form-control senior-input" placeholder="Ketik Nama..." oninput="handleLiveSearchInput()" onkeypress="handleSearchEnter(event)" autocomplete="off">
                 <button class="btn btn-navy px-4 fs-6" type="button" onclick="doSearch()">
                   <i class="fa-solid fa-search me-1"></i> Cari
                 </button>
@@ -147,18 +147,18 @@
               </div>
               <div class="card border-primary shadow-sm" style="border-radius: 14px; overflow: hidden;">
                 <div class="card-header bg-primary text-white p-3 d-flex justify-content-between align-items-center">
-                  <h5 class="mb-0 fw-bold" id="resNama" style="font-size: 1.25rem;">-</h5>
-                  <span class="badge bg-light text-dark fs-6 px-3 py-2" id="resNip">NIP: -</span>
+                  <h5 class="mb-0 fw-bold" id="resNama" style="font-size: 1.2rem;">-</h5>
+                  <span class="badge bg-light text-dark px-3 py-2 fw-semibold" id="resNip" style="font-size: 0.95rem;">NIP: -</span>
                 </div>
                 <div class="card-body p-4">
                   <div class="row text-center mb-3 g-3">
                     <div class="col-md-6 border-end mb-3 mb-md-0">
-                      <span class="text-muted fw-medium fs-6">Status Pembayaran Terakhir</span>
-                      <h5 class="text-success mt-1 mb-0 fw-bold fs-4" id="resLunas">Lunas s.d -</h5>
+                      <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.02em;">Status Pembayaran Terakhir</span>
+                      <h5 class="text-success mt-2 mb-0 fw-bold" style="font-size: 1.25rem;" id="resLunas">Lunas s.d -</h5>
                     </div>
                     <div class="col-md-6">
-                      <span class="text-muted fw-medium fs-6">Kekurangan Pembayaran s.d <span id="resBulanIni">-</span></span>
-                      <h4 class="mt-1 mb-0 fw-bold" id="resTotalTunggakan">Rp 0</h4>
+                      <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.02em;">Kekurangan Pembayaran s.d <span id="resBulanIni">-</span></span>
+                      <h4 class="mt-2 mb-0 fw-bold" style="font-size: 1.35rem;" id="resTotalTunggakan">Rp 0</h4>
                     </div>
                   </div>
 
@@ -596,9 +596,12 @@
       if (data.rincianTunggakan && data.rincianTunggakan.length > 0) {
         data.rincianTunggakan.forEach(function(item) {
           var div = document.createElement("div");
-          div.className = "list-group-item d-flex justify-content-between align-items-center py-3 bg-light rounded-3 mb-2 border-0 shadow-sm";
-          div.innerHTML = '<div class="py-1"><span class="fw-bold text-dark fs-5">Tahun ' + item.tahun + '</span> <span class="text-secondary fs-5 fw-medium ms-2">(' + item.rentangBulan + ')</span></div>' +
-                          '<span class="badge bg-danger rounded-pill px-3 py-2 fs-5 fw-bold ms-2">Rp ' + item.total.toLocaleString('id-ID') + '</span>';
+          div.className = "list-group-item d-flex justify-content-between align-items-center py-2.5 px-3 bg-light rounded-3 mb-2 border-0 shadow-sm";
+          div.innerHTML = '<div class="d-flex align-items-center py-1">' +
+                            '<span class="fw-bold text-dark" style="font-size: 1.1rem;">Tahun ' + item.tahun + '</span>' +
+                            '<span class="text-muted ms-2 fw-medium" style="font-size: 0.95rem;">(' + item.rentangBulan + ')</span>' +
+                          '</div>' +
+                          '<span class="badge bg-danger rounded-pill px-3 py-2 fw-bold ms-2" style="font-size: 0.95rem;">Rp ' + item.total.toLocaleString('id-ID') + '</span>';
           listEl.appendChild(div);
         });
       } else {
