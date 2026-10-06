@@ -50,12 +50,6 @@
               </button>
             </div>
             
-            <!-- Loading Spinner -->
-            <div id="searchLoader" class="text-center py-3 loader">
-              <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
-              <p class="small text-muted mt-2">Mencari data anggota...</p>
-            </div>
-
             <!-- Multiple Matches Selection List -->
             <div id="multipleResults" class="d-none mt-3">
               <div class="alert alert-info py-3 shadow-sm border-0">
@@ -65,6 +59,12 @@
               <div id="multipleList" class="row g-3 mb-3">
                 <!-- Cards populated by JS -->
               </div>
+            </div>
+
+            <!-- Loading Spinner (Berada di bawah daftar pilihan nama) -->
+            <div id="searchLoader" class="text-center py-3 loader">
+              <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+              <p class="small text-muted mt-2" id="searchLoaderText">Mencari data anggota...</p>
             </div>
 
             <!-- Single Result Card -->
@@ -334,6 +334,7 @@
       var kw = document.getElementById("searchKeyword").value.trim();
       if (!kw) return alert("Masukkan Nama atau NIP terlebih dahulu!");
 
+      document.getElementById("searchLoaderText").textContent = "Mencari data anggota...";
       document.getElementById("searchLoader").classList.remove("loader");
       document.getElementById("multipleResults").classList.add("d-none");
       document.getElementById("searchResult").classList.add("d-none");
@@ -377,7 +378,10 @@
     }
 
     function selectAnggota(idAnggota) {
+      document.getElementById("searchLoaderText").textContent = "Memuat rincian data anggota...";
+      document.getElementById("searchResult").classList.add("d-none");
       document.getElementById("searchLoader").classList.remove("loader");
+
       google.script.run.withSuccessHandler(function(res) {
         document.getElementById("searchLoader").classList.add("loader");
         if (res.success) {
