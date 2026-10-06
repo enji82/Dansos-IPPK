@@ -603,9 +603,9 @@
             item.detailBulan.forEach(function(bln) {
               monthlyHtml += 
                 '<div class="col-12 col-md-6">' +
-                  '<div class="p-2.5 px-3 bg-light rounded-3 d-flex justify-content-between align-items-center border-start border-3 border-danger shadow-sm mb-1">' +
-                    '<span class="fw-bold text-dark text-nowrap" style="font-size: clamp(0.9rem, 2.5vw, 1.05rem);"><i class="fa-regular fa-calendar-check me-2 text-primary"></i>' + bln.namaBulan + '</span>' +
-                    '<span class="fw-bold text-danger text-nowrap ms-2" style="font-size: clamp(0.9rem, 2.5vw, 1.05rem);">Rp ' + bln.nominal.toLocaleString('id-ID') + '</span>' +
+                  '<div class="p-2 px-3 bg-light rounded-3 d-flex justify-content-between align-items-center border-start border-3 border-danger shadow-sm mb-1">' +
+                    '<span class="fw-medium text-dark text-nowrap" style="font-size: 0.92rem;"><i class="fa-regular fa-calendar-check me-2 text-primary"></i>' + bln.namaBulan + '</span>' +
+                    '<span class="fw-bold text-danger text-nowrap ms-2" style="font-size: 0.92rem;">Rp ' + bln.nominal.toLocaleString('id-ID') + '</span>' +
                   '</div>' +
                 '</div>';
             });
@@ -617,7 +617,7 @@
                 '<i class="fa-solid fa-chevron-right text-primary me-2 transition-icon" id="iconYear-' + item.tahun + '"></i>' +
                 '<div>' +
                   '<span class="fw-bold text-dark fs-5">Tahun ' + item.tahun + '</span>' +
-                  '<span class="text-secondary fs-6 fw-medium ms-2">(' + item.rentangBulan + ')</span>' +
+                  '<span class="text-dark fw-bold ms-2" style="font-size: 1.05rem;">(' + item.rentangBulan + ')</span>' +
                 '</div>' +
               '</div>' +
               '<div class="d-flex align-items-center">' +
