@@ -4,18 +4,71 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistem Iuran Anggota</title>
+  <!-- Google Fonts: Plus Jakarta Sans (Ramah Lansia) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body {
+      background-color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+    }
     .navbar-custom { background-color: #1F4E79; }
-    .card-custom { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .btn-navy { background-color: #1F4E79; color: white; }
-    .btn-navy:hover { background-color: #153452; color: white; }
-    .status-badge { font-size: 0.9rem; padding: 6px 12px; border-radius: 20px; }
+    .card-custom {
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    }
+    .btn-navy {
+      background-color: #1F4E79;
+      color: white;
+      font-weight: 600;
+    }
+    .btn-navy:hover {
+      background-color: #153452;
+      color: white;
+    }
+    .status-badge { font-size: 0.95rem; padding: 6px 14px; border-radius: 20px; }
     .loader { display: none; }
+
+    /* Tipografi & Interaksi Ramah Lansia */
+    .senior-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #1F4E79;
+    }
+    .senior-input {
+      font-size: 1.15rem;
+      font-weight: 500;
+      padding: 12px 18px;
+    }
+    .senior-card-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .senior-nip {
+      font-size: 0.95rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+    .name-selection-card {
+      transition: all 0.2s ease;
+      border-left: 5px solid #1F4E79 !important;
+      border-radius: 12px;
+      background-color: #ffffff;
+    }
+    .name-selection-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(31, 78, 121, 0.12) !important;
+      background-color: #f8fafc;
+    }
   </style>
 </head>
 <body>
@@ -23,11 +76,11 @@
   <!-- NAVBAR HEADER -->
   <nav class="navbar navbar-dark navbar-custom mb-4 shadow-sm">
     <div class="container">
-      <span class="navbar-brand mb-0 h1"><i class="fa-solid fa-wallet me-2"></i> Sistem Iuran Anggota</span>
-      <button class="btn btn-outline-light btn-sm" id="btnAdminAuth" onclick="openLoginModal()">
+      <span class="navbar-brand mb-0 h1 fw-bold"><i class="fa-solid fa-wallet me-2"></i> Sistem Iuran Anggota</span>
+      <button class="btn btn-outline-light btn-sm fw-semibold" id="btnAdminAuth" onclick="openLoginModal()">
         <i class="fa-solid fa-lock me-1"></i> Akses Admin
       </button>
-      <button class="btn btn-danger btn-sm d-none" id="btnLogout" onclick="logoutAdmin()">
+      <button class="btn btn-danger btn-sm d-none fw-semibold" id="btnLogout" onclick="logoutAdmin()">
         <i class="fa-solid fa-right-from-bracket me-1"></i> Keluar Admin
       </button>
     </div>
@@ -40,20 +93,26 @@
       <div class="row justify-content-center">
         <div class="col-md-8">
           <div class="card card-custom p-4 mb-4">
-            <h4 class="text-center text-primary mb-3"><i class="fa-solid fa-magnifying-glass me-2"></i> Cek Status Pembayaran Iuran</h4>
-            <p class="text-muted text-center small mb-4">Masukkan Nama, NIP, atau ID Anggota Anda untuk melihat posisi pembayaran & setoran.</p>
+            <h4 class="text-center senior-title mb-2"><i class="fa-solid fa-magnifying-glass me-2"></i> Cek Status Pembayaran Iuran</h4>
+            <p class="text-muted text-center fs-6 mb-4">Masukkan Nama, NIP, atau ID Anggota Anda untuk melihat posisi pembayaran.</p>
             
             <div class="input-group input-group-lg mb-3">
-              <input type="text" id="searchKeyword" class="form-control" placeholder="Ketik NIP / Nama Anggota..." onkeypress="handleSearchEnter(event)">
-              <button class="btn btn-navy" type="button" onclick="doSearch()">
-                <i class="fa-solid fa-search"></i> Cari
+              <input type="text" id="searchKeyword" class="form-control senior-input" placeholder="Ketik NIP / Nama Anggota..." onkeypress="handleSearchEnter(event)">
+              <button class="btn btn-navy px-4 fs-6" type="button" onclick="doSearch()">
+                <i class="fa-solid fa-search me-1"></i> Cari
               </button>
+            </div>
+
+            <!-- Loading Spinner (Berada di antara daftar nama dan rincian) -->
+            <div id="searchLoader" class="text-center py-4 loader">
+              <div class="spinner-border text-primary" style="width: 2.5rem; height: 2.5rem;" role="status"><span class="visually-hidden">Loading...</span></div>
+              <p class="fs-6 text-muted fw-semibold mt-3" id="searchLoaderText">Mencari data anggota...</p>
             </div>
             
             <!-- Multiple Matches Selection List -->
             <div id="multipleResults" class="d-none mt-3">
-              <div class="alert alert-info py-3 shadow-sm border-0">
-                <h6 class="fw-bold mb-1"><i class="fa-solid fa-users me-2"></i> Ditemukan <span id="multiCount">0</span> Nama Anggota yang Cocok</h6>
+              <div class="alert alert-info py-3 shadow-sm border-0 rounded-3 mb-3">
+                <h6 class="fw-bold fs-6 mb-1"><i class="fa-solid fa-users me-2"></i> Ditemukan <span id="multiCount">0</span> Nama Anggota yang Cocok</h6>
                 <p class="small mb-0 text-secondary">Silakan sentuh atau klik kartu nama Anda di bawah ini untuk melihat rincian pembayaran:</p>
               </div>
               <div id="multipleList" class="row g-3 mb-3">
@@ -61,34 +120,33 @@
               </div>
             </div>
 
-            <!-- Loading Spinner (Berada di bawah daftar pilihan nama) -->
-            <div id="searchLoader" class="text-center py-3 loader">
-              <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
-              <p class="small text-muted mt-2" id="searchLoaderText">Mencari data anggota...</p>
-            </div>
-
             <!-- Single Result Card -->
             <div id="searchResult" class="d-none mt-3">
-              <div class="card border-primary shadow-sm">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                  <h6 class="mb-0 fw-bold fs-6" id="resNama">-</h6>
-                  <span class="badge bg-light text-dark" id="resNip">NIP: -</span>
+              <div class="mb-3 d-none" id="btnBackToMultiple">
+                <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold rounded-pill" onclick="backToMultipleList()">
+                  <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Pilihan Nama
+                </button>
+              </div>
+              <div class="card border-primary shadow-sm" style="border-radius: 14px; overflow: hidden;">
+                <div class="card-header bg-primary text-white p-3 d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0 fw-bold" id="resNama" style="font-size: 1.25rem;">-</h5>
+                  <span class="badge bg-light text-dark fs-6 px-3 py-2" id="resNip">NIP: -</span>
                 </div>
-                <div class="card-body">
-                  <div class="row text-center mb-3">
+                <div class="card-body p-4">
+                  <div class="row text-center mb-3 g-3">
                     <div class="col-md-6 border-end mb-3 mb-md-0">
-                      <span class="text-muted small">Status Pembayaran Terakhir</span>
-                      <h6 class="text-success mt-1 mb-0 fw-bold fs-5" id="resLunas">Lunas s.d -</h6>
+                      <span class="text-muted fw-medium fs-6">Status Pembayaran Terakhir</span>
+                      <h5 class="text-success mt-1 mb-0 fw-bold fs-4" id="resLunas">Lunas s.d -</h5>
                     </div>
                     <div class="col-md-6">
-                      <span class="text-muted small">Kekurangan Pembayaran s.d <span id="resBulanIni">-</span></span>
-                      <h6 class="mt-1 mb-0 fw-bold" id="resTotalTunggakan">Rp 0</h6>
+                      <span class="text-muted fw-medium fs-6">Kekurangan Pembayaran s.d <span id="resBulanIni">-</span></span>
+                      <h4 class="mt-1 mb-0 fw-bold" id="resTotalTunggakan">Rp 0</h4>
                     </div>
                   </div>
 
                   <!-- Rincian Kekurangan Per Tahun -->
                   <div id="resRincianContainer" class="border-top pt-3">
-                    <h6 class="text-muted small fw-bold mb-2"><i class="fa-solid fa-list-check me-1"></i> Rincian Kekurangan per Tahun:</h6>
+                    <h6 class="text-muted fw-bold mb-3 fs-6"><i class="fa-solid fa-list-check me-2"></i> Rincian Kekurangan per Tahun:</h6>
                     <div id="resRincianList" class="list-group list-group-flush">
                       <!-- Populated by JS -->
                     </div>
@@ -327,6 +385,8 @@
       });
     }
 
+    var isMultipleSearchResult = false;
+
     // SEARCH PUBLIK
     function handleSearchEnter(e) { if (e.key === 'Enter') doSearch(); }
     
@@ -334,6 +394,8 @@
       var kw = document.getElementById("searchKeyword").value.trim();
       if (!kw) return alert("Masukkan Nama atau NIP terlebih dahulu!");
 
+      isMultipleSearchResult = false;
+      document.getElementById("btnBackToMultiple").classList.add("d-none");
       document.getElementById("searchLoaderText").textContent = "Mencari data anggota...";
       document.getElementById("searchLoader").classList.remove("loader");
       document.getElementById("multipleResults").classList.add("d-none");
@@ -345,6 +407,7 @@
           if (res.type === "single") {
             renderDetailResult(res.data);
           } else if (res.type === "multiple") {
+            isMultipleSearchResult = true;
             renderMultipleMatches(res);
           }
         } else {
@@ -362,11 +425,11 @@
         var col = document.createElement("div");
         col.className = "col-12 col-md-6";
         col.innerHTML = 
-          '<div class="card card-custom p-3 border-start border-primary border-4 shadow-sm" style="cursor: pointer;" onclick="selectAnggota(\'' + item.id + '\')">' +
+          '<div class="card name-selection-card p-3 shadow-sm h-100" style="cursor: pointer;" onclick="selectAnggota(\'' + item.id + '\', \'' + escapeQuotes(item.nama) + '\')">' +
             '<div class="d-flex justify-content-between align-items-center">' +
               '<div>' +
-                '<h5 class="fw-bold text-navy mb-1"><i class="fa-solid fa-user me-2 text-primary"></i>' + item.nama + '</h5>' +
-                '<span class="text-muted small fs-6">NIP: ' + (item.nip || '-') + '</span>' +
+                '<h5 class="senior-card-name mb-1"><i class="fa-solid fa-user me-2 text-primary"></i>' + item.nama + '</h5>' +
+                '<span class="senior-nip">NIP: ' + (item.nip || '-') + '</span>' +
               '</div>' +
               '<i class="fa-solid fa-chevron-right text-primary fs-5 ms-2"></i>' +
             '</div>' +
@@ -377,19 +440,39 @@
       document.getElementById("multipleResults").classList.remove("d-none");
     }
 
-    function selectAnggota(idAnggota) {
-      document.getElementById("searchLoaderText").textContent = "Memuat rincian data anggota...";
+    function escapeQuotes(str) {
+      return (str || "").replace(/'/g, "\\'");
+    }
+
+    function selectAnggota(idAnggota, namaAnggota) {
+      // 1. Sembunyikan kartu daftar nama & kartu rincian lama
+      document.getElementById("multipleResults").classList.add("d-none");
       document.getElementById("searchResult").classList.add("d-none");
+
+      // 2. Tampilkan spinner loader
+      document.getElementById("searchLoaderText").textContent = "Memuat rincian data " + (namaAnggota || "anggota") + "...";
       document.getElementById("searchLoader").classList.remove("loader");
 
+      // 3. Panggil backend untuk mengambil rincian pembayaran
       google.script.run.withSuccessHandler(function(res) {
         document.getElementById("searchLoader").classList.add("loader");
         if (res.success) {
+          if (isMultipleSearchResult) {
+            document.getElementById("btnBackToMultiple").classList.remove("d-none");
+          } else {
+            document.getElementById("btnBackToMultiple").classList.add("d-none");
+          }
           renderDetailResult(res.data);
         } else {
+          document.getElementById("multipleResults").classList.remove("d-none");
           alert(res.message);
         }
       }).getDetailAnggotaById(idAnggota);
+    }
+
+    function backToMultipleList() {
+      document.getElementById("searchResult").classList.add("d-none");
+      document.getElementById("multipleResults").classList.remove("d-none");
     }
 
     function renderDetailResult(data) {
