@@ -147,11 +147,17 @@ function buildDetailStatusAnggota(foundRow, paguMap) {
         tahun: currY,
         total: 0,
         bulanDari: currM,
-        bulanSampai: currM
+        bulanSampai: currM,
+        detailBulan: []
       };
     }
     rincianPerTahun[currY].total += paguNominal;
     rincianPerTahun[currY].bulanSampai = currM;
+    rincianPerTahun[currY].detailBulan.push({
+      bulan: currM,
+      namaBulan: getNamaBulan(currM),
+      nominal: paguNominal
+    });
 
     currM++;
     if (currM > 12) {
@@ -168,7 +174,8 @@ function buildDetailStatusAnggota(foundRow, paguMap) {
     return {
       tahun: r.tahun,
       total: r.total,
-      rentangBulan: rentangBulan
+      rentangBulan: rentangBulan,
+      detailBulan: r.detailBulan
     };
   });
 

@@ -596,12 +596,39 @@
       if (data.rincianTunggakan && data.rincianTunggakan.length > 0) {
         data.rincianTunggakan.forEach(function(item) {
           var div = document.createElement("div");
-          div.className = "list-group-item d-flex justify-content-between align-items-center py-2.5 px-3 bg-light rounded-3 mb-2 border-0 shadow-sm";
-          div.innerHTML = '<div class="d-flex align-items-center py-1">' +
-                            '<span class="fw-bold text-dark" style="font-size: 1.1rem;">Tahun ' + item.tahun + '</span>' +
-                            '<span class="text-muted ms-2 fw-medium" style="font-size: 0.95rem;">(' + item.rentangBulan + ')</span>' +
-                          '</div>' +
-                          '<span class="badge bg-danger rounded-pill px-3 py-2 fw-bold ms-2" style="font-size: 0.95rem;">Rp ' + item.total.toLocaleString('id-ID') + '</span>';
+          div.className = "card border-0 mb-2 shadow-sm rounded-3 overflow-hidden";
+          
+          var monthlyHtml = "";
+          if (item.detailBulan && item.detailBulan.length > 0) {
+            item.detailBulan.forEach(function(bln) {
+              monthlyHtml += 
+                '<div class="col-6 col-md-4">' +
+                  '<div class="p-2 bg-light rounded-3 border d-flex justify-content-between align-items-center">' +
+                    '<span class="fw-semibold text-dark small"><i class="fa-regular fa-calendar-check me-1 text-primary"></i>' + bln.namaBulan + '</span>' +
+                    '<span class="badge bg-danger">Rp ' + bln.nominal.toLocaleString('id-ID') + '</span>' +
+                  '</div>' +
+                '</div>';
+            });
+          }
+
+          div.innerHTML = 
+            '<div class="card-header bg-light p-3 d-flex justify-content-between align-items-center border-0" style="cursor: pointer;" onclick="toggleYearAccordion(' + item.tahun + ')">' +
+              '<div class="d-flex align-items-center">' +
+                '<i class="fa-solid fa-chevron-right text-primary me-2 transition-icon" id="iconYear-' + item.tahun + '"></i>' +
+                '<div>' +
+                  '<span class="fw-bold text-dark fs-5">Tahun ' + item.tahun + '</span>' +
+                  '<span class="text-secondary fs-6 fw-medium ms-2">(' + item.rentangBulan + ')</span>' +
+                '</div>' +
+              '</div>' +
+              '<div class="d-flex align-items-center">' +
+                '<span class="badge bg-danger rounded-pill px-3 py-2 fs-6 fw-bold">Rp ' + item.total.toLocaleString('id-ID') + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="card-body bg-white p-3 border-top d-none" id="bodyYear-' + item.tahun + '">' +
+              '<p class="small text-muted fw-bold mb-2"><i class="fa-solid fa-circle-info me-1"></i> Rincian Iuran per Bulan Tahun ' + item.tahun + ':</p>' +
+              '<div class="row g-2">' + monthlyHtml + '</div>' +
+            '</div>';
+
           listEl.appendChild(div);
         });
       } else {
@@ -612,6 +639,20 @@
       }
 
       document.getElementById("searchResult").classList.remove("d-none");
+    }
+
+    function toggleYearAccordion(tahun) {
+      var body = document.getElementById("bodyYear-" + tahun);
+      var icon = document.getElementById("iconYear-" + tahun);
+      if (body && icon) {
+        if (body.classList.contains("d-none")) {
+          body.classList.remove("d-none");
+          icon.className = "fa-solid fa-chevron-down text-primary me-2 transition-icon";
+        } else {
+          body.classList.add("d-none");
+          icon.className = "fa-solid fa-chevron-right text-primary me-2 transition-icon";
+        }
+      }
     }
 
     // AUTH ADMIN
