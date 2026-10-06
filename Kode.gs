@@ -101,6 +101,89 @@ function getMatrixPaguMap() {
 }
 
 /**
+ * HELPER: Menghitung Detail Status & Tunggakan Anggota
+ */
+function buildDetailStatusAnggota(foundRow, paguMap) {
+  var idAnggota = foundRow[0];
+  var namaAnggota = foundRow[1];
+  var nip = foundRow[2];
+  var cutoffBayarBln = Number(foundRow[8]) || 0;
+  var cutoffBayarThn = Number(foundRow[9]) || 0;
+
+  paguMap = paguMap || getMatrixPaguMap();
+  var now = new Date();
+  var currentYear = now.getFullYear();
+  var currentMonth = now.getMonth() + 1; // 1 - 12
+
+  var startThn = cutoffBayarThn;
+  var startBln = cutoffBayarBln + 1;
+
+  if (cutoffBayarThn === 0 || cutoffBayarBln === 0) {
+    var paguYears = Object.keys(paguMap).map(function(k) { return parseInt(k.split("_")[0]); }).filter(Boolean);
+    startThn = paguYears.length > 0 ? Math.min.apply(null, paguYears) : currentYear;
+    startBln = 1;
+  } else if (startBln > 12) {
+    startBln = 1;
+    startThn = cutoffBayarThn + 1;
+  }
+
+  var totalTunggakan = 0;
+  var rincianPerTahun = {};
+
+  var currY = startThn;
+  var currM = startBln;
+
+  while (currY < currentYear || (currY === currentYear && currM <= currentMonth)) {
+    var key = currY + "_" + currM;
+    var paguNominal = Number(paguMap[key]);
+    if (isNaN(paguNominal) || paguNominal <= 0) {
+      paguNominal = 30000;
+    }
+
+    totalTunggakan += paguNominal;
+
+    if (!rincianPerTahun[currY]) {
+      rincianPerTahun[currY] = {
+        tahun: currY,
+        total: 0,
+        bulanDari: currM,
+        bulanSampai: currM
+      };
+    }
+    rincianPerTahun[currY].total += paguNominal;
+    rincianPerTahun[currY].bulanSampai = currM;
+
+    currM++;
+    if (currM > 12) {
+      currM = 1;
+      currY++;
+    }
+  }
+
+  var rincianTunggakanList = Object.keys(rincianPerTahun).map(function(y) {
+    var r = rincianPerTahun[y];
+    var rentangBulan = (r.bulanDari === r.bulanSampai) 
+      ? getNamaBulan(r.bulanDari) 
+      : (getNamaBulan(r.bulanDari) + " - " + getNamaBulan(r.bulanSampai));
+    return {
+      tahun: r.tahun,
+      total: r.total,
+      rentangBulan: rentangBulan
+    };
+  });
+
+  return {
+    id: idAnggota,
+    nama: namaAnggota,
+    nip: nip,
+    lunasSampai: (cutoffBayarBln > 0 && cutoffBayarThn > 0) ? (getNamaBulan(cutoffBayarBln) + " " + cutoffBayarThn) : "Belum Ada Catatan",
+    totalTunggakan: totalTunggakan,
+    rincianTunggakan: rincianTunggakanList,
+    bulanIniStr: getNamaBulan(currentMonth) + " " + currentYear
+  };
+}
+
+/**
  * 4. PENCARIAN & PEMERIKSAAN STATUS ANGGOTA (PUBLIK / USER)
  */
 function checkStatusAnggota(keyword) {
@@ -117,7 +200,7 @@ function checkStatusAnggota(keyword) {
       return { success: false, message: "Data anggota masih kosong." };
     }
     
-    var foundRow = null;
+    var matchedRows = [];
     var searchStr = String(keyword).trim().toLowerCase();
     
     for (var i = 1; i < dataAnggota.length; i++) {
@@ -126,98 +209,75 @@ function checkStatusAnggota(keyword) {
       var nip = String(dataAnggota[i][2]).toLowerCase();
       
       if (id === searchStr || nip === searchStr || nama.indexOf(searchStr) !== -1) {
+        matchedRows.push(dataAnggota[i]);
+      }
+    }
+    
+    if (matchedRows.length === 0) {
+      return { success: false, message: "Anggota tidak ditemukan. Periksa kembali nama/NIP yang diketik." };
+    }
+    
+    var paguMap = getMatrixPaguMap();
+
+    // Jika hanya ditemukan 1 orang
+    if (matchedRows.length === 1) {
+      return {
+        success: true,
+        type: "single",
+        data: buildDetailStatusAnggota(matchedRows[0], paguMap)
+      };
+    }
+
+    // Jika ditemukan beberapa orang yang cocok (multiple matches)
+    var listHasil = matchedRows.map(function(row) {
+      return {
+        id: row[0],
+        nama: row[1],
+        nip: row[2] ? String(row[2]) : "Tanpa NIP",
+        lunasSampai: (Number(row[8]) > 0 && Number(row[9]) > 0) ? (getNamaBulan(Number(row[8])) + " " + Number(row[9])) : "Belum Ada Catatan"
+      };
+    });
+
+    return {
+      success: true,
+      type: "multiple",
+      count: listHasil.length,
+      keyword: keyword,
+      list: listHasil
+    };
+
+  } catch (err) {
+    return { success: false, message: "Gagal memuat status: " + err.message };
+  }
+}
+
+/**
+ * 4B. AMBIL DETAIL ANGGOTA BY ID (DARI DAFTAR PILIHAN NAMA)
+ */
+function getDetailAnggotaById(idAnggota) {
+  try {
+    var ss = getSS();
+    var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
+    if (!sheetAnggota) return { success: false, message: "Tab Master_Anggota tidak ditemukan." };
+    
+    var dataAnggota = sheetAnggota.getDataRange().getValues();
+    var foundRow = null;
+    
+    for (var i = 1; i < dataAnggota.length; i++) {
+      if (String(dataAnggota[i][0]) === String(idAnggota)) {
         foundRow = dataAnggota[i];
         break;
       }
     }
     
-    if (!foundRow) {
-      return { success: false, message: "Anggota tidak ditemukan. Periksa NIP/Nama." };
-    }
-    
-    var idAnggota = foundRow[0];
-    var namaAnggota = foundRow[1];
-    var nip = foundRow[2];
-    var cutoffBayarBln = Number(foundRow[8]) || 0;
-    var cutoffBayarThn = Number(foundRow[9]) || 0;
-
-    var paguMap = getMatrixPaguMap();
-    var now = new Date();
-    var currentYear = now.getFullYear();
-    var currentMonth = now.getMonth() + 1; // 1 - 12
-
-    // Hitung tunggakan / kekurangan pembayaran sampai bulan ini
-    var startThn = cutoffBayarThn;
-    var startBln = cutoffBayarBln + 1;
-
-    if (cutoffBayarThn === 0 || cutoffBayarBln === 0) {
-      var paguYears = Object.keys(paguMap).map(function(k) { return parseInt(k.split("_")[0]); }).filter(Boolean);
-      startThn = paguYears.length > 0 ? Math.min.apply(null, paguYears) : currentYear;
-      startBln = 1;
-    } else if (startBln > 12) {
-      startBln = 1;
-      startThn = cutoffBayarThn + 1;
-    }
-
-    var totalTunggakan = 0;
-    var rincianPerTahun = {};
-
-    var currY = startThn;
-    var currM = startBln;
-
-    while (currY < currentYear || (currY === currentYear && currM <= currentMonth)) {
-      var key = currY + "_" + currM;
-      var paguNominal = Number(paguMap[key]);
-      if (isNaN(paguNominal) || paguNominal <= 0) {
-        paguNominal = 30000;
-      }
-
-      totalTunggakan += paguNominal;
-
-      if (!rincianPerTahun[currY]) {
-        rincianPerTahun[currY] = {
-          tahun: currY,
-          total: 0,
-          bulanDari: currM,
-          bulanSampai: currM
-        };
-      }
-      rincianPerTahun[currY].total += paguNominal;
-      rincianPerTahun[currY].bulanSampai = currM;
-
-      currM++;
-      if (currM > 12) {
-        currM = 1;
-        currY++;
-      }
-    }
-
-    var rincianTunggakanList = Object.keys(rincianPerTahun).map(function(y) {
-      var r = rincianPerTahun[y];
-      var rentangBulan = (r.bulanDari === r.bulanSampai) 
-        ? getNamaBulan(r.bulanDari) 
-        : (getNamaBulan(r.bulanDari) + " - " + getNamaBulan(r.bulanSampai));
-      return {
-        tahun: r.tahun,
-        total: r.total,
-        rentangBulan: rentangBulan
-      };
-    });
+    if (!foundRow) return { success: false, message: "Data anggota tidak ditemukan." };
     
     return {
       success: true,
-      data: {
-        id: idAnggota,
-        nama: namaAnggota,
-        nip: nip,
-        lunasSampai: (cutoffBayarBln > 0 && cutoffBayarThn > 0) ? (getNamaBulan(cutoffBayarBln) + " " + cutoffBayarThn) : "Belum Ada Catatan",
-        totalTunggakan: totalTunggakan,
-        rincianTunggakan: rincianTunggakanList,
-        bulanIniStr: getNamaBulan(currentMonth) + " " + currentYear
-      }
+      data: buildDetailStatusAnggota(foundRow, getMatrixPaguMap())
     };
   } catch (err) {
-    return { success: false, message: "Gagal memuat status: " + err.message };
+    return { success: false, message: "Gagal memuat detail anggota: " + err.message };
   }
 }
 

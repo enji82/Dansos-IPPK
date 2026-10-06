@@ -56,18 +56,29 @@
               <p class="small text-muted mt-2">Mencari data anggota...</p>
             </div>
 
-            <!-- Result Card -->
+            <!-- Multiple Matches Selection List -->
+            <div id="multipleResults" class="d-none mt-3">
+              <div class="alert alert-info py-3 shadow-sm border-0">
+                <h6 class="fw-bold mb-1"><i class="fa-solid fa-users me-2"></i> Ditemukan <span id="multiCount">0</span> Nama Anggota yang Cocok</h6>
+                <p class="small mb-0 text-secondary">Silakan sentuh atau klik kartu nama Anda di bawah ini untuk melihat rincian pembayaran:</p>
+              </div>
+              <div id="multipleList" class="row g-3 mb-3">
+                <!-- Cards populated by JS -->
+              </div>
+            </div>
+
+            <!-- Single Result Card -->
             <div id="searchResult" class="d-none mt-3">
-              <div class="card border-primary">
+              <div class="card border-primary shadow-sm">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                  <h6 class="mb-0" id="resNama">-</h6>
+                  <h6 class="mb-0 fw-bold fs-6" id="resNama">-</h6>
                   <span class="badge bg-light text-dark" id="resNip">NIP: -</span>
                 </div>
                 <div class="card-body">
                   <div class="row text-center mb-3">
                     <div class="col-md-6 border-end mb-3 mb-md-0">
                       <span class="text-muted small">Status Pembayaran Terakhir</span>
-                      <h6 class="text-success mt-1 mb-0 fw-bold" id="resLunas">Lunas s.d -</h6>
+                      <h6 class="text-success mt-1 mb-0 fw-bold fs-5" id="resLunas">Lunas s.d -</h6>
                     </div>
                     <div class="col-md-6">
                       <span class="text-muted small">Kekurangan Pembayaran s.d <span id="resBulanIni">-</span></span>
@@ -324,48 +335,95 @@
       if (!kw) return alert("Masukkan Nama atau NIP terlebih dahulu!");
 
       document.getElementById("searchLoader").classList.remove("loader");
+      document.getElementById("multipleResults").classList.add("d-none");
       document.getElementById("searchResult").classList.add("d-none");
 
       google.script.run.withSuccessHandler(function(res) {
         document.getElementById("searchLoader").classList.add("loader");
         if (res.success) {
-          document.getElementById("resNama").textContent = res.data.nama;
-          document.getElementById("resNip").textContent = "NIP: " + (res.data.nip || "-");
-          document.getElementById("resLunas").textContent = "Lunas s.d " + res.data.lunasSampai;
-          document.getElementById("resBulanIni").textContent = res.data.bulanIniStr;
-
-          var elTotal = document.getElementById("resTotalTunggakan");
-          if (res.data.totalTunggakan > 0) {
-            elTotal.className = "text-danger mt-1 mb-0 fw-bold fs-5";
-            elTotal.textContent = "Rp " + res.data.totalTunggakan.toLocaleString('id-ID');
-          } else {
-            elTotal.className = "text-success mt-1 mb-0 fw-bold fs-5";
-            elTotal.textContent = "Rp 0 (Lunas)";
+          if (res.type === "single") {
+            renderDetailResult(res.data);
+          } else if (res.type === "multiple") {
+            renderMultipleMatches(res);
           }
-
-          var listEl = document.getElementById("resRincianList");
-          listEl.innerHTML = "";
-
-          if (res.data.rincianTunggakan && res.data.rincianTunggakan.length > 0) {
-            res.data.rincianTunggakan.forEach(function(item) {
-              var div = document.createElement("div");
-              div.className = "list-group-item d-flex justify-content-between align-items-center py-2 bg-light rounded mb-2 border-0 shadow-sm";
-              div.innerHTML = '<div><strong class="text-dark">Tahun ' + item.tahun + '</strong> <span class="text-muted small ms-1">(' + item.rentangBulan + ')</span></div>' +
-                              '<span class="badge bg-danger rounded-pill px-3 py-2 fs-6">Rp ' + item.total.toLocaleString('id-ID') + '</span>';
-              listEl.appendChild(div);
-            });
-          } else {
-            var div = document.createElement("div");
-            div.className = "alert alert-success py-2 mb-0 small text-center";
-            div.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> Tidak ada kekurangan pembayaran hingga bulan ini.';
-            listEl.appendChild(div);
-          }
-
-          document.getElementById("searchResult").classList.remove("d-none");
         } else {
           alert(res.message);
         }
       }).checkStatusAnggota(kw);
+    }
+
+    function renderMultipleMatches(res) {
+      document.getElementById("multiCount").textContent = res.count;
+      var container = document.getElementById("multipleList");
+      container.innerHTML = "";
+
+      res.list.forEach(function(item) {
+        var col = document.createElement("div");
+        col.className = "col-md-6";
+        col.innerHTML = 
+          '<div class="card card-custom p-3 border-start border-primary border-4 h-100 shadow-sm" style="cursor: pointer;" onclick="selectAnggota(\'' + item.id + '\')">' +
+            '<div class="d-flex justify-content-between align-items-center mb-2">' +
+              '<h5 class="card-title text-primary fw-bold mb-0"><i class="fa-solid fa-user me-2"></i>' + item.nama + '</h5>' +
+              '<span class="badge bg-secondary">ID: ' + item.id + '</span>' +
+            '</div>' +
+            '<p class="small text-muted mb-2">NIP: ' + item.nip + '</p>' +
+            '<div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">' +
+              '<span class="small text-success fw-bold">Lunas s.d ' + item.lunasSampai + '</span>' +
+              '<button class="btn btn-navy btn-sm px-3"><i class="fa-solid fa-arrow-right me-1"></i> Pilih Nama Ini</button>' +
+            '</div>' +
+          '</div>';
+        container.appendChild(col);
+      });
+
+      document.getElementById("multipleResults").classList.remove("d-none");
+    }
+
+    function selectAnggota(idAnggota) {
+      document.getElementById("searchLoader").classList.remove("loader");
+      google.script.run.withSuccessHandler(function(res) {
+        document.getElementById("searchLoader").classList.add("loader");
+        if (res.success) {
+          renderDetailResult(res.data);
+        } else {
+          alert(res.message);
+        }
+      }).getDetailAnggotaById(idAnggota);
+    }
+
+    function renderDetailResult(data) {
+      document.getElementById("resNama").textContent = data.nama;
+      document.getElementById("resNip").textContent = "NIP: " + (data.nip || "-");
+      document.getElementById("resLunas").textContent = "Lunas s.d " + data.lunasSampai;
+      document.getElementById("resBulanIni").textContent = data.bulanIniStr;
+
+      var elTotal = document.getElementById("resTotalTunggakan");
+      if (data.totalTunggakan > 0) {
+        elTotal.className = "text-danger mt-1 mb-0 fw-bold fs-5";
+        elTotal.textContent = "Rp " + data.totalTunggakan.toLocaleString('id-ID');
+      } else {
+        elTotal.className = "text-success mt-1 mb-0 fw-bold fs-5";
+        elTotal.textContent = "Rp 0 (Lunas)";
+      }
+
+      var listEl = document.getElementById("resRincianList");
+      listEl.innerHTML = "";
+
+      if (data.rincianTunggakan && data.rincianTunggakan.length > 0) {
+        data.rincianTunggakan.forEach(function(item) {
+          var div = document.createElement("div");
+          div.className = "list-group-item d-flex justify-content-between align-items-center py-2 bg-light rounded mb-2 border-0 shadow-sm";
+          div.innerHTML = '<div><strong class="text-dark">Tahun ' + item.tahun + '</strong> <span class="text-muted small ms-1">(' + item.rentangBulan + ')</span></div>' +
+                          '<span class="badge bg-danger rounded-pill px-3 py-2 fs-6">Rp ' + item.total.toLocaleString('id-ID') + '</span>';
+          listEl.appendChild(div);
+        });
+      } else {
+        var div = document.createElement("div");
+        div.className = "alert alert-success py-2 mb-0 small text-center";
+        div.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> Tidak ada kekurangan pembayaran hingga bulan ini.';
+        listEl.appendChild(div);
+      }
+
+      document.getElementById("searchResult").classList.remove("d-none");
     }
 
     // AUTH ADMIN
