@@ -602,10 +602,10 @@
           if (item.detailBulan && item.detailBulan.length > 0) {
             item.detailBulan.forEach(function(bln) {
               monthlyHtml += 
-                '<div class="col-12 col-sm-6 col-md-4">' +
-                  '<div class="p-2.5 px-3 bg-light rounded-3 d-flex justify-content-between align-items-center border-start border-3 border-danger shadow-sm">' +
-                    '<span class="fw-bold text-dark fs-6"><i class="fa-regular fa-calendar-check me-2 text-primary"></i>' + bln.namaBulan + '</span>' +
-                    '<span class="fw-bold text-danger fs-6">Rp ' + bln.nominal.toLocaleString('id-ID') + '</span>' +
+                '<div class="col-12 col-md-6">' +
+                  '<div class="p-2.5 px-3 bg-light rounded-3 d-flex justify-content-between align-items-center border-start border-3 border-danger shadow-sm mb-1">' +
+                    '<span class="fw-bold text-dark text-nowrap" style="font-size: clamp(0.9rem, 2.5vw, 1.05rem);"><i class="fa-regular fa-calendar-check me-2 text-primary"></i>' + bln.namaBulan + '</span>' +
+                    '<span class="fw-bold text-danger text-nowrap ms-2" style="font-size: clamp(0.9rem, 2.5vw, 1.05rem);">Rp ' + bln.nominal.toLocaleString('id-ID') + '</span>' +
                   '</div>' +
                 '</div>';
             });
