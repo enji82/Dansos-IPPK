@@ -69,6 +69,18 @@
       box-shadow: 0 8px 20px rgba(31, 78, 121, 0.12) !important;
       background-color: #f8fafc;
     }
+    .suggestion-item {
+      padding: 14px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+    .suggestion-item:hover, .suggestion-item:focus {
+      background-color: #f1f5f9;
+    }
   </style>
 </head>
 <body>
@@ -96,11 +108,17 @@
             <h4 class="text-center senior-title mb-2"><i class="fa-solid fa-magnifying-glass me-2"></i> Cek Status Pembayaran Iuran</h4>
             <p class="text-muted text-center fs-6 mb-4">Masukkan Nama, NIP, atau ID Anggota Anda untuk melihat posisi pembayaran.</p>
             
-            <div class="input-group input-group-lg mb-3">
-              <input type="text" id="searchKeyword" class="form-control senior-input" placeholder="Ketik NIP / Nama Anggota..." onkeypress="handleSearchEnter(event)">
-              <button class="btn btn-navy px-4 fs-6" type="button" onclick="doSearch()">
-                <i class="fa-solid fa-search me-1"></i> Cari
-              </button>
+            <div class="position-relative mb-3">
+              <div class="input-group input-group-lg">
+                <input type="text" id="searchKeyword" class="form-control senior-input" placeholder="Ketik NIP / Nama Anggota..." oninput="handleLiveSearchInput()" onkeypress="handleSearchEnter(event)" autocomplete="off">
+                <button class="btn btn-navy px-4 fs-6" type="button" onclick="doSearch()">
+                  <i class="fa-solid fa-search me-1"></i> Cari
+                </button>
+              </div>
+              <!-- Dropdown Live Suggestions Overlay -->
+              <div id="searchSuggestions" class="dropdown-menu w-100 shadow-lg border-0 rounded-3 mt-1 py-0 loader" style="max-height: 360px; overflow-y: auto; z-index: 1050;">
+                <!-- Dynamically populated -->
+              </div>
             </div>
 
             <!-- Loading Spinner (Berada di antara daftar nama dan rincian) -->
@@ -352,6 +370,14 @@
 
     document.addEventListener("DOMContentLoaded", function() {
       initDropdownOptions();
+      loadPublicAnggotaList();
+
+      // Sembunyikan saran jika klik di luar kolom pencarian
+      document.addEventListener("click", function(e) {
+        if (!e.target.closest(".position-relative")) {
+          hideSuggestions();
+        }
+      });
     });
 
     function initDropdownOptions() {
@@ -385,12 +411,86 @@
       });
     }
 
+    function loadPublicAnggotaList() {
+      google.script.run.withSuccessHandler(function(list) {
+        if (list && list.length > 0) {
+          globalAnggotaList = list;
+        }
+      }).getAllAnggota();
+    }
+
+    function handleLiveSearchInput() {
+      var kw = document.getElementById("searchKeyword").value.trim().toLowerCase();
+      var container = document.getElementById("searchSuggestions");
+
+      if (kw.length < 2) {
+        hideSuggestions();
+        return;
+      }
+
+      if (!globalAnggotaList || globalAnggotaList.length === 0) {
+        loadPublicAnggotaList();
+        return;
+      }
+
+      var matches = globalAnggotaList.filter(function(a) {
+        var idMatch = String(a.id || "").toLowerCase().indexOf(kw) !== -1;
+        var namaMatch = String(a.nama || "").toLowerCase().indexOf(kw) !== -1;
+        var nipMatch = String(a.nip || "").toLowerCase().indexOf(kw) !== -1;
+        return idMatch || namaMatch || nipMatch;
+      });
+
+      if (matches.length === 0) {
+        container.innerHTML = '<div class="p-3 text-muted small text-center"><i class="fa-solid fa-circle-exclamation me-1"></i> Tidak ditemukan nama "' + escapeQuotes(kw) + '"</div>';
+        container.classList.remove("loader");
+        container.classList.add("show");
+        return;
+      }
+
+      var html = "";
+      // Batasi 8 saran teratas agar ramah lansia
+      matches.slice(0, 8).forEach(function(item) {
+        html += 
+          '<div class="suggestion-item d-flex justify-content-between align-items-center" onclick="selectSuggestion(\'' + item.id + '\', \'' + escapeQuotes(item.nama) + '\')">' +
+            '<div>' +
+              '<div class="senior-card-name"><i class="fa-solid fa-user me-2 text-primary"></i>' + item.nama + '</div>' +
+              '<div class="senior-nip">NIP: ' + (item.nip || '-') + '</div>' +
+            '</div>' +
+            '<i class="fa-solid fa-chevron-right text-primary fs-6"></i>' +
+          '</div>';
+      });
+
+      container.innerHTML = html;
+      container.classList.remove("loader");
+      container.classList.add("show");
+    }
+
+    function hideSuggestions() {
+      var container = document.getElementById("searchSuggestions");
+      if (container) {
+        container.classList.remove("show");
+        container.classList.add("loader");
+      }
+    }
+
+    function selectSuggestion(idAnggota, namaAnggota) {
+      hideSuggestions();
+      document.getElementById("searchKeyword").value = namaAnggota;
+      selectAnggota(idAnggota, namaAnggota);
+    }
+
     var isMultipleSearchResult = false;
 
     // SEARCH PUBLIK
-    function handleSearchEnter(e) { if (e.key === 'Enter') doSearch(); }
+    function handleSearchEnter(e) { 
+      if (e.key === 'Enter') {
+        hideSuggestions();
+        doSearch(); 
+      }
+    }
     
     function doSearch() {
+      hideSuggestions();
       var kw = document.getElementById("searchKeyword").value.trim();
       if (!kw) return alert("Masukkan Nama atau NIP terlebih dahulu!");
 
