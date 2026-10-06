@@ -243,16 +243,24 @@
           <div class="tab-pane fade" id="panelMasuk">
             <form id="formMasuk" onsubmit="submitFormMasuk(event)">
               <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label fw-bold">Pilih Anggota</label>
-                  <select id="masukAnggota" class="form-select" required onchange="onSelectAnggotaMasuk()">
-                    <option value="">-- Pilih Anggota --</option>
-                  </select>
+                <div class="col-md-12">
+                  <label class="form-label fw-bold"><i class="fa-solid fa-user me-1 text-primary"></i> Pilih Anggota (Pencarian Nama / NIP / ID)</label>
+                  <div class="position-relative">
+                    <input type="text" id="masukAnggotaSearch" class="form-control form-control-lg senior-input" placeholder="Ketik Nama, NIP, atau ID Anggota..." oninput="handleMasukAnggotaSearch()" autocomplete="off">
+                    <input type="hidden" id="masukAnggota" required>
+                    <div id="masukAnggotaSuggestions" class="dropdown-menu w-100 shadow-lg border-0 rounded-3 mt-1 py-0 loader" style="max-height: 280px; overflow-y: auto; z-index: 1060;"></div>
+                  </div>
+                  <div id="masukAnggotaSelectedBadge" class="mt-2 d-none">
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success p-2 fs-6 fw-bold me-2">
+                      <i class="fa-solid fa-user-check me-1"></i> <span id="masukAnggotaSelectedNama">-</span>
+                    </span>
+                    <span class="small text-muted" id="masukAnggotaSelectedInfo">-</span>
+                  </div>
                 </div>
-                
-                <div class="col-md-6">
-                  <label class="form-label fw-bold">Tahun Periode</label>
-                  <select id="masukTahun" class="form-select" required onchange="hitungKalkulasiBayar()">
+
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Tahun Dari</label>
+                  <select id="masukTahunDari" class="form-select" required onchange="hitungKalkulasiBayar()">
                     <!-- Populated by JS -->
                   </select>
                 </div>
@@ -260,6 +268,13 @@
                 <div class="col-md-3">
                   <label class="form-label fw-bold">Bulan Dari</label>
                   <select id="masukBulanDari" class="form-select" required onchange="hitungKalkulasiBayar()">
+                    <!-- Populated by JS -->
+                  </select>
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Tahun Sampai</label>
+                  <select id="masukTahunSampai" class="form-select" required onchange="hitungKalkulasiBayar()">
                     <!-- Populated by JS -->
                   </select>
                 </div>
@@ -273,12 +288,13 @@
 
                 <div class="col-md-6">
                   <label class="form-label fw-bold">Total Pagu Seharusnya (Rp)</label>
-                  <input type="text" id="masukPaguTotal" class="form-control bg-light" readonly value="0">
+                  <input type="text" id="masukPaguTotal" class="form-control bg-light fs-5 fw-bold text-primary" readonly value="Rp 0">
+                  <div class="form-text text-muted" id="masukJumlahBulanInfo">Total: 0 Bulan</div>
                 </div>
 
                 <div class="col-md-6">
                   <label class="form-label fw-bold">Nominal Uang Diterima (Rp)</label>
-                  <input type="number" id="masukNominal" class="form-control" placeholder="Contoh: 180000" required oninput="hitungKalkulasiBayar()">
+                  <input type="number" id="masukNominal" class="form-control fs-5 fw-bold" placeholder="Contoh: 180000" required oninput="hitungKalkulasiBayar()">
                 </div>
 
                 <div class="col-md-6">
@@ -305,7 +321,7 @@
 
                 <div class="col-12">
                   <label class="form-label fw-bold">Catatan (Opsional)</label>
-                  <input type="text" id="masukCatatan" class="form-control" placeholder="Misal: Pembayaran Tunai Semester 1">
+                  <input type="text" id="masukCatatan" class="form-control" placeholder="Misal: Pembayaran Tunai Lintas Tahun">
                 </div>
 
                 <div class="col-12 text-end mt-4">
@@ -321,16 +337,24 @@
           <div class="tab-pane fade" id="panelSetor">
             <form id="formSetor" onsubmit="submitFormSetor(event)">
               <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label fw-bold">Pilih Anggota</label>
-                  <select id="setorAnggota" class="form-select" required onchange="onSelectAnggotaSetor()">
-                    <option value="">-- Pilih Anggota --</option>
-                  </select>
+                <div class="col-md-12">
+                  <label class="form-label fw-bold"><i class="fa-solid fa-user me-1 text-warning"></i> Pilih Anggota (Pencarian Nama / NIP / ID)</label>
+                  <div class="position-relative">
+                    <input type="text" id="setorAnggotaSearch" class="form-control form-control-lg senior-input" placeholder="Ketik Nama, NIP, atau ID Anggota..." oninput="handleSetorAnggotaSearch()" autocomplete="off">
+                    <input type="hidden" id="setorAnggota" required>
+                    <div id="setorAnggotaSuggestions" class="dropdown-menu w-100 shadow-lg border-0 rounded-3 mt-1 py-0 loader" style="max-height: 280px; overflow-y: auto; z-index: 1060;"></div>
+                  </div>
+                  <div id="setorAnggotaSelectedBadge" class="mt-2 d-none">
+                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning p-2 fs-6 fw-bold me-2">
+                      <i class="fa-solid fa-user-check me-1"></i> <span id="setorAnggotaSelectedNama">-</span>
+                    </span>
+                    <span class="small text-muted" id="setorAnggotaSelectedInfo">-</span>
+                  </div>
                 </div>
 
-                <div class="col-md-6">
-                  <label class="form-label fw-bold">Tahun Periode Setoran</label>
-                  <select id="setorTahun" class="form-select" required>
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Tahun Disetor Dari</label>
+                  <select id="setorTahunDari" class="form-select" required>
                     <!-- Populated by JS -->
                   </select>
                 </div>
@@ -338,6 +362,13 @@
                 <div class="col-md-3">
                   <label class="form-label fw-bold">Bulan Disetor Dari</label>
                   <select id="setorBulanDari" class="form-select" required>
+                    <!-- Populated by JS -->
+                  </select>
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Tahun Disetor Sampai</label>
+                  <select id="setorTahunSampai" class="form-select" required>
                     <!-- Populated by JS -->
                   </select>
                 </div>
@@ -351,7 +382,7 @@
 
                 <div class="col-md-6">
                   <label class="form-label fw-bold">Nominal Disetor (Rp)</label>
-                  <input type="number" id="setorNominal" class="form-control" placeholder="Contoh: 180000" required>
+                  <input type="number" id="setorNominal" class="form-control fs-5 fw-bold" placeholder="Contoh: 180000" required>
                 </div>
 
                 <div class="col-md-6">
@@ -368,6 +399,9 @@
                   <button type="submit" class="btn btn-navy px-4" id="btnSimpanSetor">
                     <i class="fa-solid fa-paper-plane me-1"></i> Catat Setoran Kas
                   </button>
+                </div>
+              </div>
+            </form>
                 </div>
               </div>
             </form>
@@ -587,10 +621,14 @@
     });
 
     function initDropdownOptions() {
-      var thnSelects = [document.getElementById("masukTahun"), document.getElementById("setorTahun")];
+      var thnSelects = [
+        document.getElementById("masukTahunDari"), document.getElementById("masukTahunSampai"),
+        document.getElementById("setorTahunDari"), document.getElementById("setorTahunSampai")
+      ];
       var currentYear = new Date().getFullYear();
       
       thnSelects.forEach(function(sel) {
+        if (!sel) return;
         sel.innerHTML = "";
         for (var y = 2021; y <= 2030; y++) {
           var opt = document.createElement("option");
@@ -607,6 +645,7 @@
       ];
 
       blnSelects.forEach(function(sel) {
+        if (!sel) return;
         sel.innerHTML = "";
         for (var b = 1; b <= 12; b++) {
           var opt = document.createElement("option");
@@ -615,6 +654,250 @@
           sel.appendChild(opt);
         }
       });
+    }
+
+    // AUTOCOMPLETE FORM MASUK & SETOR
+    function handleMasukAnggotaSearch() {
+      var kw = document.getElementById("masukAnggotaSearch").value.trim().toLowerCase();
+      var container = document.getElementById("masukAnggotaSuggestions");
+
+      if (kw.length < 2) {
+        container.classList.remove("show");
+        container.classList.add("loader");
+        return;
+      }
+
+      var matches = globalAnggotaList.filter(function(a) {
+        return String(a.id||'').toLowerCase().includes(kw) || String(a.nama||'').toLowerCase().includes(kw) || String(a.nip||'').toLowerCase().includes(kw);
+      });
+
+      if (matches.length === 0) {
+        container.innerHTML = '<div class="p-3 text-muted small text-center">Tidak ditemukan</div>';
+      } else {
+        var html = "";
+        matches.slice(0, 8).forEach(function(item) {
+          html += 
+            '<div class="suggestion-item d-flex justify-content-between align-items-center" onclick="selectMasukAnggota(\'' + item.id + '\')">' +
+              '<div>' +
+                '<div class="fw-bold text-dark"><i class="fa-solid fa-user me-2 text-primary"></i>' + item.nama + '</div>' +
+                '<div class="small text-muted">ID: ' + item.id + ' | NIP: ' + (item.nip || '-') + '</div>' +
+              '</div>' +
+              '<i class="fa-solid fa-chevron-right text-primary small"></i>' +
+            '</div>';
+        });
+        container.innerHTML = html;
+      }
+      container.classList.remove("loader");
+      container.classList.add("show");
+    }
+
+    function selectMasukAnggota(id) {
+      document.getElementById("masukAnggotaSuggestions").classList.remove("show");
+      document.getElementById("masukAnggotaSuggestions").classList.add("loader");
+      
+      var a = globalAnggotaList.find(x => String(x.id) === String(id));
+      if (a) {
+        document.getElementById("masukAnggotaSearch").value = a.nama;
+        document.getElementById("masukAnggota").value = a.id;
+        
+        document.getElementById("masukAnggotaSelectedNama").textContent = a.nama;
+        var bayarStr = (a.bayarBln > 0 && a.bayarThn > 0) ? (namaBulanList[a.bayarBln] + " " + a.bayarThn) : "Belum Ada Catatan";
+        document.getElementById("masukAnggotaSelectedInfo").textContent = "ID: " + a.id + " | NIP: " + (a.nip || '-') + " | Lunas s.d: " + bayarStr;
+        document.getElementById("masukAnggotaSelectedBadge").classList.remove("d-none");
+
+        // Set otomatis periode berikutnya
+        var nextBln = (a.bayarBln >= 12) ? 1 : (a.bayarBln + 1);
+        var nextThn = (a.bayarBln >= 12) ? (a.bayarThn + 1) : (a.bayarThn || new Date().getFullYear());
+        
+        document.getElementById("masukTahunDari").value = nextThn;
+        document.getElementById("masukBulanDari").value = nextBln;
+        document.getElementById("masukTahunSampai").value = nextThn;
+        document.getElementById("masukBulanSampai").value = nextBln;
+
+        hitungKalkulasiBayar();
+      }
+    }
+
+    function handleSetorAnggotaSearch() {
+      var kw = document.getElementById("setorAnggotaSearch").value.trim().toLowerCase();
+      var container = document.getElementById("setorAnggotaSuggestions");
+
+      if (kw.length < 2) {
+        container.classList.remove("show");
+        container.classList.add("loader");
+        return;
+      }
+
+      var matches = globalAnggotaList.filter(function(a) {
+        return String(a.id||'').toLowerCase().includes(kw) || String(a.nama||'').toLowerCase().includes(kw) || String(a.nip||'').toLowerCase().includes(kw);
+      });
+
+      if (matches.length === 0) {
+        container.innerHTML = '<div class="p-3 text-muted small text-center">Tidak ditemukan</div>';
+      } else {
+        var html = "";
+        matches.slice(0, 8).forEach(function(item) {
+          html += 
+            '<div class="suggestion-item d-flex justify-content-between align-items-center" onclick="selectSetorAnggota(\'' + item.id + '\')">' +
+              '<div>' +
+                '<div class="fw-bold text-dark"><i class="fa-solid fa-user me-2 text-warning"></i>' + item.nama + '</div>' +
+                '<div class="small text-muted">ID: ' + item.id + ' | NIP: ' + (item.nip || '-') + '</div>' +
+              '</div>' +
+              '<i class="fa-solid fa-chevron-right text-warning small"></i>' +
+            '</div>';
+        });
+        container.innerHTML = html;
+      }
+      container.classList.remove("loader");
+      container.classList.add("show");
+    }
+
+    function selectSetorAnggota(id) {
+      document.getElementById("setorAnggotaSuggestions").classList.remove("show");
+      document.getElementById("setorAnggotaSuggestions").classList.add("loader");
+
+      var a = globalAnggotaList.find(x => String(x.id) === String(id));
+      if (a) {
+        document.getElementById("setorAnggotaSearch").value = a.nama;
+        document.getElementById("setorAnggota").value = a.id;
+
+        document.getElementById("setorAnggotaSelectedNama").textContent = a.nama;
+        var setorStr = (a.setorBln > 0 && a.setorThn > 0) ? (namaBulanList[a.setorBln] + " " + a.setorThn) : "Belum Ada Catatan";
+        document.getElementById("setorAnggotaSelectedInfo").textContent = "ID: " + a.id + " | NIP: " + (a.nip || '-') + " | Disetor s.d: " + setorStr;
+        document.getElementById("setorAnggotaSelectedBadge").classList.remove("d-none");
+
+        var nextBln = (a.setorBln >= 12) ? 1 : (a.setorBln + 1);
+        var nextThn = (a.setorBln >= 12) ? (a.setorThn + 1) : (a.setorThn || new Date().getFullYear());
+
+        document.getElementById("setorTahunDari").value = nextThn;
+        document.getElementById("setorBulanDari").value = nextBln;
+        document.getElementById("setorTahunSampai").value = nextThn;
+        document.getElementById("setorBulanSampai").value = nextBln;
+      }
+    }
+
+    // HITUNG KALKULASI BAYAR PERIODE LINTAS TAHUN
+    function hitungKalkulasiBayar() {
+      var thnDari = parseInt(document.getElementById("masukTahunDari").value);
+      var blnDari = parseInt(document.getElementById("masukBulanDari").value);
+      var thnSampai = parseInt(document.getElementById("masukTahunSampai").value);
+      var blnSampai = parseInt(document.getElementById("masukBulanSampai").value);
+      var nominal = parseFloat(document.getElementById("masukNominal").value) || 0;
+
+      // Proteksi jika Tahun/Bulan Sampai < Tahun/Bulan Dari
+      if (thnSampai < thnDari || (thnSampai === thnDari && blnSampai < blnDari)) {
+        document.getElementById("masukTahunSampai").value = thnDari;
+        document.getElementById("masukBulanSampai").value = blnDari;
+        thnSampai = thnDari;
+        blnSampai = blnDari;
+      }
+
+      var totalPagu = 0;
+      var countBulan = 0;
+
+      var y = thnDari;
+      var m = blnDari;
+
+      while (y < thnSampai || (y === thnSampai && m <= blnSampai)) {
+        var key = y + "_" + m;
+        totalPagu += (globalPaguMap[key] || 30000);
+        countBulan++;
+
+        m++;
+        if (m > 12) {
+          m = 1;
+          y++;
+        }
+      }
+
+      document.getElementById("masukPaguTotal").value = "Rp " + totalPagu.toLocaleString('id-ID');
+      document.getElementById("masukJumlahBulanInfo").textContent = "Total: " + countBulan + " Bulan iuran (" + getNamaBulan(blnDari) + " " + thnDari + " s.d " + getNamaBulan(blnSampai) + " " + thnSampai + ")";
+
+      var sisa = nominal - totalPagu;
+      var isDeposit = document.getElementById("radioDeposit").checked;
+
+      if (sisa >= 0) {
+        if (isDeposit) {
+          document.getElementById("masukKembalian").value = "Rp 0";
+          document.getElementById("masukDepositVal").value = "Rp " + sisa.toLocaleString('id-ID');
+        } else {
+          document.getElementById("masukKembalian").value = "Rp " + sisa.toLocaleString('id-ID');
+          document.getElementById("masukDepositVal").value = "Rp 0";
+        }
+      } else {
+        document.getElementById("masukKembalian").value = "Rp 0";
+        document.getElementById("masukDepositVal").value = "Rp 0";
+      }
+    }
+
+    function submitFormMasuk(e) {
+      e.preventDefault();
+      var idAnggota = document.getElementById("masukAnggota").value;
+      if (!idAnggota) return alert("Silakan pilih anggota dari hasil pencarian!");
+
+      var btn = document.getElementById("btnSimpanMasuk");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
+
+      var formObj = {
+        adminPin: currentAdminPin,
+        idAnggota: idAnggota,
+        tahunDari: document.getElementById("masukTahunDari").value,
+        bulanDari: document.getElementById("masukBulanDari").value,
+        tahunSampai: document.getElementById("masukTahunSampai").value,
+        bulanSampai: document.getElementById("masukBulanSampai").value,
+        nominalDiterima: document.getElementById("masukNominal").value,
+        iuranTerpakai: parseCurrency(document.getElementById("masukPaguTotal").value),
+        kembalianCash: parseCurrency(document.getElementById("masukKembalian").value),
+        masukDeposit: parseCurrency(document.getElementById("masukDepositVal").value),
+        catatan: document.getElementById("masukCatatan").value
+      };
+
+      google.script.run.withSuccessHandler(function(res) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Simpan Transaksi Masuk';
+        alert(res.message);
+        if (res.success) {
+          document.getElementById("formMasuk").reset();
+          document.getElementById("masukAnggota").value = "";
+          document.getElementById("masukAnggotaSelectedBadge").classList.add("d-none");
+          loadAdminData();
+        }
+      }).simpanTransaksiMasuk(formObj);
+    }
+
+    function submitFormSetor(e) {
+      e.preventDefault();
+      var idAnggota = document.getElementById("setorAnggota").value;
+      if (!idAnggota) return alert("Silakan pilih anggota dari hasil pencarian!");
+
+      var btn = document.getElementById("btnSimpanSetor");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mencatat...';
+
+      var formObj = {
+        adminPin: currentAdminPin,
+        idAnggota: idAnggota,
+        tahunDari: document.getElementById("setorTahunDari").value,
+        bulanDari: document.getElementById("setorBulanDari").value,
+        tahunSampai: document.getElementById("setorTahunSampai").value,
+        bulanSampai: document.getElementById("setorBulanSampai").value,
+        nominalDisetor: document.getElementById("setorNominal").value,
+        penerimaSetor: document.getElementById("setorPenerima").value,
+        catatan: document.getElementById("setorCatatan").value
+      };
+
+      google.script.run.withSuccessHandler(function(res) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Catat Setoran Kas';
+        alert(res.message);
+        if (res.success) {
+          document.getElementById("formSetor").reset();
+          document.getElementById("setorAnggota").value = "";
+          document.getElementById("setorAnggotaSelectedBadge").classList.add("d-none");
+          loadAdminData();
+        }
+      }).simpanTransaksiSetor(formObj);
     }
 
     function loadPublicAnggotaList() {
@@ -1193,14 +1476,12 @@
 
     function quickFillPembayaran(idAnggota) {
       document.getElementById("tab-masuk").click();
-      document.getElementById("masukAnggota").value = idAnggota;
-      onSelectAnggotaMasuk();
+      selectMasukAnggota(idAnggota);
     }
 
     function quickFillSetoran(idAnggota) {
       document.getElementById("tab-setor").click();
-      document.getElementById("setorAnggota").value = idAnggota;
-      onSelectAnggotaSetor();
+      selectSetorAnggota(idAnggota);
     }
 
     // MENU 4: DATA ANGGOTA ADMIN

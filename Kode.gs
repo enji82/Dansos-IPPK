@@ -337,8 +337,9 @@ function simpanTransaksiMasuk(form) {
     
     var idAnggota = form.idAnggota;
     var nominalDiterima = Number(form.nominalDiterima) || 0;
-    var tahunPeriode = Number(form.tahunPeriode);
+    var tahunDari = Number(form.tahunDari || form.tahunPeriode);
     var bulanDari = Number(form.bulanDari);
+    var tahunSampai = Number(form.tahunSampai || form.tahunPeriode);
     var bulanSampai = Number(form.bulanSampai);
     var iuranTerpakai = Number(form.iuranTerpakai) || 0;
     var kembalianCash = Number(form.kembalianCash) || 0;
@@ -367,17 +368,21 @@ function simpanTransaksiMasuk(form) {
       return { success: false, message: "Data Anggota tidak ditemukan!" };
     }
     
+    var periodeStr = (tahunDari === tahunSampai) 
+      ? (tahunDari + " (" + getNamaBulan(bulanDari) + " - " + getNamaBulan(bulanSampai) + ")")
+      : (getNamaBulan(bulanDari) + " " + tahunDari + " - " + getNamaBulan(bulanSampai) + " " + tahunSampai);
+
     sheetMasuk.appendRow([
       idTrx, tglStr, idAnggota, namaAnggota, nominalDiterima,
-      tahunPeriode, bulanDari, bulanSampai, iuranTerpakai,
-      kembalianCash, masukDeposit, catatan
+      tahunSampai, bulanDari, bulanSampai, iuranTerpakai,
+      kembalianCash, masukDeposit, catatan + " [" + periodeStr + "]"
     ]);
     
     var newDeposit = currentDeposit + masukDeposit;
     // Batch update: Saldo Deposit (kolom 8), Cutoff Bayar Bulan (kolom 9), Cutoff Bayar Tahun (kolom 10)
-    sheetAnggota.getRange(targetRowIdx, 8, 1, 3).setValues([[newDeposit, bulanSampai, tahunPeriode]]);
+    sheetAnggota.getRange(targetRowIdx, 8, 1, 3).setValues([[newDeposit, bulanSampai, tahunSampai]]);
     
-    return { success: true, message: "Transaksi Pembayaran Berhasil Disimpan! ID: " + idTrx };
+    return { success: true, message: "Transaksi Pembayaran Berhasil Disimpan (" + periodeStr + ")! ID: " + idTrx };
   } catch (err) {
     return { success: false, message: "Gagal menyimpan transaksi: " + err.message };
   }
@@ -404,8 +409,9 @@ function simpanTransaksiSetor(form) {
     
     var idAnggota = form.idAnggota;
     var nominalDisetor = Number(form.nominalDisetor) || 0;
-    var tahunPeriode = Number(form.tahunPeriode);
+    var tahunDari = Number(form.tahunDari || form.tahunPeriode);
     var bulanDari = Number(form.bulanDari);
+    var tahunSampai = Number(form.tahunSampai || form.tahunPeriode);
     var bulanSampai = Number(form.bulanSampai);
     var penerimaSetor = form.penerimaSetor || "Bendahara";
     var catatan = form.catatan || "-";
@@ -430,15 +436,19 @@ function simpanTransaksiSetor(form) {
       return { success: false, message: "Data Anggota tidak ditemukan!" };
     }
     
+    var periodeStr = (tahunDari === tahunSampai) 
+      ? (tahunDari + " (" + getNamaBulan(bulanDari) + " - " + getNamaBulan(bulanSampai) + ")")
+      : (getNamaBulan(bulanDari) + " " + tahunDari + " - " + getNamaBulan(bulanSampai) + " " + tahunSampai);
+
     sheetSetor.appendRow([
       idSetor, tglStr, idAnggota, namaAnggota, nominalDisetor,
-      tahunPeriode, bulanDari, bulanSampai, penerimaSetor, catatan
+      tahunSampai, bulanDari, bulanSampai, penerimaSetor, catatan + " [" + periodeStr + "]"
     ]);
     
     // Batch update: Cutoff Setor Bulan (kolom 11), Cutoff Setor Tahun (kolom 12)
-    sheetAnggota.getRange(targetRowIdx, 11, 1, 2).setValues([[bulanSampai, tahunPeriode]]);
+    sheetAnggota.getRange(targetRowIdx, 11, 1, 2).setValues([[bulanSampai, tahunSampai]]);
     
-    return { success: true, message: "Setoran Kas Berhasil Dicatat! ID: " + idSetor };
+    return { success: true, message: "Setoran Kas Berhasil Dicatat (" + periodeStr + ")! ID: " + idSetor };
   } catch (err) {
     return { success: false, message: "Gagal mencatat setoran: " + err.message };
   }
