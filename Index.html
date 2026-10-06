@@ -182,23 +182,65 @@
     <div id="adminSection" class="d-none">
       <div class="card card-custom p-4">
         
-        <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
-          <li class="nav-item">
-            <button class="nav-link active fw-bold" id="tab-masuk" data-bs-toggle="tab" data-bs-target="#panelMasuk">
-              <i class="fa-solid fa-hand-holding-dollar me-2"></i> Input Pembayaran Iuran
+        <!-- NAV TABS 5 MENU ADMIN -->
+        <ul class="nav nav-pills nav-fill mb-4 p-2 bg-light rounded-4 border shadow-sm" id="adminTabs" role="tablist">
+          <li class="nav-item me-1 mb-1 mb-md-0">
+            <button class="nav-link active fw-bold py-2 px-3 fs-6" id="tab-cek" data-bs-toggle="tab" data-bs-target="#panelCek" onclick="onSwitchAdminTab('cek')">
+              <i class="fa-solid fa-magnifying-glass me-2 text-primary"></i>Cek Pembayaran
             </button>
           </li>
-          <li class="nav-item">
-            <button class="nav-link fw-bold" id="tab-setor" data-bs-toggle="tab" data-bs-target="#panelSetor">
-              <i class="fa-solid fa-building-columns me-2"></i> Input Setoran Kas
+          <li class="nav-item me-1 mb-1 mb-md-0">
+            <button class="nav-link fw-bold py-2 px-3 fs-6" id="tab-masuk" data-bs-toggle="tab" data-bs-target="#panelMasuk" onclick="onSwitchAdminTab('masuk')">
+              <i class="fa-solid fa-hand-holding-dollar me-2 text-success"></i>Input Pembayaran
+            </button>
+          </li>
+          <li class="nav-item me-1 mb-1 mb-md-0">
+            <button class="nav-link fw-bold py-2 px-3 fs-6" id="tab-setor" data-bs-toggle="tab" data-bs-target="#panelSetor" onclick="onSwitchAdminTab('setor')">
+              <i class="fa-solid fa-building-columns me-2 text-warning"></i>Input Setoran
+            </button>
+          </li>
+          <li class="nav-item me-1 mb-1 mb-md-0">
+            <button class="nav-link fw-bold py-2 px-3 fs-6" id="tab-anggota" data-bs-toggle="tab" data-bs-target="#panelAnggota" onclick="onSwitchAdminTab('anggota')">
+              <i class="fa-solid fa-users me-2 text-info"></i>Data Anggota
+            </button>
+          </li>
+          <li class="nav-item mb-1 mb-md-0">
+            <button class="nav-link fw-bold py-2 px-3 fs-6" id="tab-laporan" data-bs-toggle="tab" data-bs-target="#panelLaporan" onclick="onSwitchAdminTab('laporan')">
+              <i class="fa-solid fa-print me-2 text-danger"></i>Cetak Laporan
             </button>
           </li>
         </ul>
 
         <div class="tab-content" id="adminTabsContent">
           
-          <!-- TAB 1: INPUT PEMBAYARAN IURAN -->
-          <div class="tab-pane fade show active" id="panelMasuk">
+          <!-- MENU 1: CEK PEMBAYARAN (ADMIN MODE SUMMARY) -->
+          <div class="tab-pane fade show active" id="panelCek">
+            <div class="alert alert-primary border-0 rounded-3 mb-4 shadow-sm">
+              <h5 class="fw-bold mb-1"><i class="fa-solid fa-user-check me-2"></i> Pengecekan & Status Iuran Anggota</h5>
+              <p class="small mb-0 text-secondary">Cari dan lihat rincian posisi tunggakan atau lunas iuran per anggota secara cepat.</p>
+            </div>
+            
+            <div class="position-relative mb-3">
+              <div class="input-group input-group-lg">
+                <input type="text" id="adminSearchKeyword" class="form-control senior-input" placeholder="Ketik Nama Anggota / NIP..." oninput="handleAdminLiveSearch()" onkeypress="if(event.key==='Enter') doAdminSearch()" autocomplete="off">
+                <button class="btn btn-navy px-4 fs-6" type="button" onclick="doAdminSearch()">
+                  <i class="fa-solid fa-search me-1"></i> Cari Data
+                </button>
+              </div>
+              <div id="adminSearchSuggestions" class="dropdown-menu w-100 shadow-lg border-0 rounded-3 mt-1 py-0 loader" style="max-height: 360px; overflow-y: auto; z-index: 1050;"></div>
+            </div>
+
+            <div id="adminSearchLoader" class="text-center py-4 loader">
+              <div class="spinner-border text-primary" style="width: 2.5rem; height: 2.5rem;" role="status"><span class="visually-hidden">Loading...</span></div>
+              <p class="fs-6 text-muted fw-semibold mt-3" id="adminSearchLoaderText">Memuat data anggota...</p>
+            </div>
+
+            <!-- Admin Search Result View Container -->
+            <div id="adminSearchResult" class="d-none"></div>
+          </div>
+
+          <!-- MENU 2: INPUT PEMBAYARAN IURAN -->
+          <div class="tab-pane fade" id="panelMasuk">
             <form id="formMasuk" onsubmit="submitFormMasuk(event)">
               <div class="row g-3">
                 <div class="col-md-6">
@@ -275,7 +317,7 @@
             </form>
           </div>
 
-          <!-- TAB 2: INPUT SETORAN KAS KE BENDAHARA -->
+          <!-- MENU 3: INPUT SETORAN KAS KE BENDAHARA -->
           <div class="tab-pane fade" id="panelSetor">
             <form id="formSetor" onsubmit="submitFormSetor(event)">
               <div class="row g-3">
@@ -331,6 +373,129 @@
             </form>
           </div>
 
+          <!-- MENU 4: DATA ANGGOTA -->
+          <div class="tab-pane fade" id="panelAnggota">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 g-2">
+              <div>
+                <h5 class="fw-bold mb-1"><i class="fa-solid fa-address-book text-info me-2"></i> Kelola Data Anggota</h5>
+                <p class="small text-secondary mb-0">Daftar seluruh anggota terdaftar beserta status iuran & saldo deposit.</p>
+              </div>
+              <button class="btn btn-success fw-bold rounded-pill px-3 shadow-sm mt-2 mt-md-0" onclick="openTambahAnggotaModal()">
+                <i class="fa-solid fa-user-plus me-1"></i> Tambah Anggota Baru
+              </button>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <input type="text" id="filterAnggotaInput" class="form-control" placeholder="Cari Anggota dalam tabel..." oninput="filterTableAnggota()">
+              </div>
+            </div>
+
+            <div class="table-responsive rounded-3 border shadow-sm">
+              <table class="table table-hover align-middle mb-0" id="tableDataAnggota">
+                <thead class="table-dark bg-navy">
+                  <tr>
+                    <th>ID</th>
+                    <th>Nama Anggota</th>
+                    <th>NIP</th>
+                    <th>Bayar Iuran s.d</th>
+                    <th>Disetor s.d</th>
+                    <th>Saldo Deposit</th>
+                    <th class="text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyAnggota">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- MENU 5: CETAK LAPORAN -->
+          <div class="tab-pane fade" id="panelLaporan">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom g-2">
+              <div>
+                <h5 class="fw-bold mb-1"><i class="fa-solid fa-file-invoice-dollar text-danger me-2"></i> Rekap Laporan Iuran & Setoran Kas</h5>
+                <p class="small text-secondary mb-0">Laporan transaksi iuran masuk dan setoran ke bendahara yang siap dicetak.</p>
+              </div>
+              <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+                <select id="filterTahunLaporan" class="form-select form-select-sm fw-bold" onchange="loadRekapLaporanAdmin()" style="width: 140px;">
+                  <option value="semua">Semua Tahun</option>
+                </select>
+                <button class="btn btn-danger fw-bold btn-sm px-3 rounded-pill shadow-sm" onclick="window.print()">
+                  <i class="fa-solid fa-print me-1"></i> Cetak PDF / Print
+                </button>
+              </div>
+            </div>
+
+            <!-- SUMMARY CARDS -->
+            <div class="row g-3 mb-4">
+              <div class="col-md-4">
+                <div class="card border-0 bg-success bg-opacity-10 p-3 rounded-3 border-start border-4 border-success">
+                  <span class="text-muted small fw-bold">TOTAL IURAN MASUK</span>
+                  <h4 class="fw-bold text-success mb-0 mt-1" id="repTotalMasuk">Rp 0</h4>
+                  <span class="small text-secondary" id="repCountMasuk">0 Transaksi</span>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card border-0 bg-warning bg-opacity-10 p-3 rounded-3 border-start border-4 border-warning">
+                  <span class="text-muted small fw-bold">TOTAL DISETOR KE BENDAHARA</span>
+                  <h4 class="fw-bold text-warning mb-0 mt-1" id="repTotalSetor">Rp 0</h4>
+                  <span class="small text-secondary" id="repCountSetor">0 Setoran</span>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card border-0 bg-primary bg-opacity-10 p-3 rounded-3 border-start border-4 border-primary">
+                  <span class="text-muted small fw-bold">SALDO KAS DIORGANISASI</span>
+                  <h4 class="fw-bold text-primary mb-0 mt-1" id="repSaldoKas">Rp 0</h4>
+                  <span class="small text-secondary">Selisih Kas Tersedia</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- REKAP TRANSAKSI MASUK TABEL -->
+            <h6 class="fw-bold mb-2"><i class="fa-solid fa-list me-2"></i> Rincian Iuran Masuk dari Anggota</h6>
+            <div class="table-responsive rounded-3 border mb-4 shadow-sm">
+              <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>ID Trx</th>
+                    <th>Tanggal</th>
+                    <th>Nama Anggota</th>
+                    <th>Tahun</th>
+                    <th>Periode Bulan</th>
+                    <th>Nominal</th>
+                    <th>Catatan</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyLaporanMasuk">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- REKAP SETORAN KAS TABEL -->
+            <h6 class="fw-bold mb-2"><i class="fa-solid fa-paper-plane me-2"></i> Rincian Setoran Kas ke Bendahara</h6>
+            <div class="table-responsive rounded-3 border shadow-sm">
+              <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>ID Setor</th>
+                    <th>Tanggal</th>
+                    <th>Nama Anggota</th>
+                    <th>Tahun</th>
+                    <th>Periode Bulan</th>
+                    <th>Penerima</th>
+                    <th>Nominal</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyLaporanSetor">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
 
       </div>
@@ -347,13 +512,54 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body text-center">
-          <p class="small text-muted mb-3">Masukkan PIN khusus Admin untuk menginput transaksi.</p>
+          <p class="small text-muted mb-3">Masukkan PIN khusus Admin untuk mengakses Panel Admin.</p>
           <input type="password" id="inputPin" class="form-control form-control-lg text-center" placeholder="******" maxlength="10">
           <div id="loginAlert" class="alert alert-danger mt-3 py-2 small d-none"></div>
         </div>
         <div class="modal-footer justify-content-center">
           <button type="button" class="btn btn-navy w-100" onclick="processLogin()">Masuk Mode Admin</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL TAMBAH ANGGOTA BARU -->
+  <div class="modal fade" id="tambahAnggotaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-navy text-white" style="background-color: #1F4E79;">
+          <h5 class="modal-title"><i class="fa-solid fa-user-plus me-2"></i> Tambah Anggota Baru</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="formTambahAnggota" onsubmit="submitFormTambahAnggota(event)">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Nama Lengkap</label>
+              <input type="text" id="newNama" class="form-control" placeholder="Contoh: Drs. H. Ahmad Sudrajat" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">NIP / ID Pensiun</label>
+              <input type="text" id="newNip" class="form-control" placeholder="Contoh: 19650412..." required>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Jenis Kelamin</label>
+                <select id="newGender" class="form-select">
+                  <option value="L">Laki-laki (L)</option>
+                  <option value="P">Perempuan (P)</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">No. Telepon / WA</label>
+                <input type="text" id="newNoHp" class="form-control" placeholder="0812...">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-navy" id="btnSimpanAnggotaNew">Simpan Anggota</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -840,6 +1046,316 @@
           loadAdminData();
         }
       }).simpanTransaksiSetor(formObj);
+    }
+
+    // ==========================================
+    // LOGIK 5 MENU ADMIN & NAVIGASI TAB
+    // ==========================================
+    function onSwitchAdminTab(tabName) {
+      if (tabName === 'anggota') {
+        loadTableAdminAnggota();
+      } else if (tabName === 'laporan') {
+        initFilterTahunLaporan();
+        loadRekapLaporanAdmin();
+      }
+    }
+
+    // MENU 1: CEK PEMBAYARAN DI ADMIN MODE
+    function handleAdminLiveSearch() {
+      var kw = document.getElementById("adminSearchKeyword").value.trim().toLowerCase();
+      var container = document.getElementById("adminSearchSuggestions");
+
+      if (kw.length < 2) {
+        container.classList.remove("show");
+        container.classList.add("loader");
+        return;
+      }
+
+      var matches = globalAnggotaList.filter(function(a) {
+        return String(a.id||'').toLowerCase().includes(kw) || String(a.nama||'').toLowerCase().includes(kw) || String(a.nip||'').toLowerCase().includes(kw);
+      });
+
+      if (matches.length === 0) {
+        container.innerHTML = '<div class="p-3 text-muted small text-center">Tidak ditemukan "' + escapeQuotes(kw) + '"</div>';
+      } else {
+        var html = "";
+        matches.slice(0, 8).forEach(function(item) {
+          html += 
+            '<div class="suggestion-item d-flex justify-content-between align-items-center" onclick="selectAdminSuggestion(\'' + item.id + '\', \'' + escapeQuotes(item.nama) + '\')">' +
+              '<div>' +
+                '<div class="senior-card-name"><i class="fa-solid fa-user me-2 text-primary"></i>' + item.nama + '</div>' +
+                '<div class="senior-nip">NIP: ' + (item.nip || '-') + '</div>' +
+              '</div>' +
+              '<i class="fa-solid fa-chevron-right text-primary fs-6"></i>' +
+            '</div>';
+        });
+        container.innerHTML = html;
+      }
+      container.classList.remove("loader");
+      container.classList.add("show");
+    }
+
+    function selectAdminSuggestion(idAnggota, namaAnggota) {
+      document.getElementById("adminSearchSuggestions").classList.remove("show");
+      document.getElementById("adminSearchSuggestions").classList.add("loader");
+      document.getElementById("adminSearchKeyword").value = namaAnggota;
+      fetchAdminDetailAnggota(idAnggota);
+    }
+
+    function doAdminSearch() {
+      var kw = document.getElementById("adminSearchKeyword").value.trim();
+      if (!kw) return alert("Ketik nama atau NIP anggota!");
+      document.getElementById("adminSearchSuggestions").classList.remove("show");
+      document.getElementById("adminSearchSuggestions").classList.add("loader");
+
+      document.getElementById("adminSearchLoader").classList.remove("loader");
+      document.getElementById("adminSearchResult").classList.add("d-none");
+
+      google.script.run.withSuccessHandler(function(res) {
+        document.getElementById("adminSearchLoader").classList.add("loader");
+        if (res.success) {
+          if (res.type === "single") {
+            renderAdminSearchResult(res.data);
+          } else if (res.type === "multiple") {
+            var html = '<div class="alert alert-info py-2 mb-3">Ditemukan ' + res.count + ' nama anggota yang cocok. Klik nama untuk melihat detail:</div><div class="row g-2">';
+            res.list.forEach(function(item) {
+              html += '<div class="col-md-6"><div class="card p-3 shadow-sm border-start border-4 border-primary" style="cursor:pointer;" onclick="fetchAdminDetailAnggota(\'' + item.id + '\')">' +
+                '<h6 class="fw-bold mb-1"><i class="fa-solid fa-user text-primary me-2"></i>' + item.nama + '</h6>' +
+                '<span class="small text-muted">NIP: ' + item.nip + ' | Lunas s.d: ' + item.lunasSampai + '</span>' +
+                '</div></div>';
+            });
+            html += '</div>';
+            document.getElementById("adminSearchResult").innerHTML = html;
+            document.getElementById("adminSearchResult").classList.remove("d-none");
+          }
+        } else {
+          alert(res.message);
+        }
+      }).checkStatusAnggota(kw);
+    }
+
+    function fetchAdminDetailAnggota(idAnggota) {
+      document.getElementById("adminSearchLoader").classList.remove("loader");
+      document.getElementById("adminSearchResult").classList.add("d-none");
+
+      google.script.run.withSuccessHandler(function(res) {
+        document.getElementById("adminSearchLoader").classList.add("loader");
+        if (res.success) {
+          renderAdminSearchResult(res.data);
+        } else {
+          alert(res.message);
+        }
+      }).getDetailAnggotaById(idAnggota);
+    }
+
+    function renderAdminSearchResult(data) {
+      var statusBadge = data.totalTunggakan > 0 
+        ? '<span class="badge bg-danger fs-6 px-3 py-2">Tunggakan: Rp ' + data.totalTunggakan.toLocaleString('id-ID') + '</span>'
+        : '<span class="badge bg-success fs-6 px-3 py-2"><i class="fa-solid fa-check me-1"></i> Lunas Seluruhnya</span>';
+
+      var html = 
+        '<div class="card border-primary shadow-sm rounded-3 overflow-hidden mt-2">' +
+          '<div class="card-header bg-primary text-white p-3 d-flex justify-content-between align-items-center">' +
+            '<h5 class="mb-0 fw-bold"><i class="fa-solid fa-id-card me-2"></i>' + data.nama + '</h5>' +
+            statusBadge +
+          '</div>' +
+          '<div class="card-body p-4">' +
+            '<div class="row mb-3">' +
+              '<div class="col-md-4"><strong>NIP:</strong> ' + (data.nip || '-') + '</div>' +
+              '<div class="col-md-4"><strong>Posisi Lunas s.d:</strong> ' + data.lunasSampai + '</div>' +
+              '<div class="col-md-4"><strong>Posisi Bulan Ini:</strong> ' + data.bulanIniStr + '</div>' +
+            '</div>';
+
+      if (data.rincianTunggakan && data.rincianTunggakan.length > 0) {
+        html += '<h6 class="fw-bold text-muted border-top pt-3">Rincian Belum Dibayar:</h6><div class="list-group list-group-flush">';
+        data.rincianTunggakan.forEach(function(r) {
+          html += '<div class="list-group-item d-flex justify-content-between align-items-center bg-light rounded mb-2">' +
+            '<div><strong class="fs-6 text-dark">Tahun ' + r.tahun + '</strong> <span class="text-primary fw-bold ms-2">(' + r.rentangBulan + ')</span></div>' +
+            '<span class="badge bg-danger fs-6">Rp ' + r.total.toLocaleString('id-ID') + '</span>' +
+          '</div>';
+        });
+        html += '</div>';
+      }
+
+      html += 
+            '<div class="text-end mt-3 border-top pt-3">' +
+              '<button class="btn btn-success me-2" onclick="quickFillPembayaran(\'' + data.id + '\')"><i class="fa-solid fa-hand-holding-dollar me-1"></i> Input Pembayaran Orang Ini</button>' +
+              '<button class="btn btn-warning" onclick="quickFillSetoran(\'' + data.id + '\')"><i class="fa-solid fa-building-columns me-1"></i> Input Setoran Kas Orang Ini</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      document.getElementById("adminSearchResult").innerHTML = html;
+      document.getElementById("adminSearchResult").classList.remove("d-none");
+    }
+
+    function quickFillPembayaran(idAnggota) {
+      document.getElementById("tab-masuk").click();
+      document.getElementById("masukAnggota").value = idAnggota;
+      onSelectAnggotaMasuk();
+    }
+
+    function quickFillSetoran(idAnggota) {
+      document.getElementById("tab-setor").click();
+      document.getElementById("setorAnggota").value = idAnggota;
+      onSelectAnggotaSetor();
+    }
+
+    // MENU 4: DATA ANGGOTA ADMIN
+    function loadTableAdminAnggota() {
+      var tbody = document.getElementById("tbodyAnggota");
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm me-2"></div>Memuat data anggota...</td></tr>';
+
+      google.script.run.withSuccessHandler(function(res) {
+        if (res.success) {
+          globalAnggotaList = res.data;
+          renderTableAnggota(res.data);
+        } else {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-3">' + res.message + '</td></tr>';
+        }
+      }).getAdminDataAnggota(currentAdminPin);
+    }
+
+    function renderTableAnggota(list) {
+      var tbody = document.getElementById("tbodyAnggota");
+      tbody.innerHTML = "";
+
+      if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">Belum ada data anggota.</td></tr>';
+        return;
+      }
+
+      list.forEach(function(a) {
+        var tr = document.createElement("tr");
+        var bayarStr = (a.bayarBln > 0 && a.bayarThn > 0) ? (namaBulanList[a.bayarBln] + " " + a.bayarThn) : "Belum Ada";
+        var setorStr = (a.setorBln > 0 && a.setorThn > 0) ? (namaBulanList[a.setorBln] + " " + a.setorThn) : "Belum Ada";
+        
+        tr.innerHTML = 
+          '<td><span class="badge bg-secondary">' + a.id + '</span></td>' +
+          '<td><strong class="text-dark">' + a.nama + '</strong></td>' +
+          '<td>' + (a.nip || '-') + '</td>' +
+          '<td><span class="badge bg-success bg-opacity-10 text-success border border-success fw-bold px-2 py-1">' + bayarStr + '</span></td>' +
+          '<td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary fw-bold px-2 py-1">' + setorStr + '</span></td>' +
+          '<td><strong class="text-info">Rp ' + (a.saldoDeposit || 0).toLocaleString('id-ID') + '</strong></td>' +
+          '<td class="text-center">' +
+            '<button class="btn btn-outline-primary btn-sm me-1" onclick="quickFillPembayaran(\'' + a.id + '\')" title="Input Pembayaran"><i class="fa-solid fa-hand-holding-dollar"></i></button>' +
+            '<button class="btn btn-outline-warning btn-sm" onclick="quickFillSetoran(\'' + a.id + '\')" title="Input Setoran Kas"><i class="fa-solid fa-building-columns"></i></button>' +
+          '</td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterTableAnggota() {
+      var kw = document.getElementById("filterAnggotaInput").value.toLowerCase();
+      var filtered = globalAnggotaList.filter(function(a) {
+        return String(a.id||'').toLowerCase().includes(kw) || String(a.nama||'').toLowerCase().includes(kw) || String(a.nip||'').toLowerCase().includes(kw);
+      });
+      renderTableAnggota(filtered);
+    }
+
+    function openTambahAnggotaModal() {
+      document.getElementById("formTambahAnggota").reset();
+      var modal = new bootstrap.Modal(document.getElementById('tambahAnggotaModal'));
+      modal.show();
+    }
+
+    function submitFormTambahAnggota(e) {
+      e.preventDefault();
+      var btn = document.getElementById("btnSimpanAnggotaNew");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
+
+      var formObj = {
+        adminPin: currentAdminPin,
+        nama: document.getElementById("newNama").value,
+        nip: document.getElementById("newNip").value,
+        gender: document.getElementById("newGender").value,
+        noHp: document.getElementById("newNoHp").value
+      };
+
+      google.script.run.withSuccessHandler(function(res) {
+        btn.disabled = false;
+        btn.innerHTML = 'Simpan Anggota';
+        alert(res.message);
+        if (res.success) {
+          bootstrap.Modal.getInstance(document.getElementById('tambahAnggotaModal')).hide();
+          loadAdminData();
+          loadTableAdminAnggota();
+        }
+      }).simpanAnggotaBaru(formObj);
+    }
+
+    // MENU 5: REKAP CETAK LAPORAN ADMIN
+    function initFilterTahunLaporan() {
+      var sel = document.getElementById("filterTahunLaporan");
+      sel.innerHTML = '<option value="semua">Semua Tahun</option>';
+      var curY = new Date().getFullYear();
+      for (var y = 2021; y <= 2030; y++) {
+        var opt = document.createElement("option");
+        opt.value = y;
+        opt.textContent = "Tahun " + y;
+        if (y === curY) opt.selected = true;
+        sel.appendChild(opt);
+      }
+    }
+
+    function loadRekapLaporanAdmin() {
+      var thn = document.getElementById("filterTahunLaporan").value;
+      var tbM = document.getElementById("tbodyLaporanMasuk");
+      var tbS = document.getElementById("tbodyLaporanSetor");
+
+      tbM.innerHTML = '<tr><td colspan="7" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Memuat laporan iuran...</td></tr>';
+      tbS.innerHTML = '<tr><td colspan="7" class="text-center py-3"><div class="spinner-border spinner-border-sm text-warning me-2"></div>Memuat laporan setoran...</td></tr>';
+
+      google.script.run.withSuccessHandler(function(res) {
+        if (res.success) {
+          document.getElementById("repTotalMasuk").textContent = "Rp " + res.summary.totalIuranMasuk.toLocaleString('id-ID');
+          document.getElementById("repCountMasuk").textContent = res.summary.jumlahTransaksiMasuk + " Transaksi";
+
+          document.getElementById("repTotalSetor").textContent = "Rp " + res.summary.totalSetorKas.toLocaleString('id-ID');
+          document.getElementById("repCountSetor").textContent = res.summary.jumlahSetoranKas + " Setoran";
+
+          document.getElementById("repSaldoKas").textContent = "Rp " + res.summary.saldoKasDisimpan.toLocaleString('id-ID');
+
+          // Render Tabel Masuk
+          tbM.innerHTML = "";
+          if (res.transaksiMasuk.length === 0) {
+            tbM.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-2">Belum ada transaksi iuran masuk.</td></tr>';
+          } else {
+            res.transaksiMasuk.forEach(function(m) {
+              tbM.innerHTML += '<tr>' +
+                '<td><span class="badge bg-secondary">' + m.idTrx + '</span></td>' +
+                '<td>' + m.tanggal + '</td>' +
+                '<td><strong>' + m.nama + '</strong></td>' +
+                '<td>' + m.tahun + '</td>' +
+                '<td>' + m.periode + '</td>' +
+                '<td><strong class="text-success">Rp ' + m.nominal.toLocaleString('id-ID') + '</strong></td>' +
+                '<td>' + m.catatan + '</td>' +
+              '</tr>';
+            });
+          }
+
+          // Render Tabel Setor
+          tbS.innerHTML = "";
+          if (res.transaksiSetor.length === 0) {
+            tbS.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-2">Belum ada setoran kas ke bendahara.</td></tr>';
+          } else {
+            res.transaksiSetor.forEach(function(s) {
+              tbS.innerHTML += '<tr>' +
+                '<td><span class="badge bg-secondary">' + s.idSetor + '</span></td>' +
+                '<td>' + s.tanggal + '</td>' +
+                '<td><strong>' + s.nama + '</strong></td>' +
+                '<td>' + s.tahun + '</td>' +
+                '<td>' + s.periode + '</td>' +
+                '<td>' + s.penerima + '</td>' +
+                '<td><strong class="text-warning">Rp ' + s.nominal.toLocaleString('id-ID') + '</strong></td>' +
+              '</tr>';
+            });
+          }
+        } else {
+          alert(res.message);
+        }
+      }).getAdminRekapLaporan(currentAdminPin, thn);
     }
 
     function parseCurrency(str) {

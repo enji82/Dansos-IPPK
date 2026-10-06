@@ -445,6 +445,126 @@ function simpanTransaksiSetor(form) {
 }
 
 /**
+ * 8. MENAMPILKAN DATA LENGKAP ANGGOTA UNTUK TAB DATA ANGGOTA ADMIN
+ */
+function getAdminDataAnggota(pin) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var list = getAllAnggota();
+    return { success: true, data: list };
+  } catch (err) {
+    return { success: false, message: "Gagal mengambil data anggota: " + err.message };
+  }
+}
+
+/**
+ * 9. REKAP LAPORAN LENGKAP KAS & IURAN UNTUK CETAK LAPORAN
+ */
+function getAdminRekapLaporan(pin, filterTahun) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheetMasuk = ss.getSheetByName(SHEET_MASUK);
+    var sheetSetor = ss.getSheetByName(SHEET_SETOR);
+    
+    var listMasuk = [];
+    var totalIuranMasuk = 0;
+    if (sheetMasuk) {
+      var dataM = sheetMasuk.getDataRange().getValues();
+      for (var i = 1; i < dataM.length; i++) {
+        var r = dataM[i];
+        if (!r[0]) continue;
+        var thn = Number(r[5]);
+        if (!filterTahun || filterTahun === "semua" || thn === Number(filterTahun)) {
+          var nom = Number(r[4]) || 0;
+          totalIuranMasuk += nom;
+          listMasuk.push({
+            idTrx: r[0],
+            tanggal: r[1] ? Utilities.formatDate(new Date(r[1]), ss.getSpreadsheetTimeZone(), "yyyy-MM-dd") : "-",
+            idAnggota: r[2],
+            nama: r[3],
+            nominal: nom,
+            tahun: thn,
+            periode: getNamaBulan(r[6]) + " - " + getNamaBulan(r[7]),
+            catatan: r[11] || "-"
+          });
+        }
+      }
+    }
+
+    var listSetor = [];
+    var totalSetorKas = 0;
+    if (sheetSetor) {
+      var dataS = sheetSetor.getDataRange().getValues();
+      for (var j = 1; j < dataS.length; j++) {
+        var s = dataS[j];
+        if (!s[0]) continue;
+        var thnS = Number(s[5]);
+        if (!filterTahun || filterTahun === "semua" || thnS === Number(filterTahun)) {
+          var nomS = Number(s[4]) || 0;
+          totalSetorKas += nomS;
+          listSetor.push({
+            idSetor: s[0],
+            tanggal: s[1] ? Utilities.formatDate(new Date(s[1]), ss.getSpreadsheetTimeZone(), "yyyy-MM-dd") : "-",
+            idAnggota: s[2],
+            nama: s[3],
+            nominal: nomS,
+            tahun: thnS,
+            periode: getNamaBulan(s[6]) + " - " + getNamaBulan(s[7]),
+            penerima: s[8] || "-",
+            catatan: s[9] || "-"
+          });
+        }
+      }
+    }
+
+    return {
+      success: true,
+      summary: {
+        totalIuranMasuk: totalIuranMasuk,
+        totalSetorKas: totalSetorKas,
+        saldoKasDisimpan: totalIuranMasuk - totalSetorKas,
+        jumlahTransaksiMasuk: listMasuk.length,
+        jumlahSetoranKas: listSetor.length
+      },
+      transaksiMasuk: listMasuk,
+      transaksiSetor: listSetor
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal membuat rekap laporan: " + err.message };
+  }
+}
+
+/**
+ * 10. TAMBAH ANGGOTA BARU (KHUSUS ADMIN)
+ */
+function simpanAnggotaBaru(form) {
+  var authCheck = verifyAdminPin(form ? form.adminPin : "");
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
+    if (!sheetAnggota) return { success: false, message: "Sheet Master_Anggota tidak ada!" };
+
+    var data = sheetAnggota.getDataRange().getValues();
+    var nextId = "ANG-" + String(data.length).padStart(3, '0');
+    
+    sheetAnggota.appendRow([
+      nextId, form.nama, form.nip || "-", form.gender || "-", form.tglLahir || "-", form.alamat || "-", form.noHp || "-", 0, 0, 0, 0, 0
+    ]);
+
+    return { success: true, message: "Anggota baru berhasil ditambahkan! ID: " + nextId };
+  } catch (err) {
+    return { success: false, message: "Gagal menambah anggota: " + err.message };
+  }
+}
+
+/**
  * HELPER: Nama Bulan Bahasa Indonesia
  */
 function getNamaBulan(index) {
