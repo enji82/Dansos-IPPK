@@ -879,6 +879,7 @@
           bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
           document.getElementById("btnAdminAuth").classList.add("d-none");
           document.getElementById("btnLogout").classList.remove("d-none");
+          document.getElementById("publicSection").classList.add("d-none");
           document.getElementById("adminSection").classList.remove("d-none");
           loadAdminData();
         } else {
@@ -894,6 +895,7 @@
       document.getElementById("btnAdminAuth").classList.remove("d-none");
       document.getElementById("btnLogout").classList.add("d-none");
       document.getElementById("adminSection").classList.add("d-none");
+      document.getElementById("publicSection").classList.remove("d-none");
     }
 
     function loadAdminData() {
