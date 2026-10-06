@@ -260,7 +260,7 @@
 
                 <div class="col-md-3">
                   <label class="form-label fw-bold">Tahun Dari</label>
-                  <select id="masukTahunDari" class="form-select" required onchange="hitungKalkulasiBayar()">
+                  <select id="masukTahunDari" class="form-select" required onchange="onMasukPeriodeChange()">
                     <!-- Populated by JS -->
                   </select>
                 </div>
@@ -705,16 +705,86 @@
         document.getElementById("masukAnggotaSelectedInfo").textContent = "ID: " + a.id + " | NIP: " + (a.nip || '-') + " | Lunas s.d: " + bayarStr;
         document.getElementById("masukAnggotaSelectedBadge").classList.remove("d-none");
 
-        // Set otomatis periode berikutnya
+        // Set otomatis periode BERIKUTNYA (Bulan pertama yang BELUM LUNAS)
         var nextBln = (a.bayarBln >= 12) ? 1 : (a.bayarBln + 1);
         var nextThn = (a.bayarBln >= 12) ? (a.bayarThn + 1) : (a.bayarThn || new Date().getFullYear());
         
-        document.getElementById("masukTahunDari").value = nextThn;
-        document.getElementById("masukBulanDari").value = nextBln;
-        document.getElementById("masukTahunSampai").value = nextThn;
-        document.getElementById("masukBulanSampai").value = nextBln;
+        // Simpan posisi lunas anggota di atribut dataset untuk validasi
+        var selThnDari = document.getElementById("masukTahunDari");
+        selThnDari.dataset.lunasThn = a.bayarThn || 0;
+        selThnDari.dataset.lunasBln = a.bayarBln || 0;
 
-        hitungKalkulasiBayar();
+        // Populate pilihan Tahun Dari yang valid (hanya tahun >= tahun lunas)
+        selThnDari.innerHTML = "";
+        var minThn = a.bayarThn || 2021;
+        for (var y = minThn; y <= 2030; y++) {
+          var opt = document.createElement("option");
+          opt.value = y;
+          opt.textContent = y;
+          if (y === nextThn) opt.selected = true;
+          selThnDari.appendChild(opt);
+        }
+
+        document.getElementById("masukTahunSampai").value = nextThn;
+
+        // Update pilihan bulan yang belum lunas (disable bulan yang sudah lunas)
+        updatePeriodeMasukOptions(a.bayarThn || 0, a.bayarBln || 0, nextThn, nextBln);
+
+        // Reset nominal & reset pagu ke 0 sebelum diisi nominal uang oleh admin
+        document.getElementById("masukNominal").value = "";
+        document.getElementById("masukPaguTotal").value = "Rp 0";
+        document.getElementById("masukKembalian").value = "0";
+        document.getElementById("masukDepositVal").value = "0";
+        document.getElementById("masukJumlahBulanInfo").textContent = "Silakan isi Nominal Uang Diterima terlebih dahulu.";
+      }
+    }
+
+    function updatePeriodeMasukOptions(lunasThn, lunasBln, nextThn, nextBln) {
+      var selThnDari = document.getElementById("masukTahunDari");
+      var thnDari = parseInt(selThnDari.value) || nextThn;
+      var selBlnDari = document.getElementById("masukBulanDari");
+      selBlnDari.innerHTML = "";
+
+      // Jika memilih Tahun Dari yang sama dengan Tahun Lunas, bulan yang sudah lunas tidak boleh dipilih (disabled)
+      var minBln = (thnDari === lunasThn) ? (lunasBln + 1) : 1;
+      if (minBln > 12) minBln = 12;
+
+      for (var b = 1; b <= 12; b++) {
+        var opt = document.createElement("option");
+        opt.value = b;
+        opt.textContent = namaBulanList[b];
+        if (b < minBln) {
+          opt.disabled = true;
+          opt.textContent += " (Lunas)";
+        }
+        if (b === nextBln && b >= minBln) opt.selected = true;
+        selBlnDari.appendChild(opt);
+      }
+
+      if (parseInt(selBlnDari.value) < minBln) {
+        selBlnDari.value = minBln;
+      }
+
+      // Selaraskan pilihan Tahun & Bulan Sampai
+      var selThnSampai = document.getElementById("masukTahunSampai");
+      selThnSampai.innerHTML = "";
+      for (var y = thnDari; y <= 2030; y++) {
+        var optS = document.createElement("option");
+        optS.value = y;
+        optS.textContent = y;
+        if (y === thnDari) optS.selected = true;
+        selThnSampai.appendChild(optS);
+      }
+
+      var selBlnSampai = document.getElementById("masukBulanSampai");
+      selBlnSampai.innerHTML = "";
+      var curBlnDari = parseInt(selBlnDari.value) || 1;
+      for (var bS = 1; bS <= 12; bS++) {
+        var optBS = document.createElement("option");
+        optBS.value = bS;
+        optBS.textContent = namaBulanList[bS];
+        if (bS === curBlnDari) optBS.selected = true;
+        selBlnSampai.appendChild(optBS);
       }
     }
 
@@ -782,7 +852,8 @@
       var blnDari = parseInt(document.getElementById("masukBulanDari").value);
       var thnSampai = parseInt(document.getElementById("masukTahunSampai").value);
       var blnSampai = parseInt(document.getElementById("masukBulanSampai").value);
-      var nominal = parseFloat(document.getElementById("masukNominal").value) || 0;
+      var nominalVal = document.getElementById("masukNominal").value;
+      var nominal = parseFloat(nominalVal) || 0;
 
       // Proteksi jika Tahun/Bulan Sampai < Tahun/Bulan Dari
       if (thnSampai < thnDari || (thnSampai === thnDari && blnSampai < blnDari)) {
@@ -790,6 +861,15 @@
         document.getElementById("masukBulanSampai").value = blnDari;
         thnSampai = thnDari;
         blnSampai = blnDari;
+      }
+
+      // Jika nominal belum diisi admin, jangan tampilkan hitungan pagu & kembalian otomatis
+      if (!nominalVal || nominal <= 0) {
+        document.getElementById("masukPaguTotal").value = "Rp 0";
+        document.getElementById("masukKembalian").value = "0";
+        document.getElementById("masukDepositVal").value = "0";
+        document.getElementById("masukJumlahBulanInfo").textContent = "Silakan isi Nominal Uang Diterima terlebih dahulu.";
+        return;
       }
 
       var totalPagu = 0;
