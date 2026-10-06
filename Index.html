@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Iuran Anggota</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .navbar-custom { background-color: #1F4E79; }
+    .card-custom { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .btn-navy { background-color: #1F4E79; color: white; }
+    .btn-navy:hover { background-color: #153452; color: white; }
+    .status-badge { font-size: 0.9rem; padding: 6px 12px; border-radius: 20px; }
+    .loader { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR HEADER -->
+  <nav class="navbar navbar-dark navbar-custom mb-4 shadow-sm">
+    <div class="container">
+      <span class="navbar-brand mb-0 h1"><i class="fa-solid fa-wallet me-2"></i> Sistem Iuran Anggota</span>
+      <button class="btn btn-outline-light btn-sm" id="btnAdminAuth" onclick="openLoginModal()">
+        <i class="fa-solid fa-lock me-1"></i> Akses Admin
+      </button>
+      <button class="btn btn-danger btn-sm d-none" id="btnLogout" onclick="logoutAdmin()">
+        <i class="fa-solid fa-right-from-bracket me-1"></i> Keluar Admin
+      </button>
+    </div>
+  </nav>
+
+  <div class="container pb-5">
+    
+    <!-- SECTION 1: CEK STATUS (PUBLIK/UMUM) -->
+    <div id="publicSection">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card card-custom p-4 mb-4">
+            <h4 class="text-center text-primary mb-3"><i class="fa-solid fa-magnifying-glass me-2"></i> Cek Status Pembayaran Iuran</h4>
+            <p class="text-muted text-center small mb-4">Masukkan Nama, NIP, atau ID Anggota Anda untuk melihat posisi pembayaran & setoran.</p>
+            
+            <div class="input-group input-group-lg mb-3">
+              <input type="text" id="searchKeyword" class="form-control" placeholder="Ketik NIP / Nama Anggota..." onkeypress="handleSearchEnter(event)">
+              <button class="btn btn-navy" type="button" onclick="doSearch()">
+                <i class="fa-solid fa-search"></i> Cari
+              </button>
+            </div>
+            
+            <!-- Loading Spinner -->
+            <div id="searchLoader" class="text-center py-3 loader">
+              <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+              <p class="small text-muted mt-2">Mencari data anggota...</p>
+            </div>
+
+            <!-- Result Card -->
+            <div id="searchResult" class="d-none mt-3">
+              <div class="card border-primary">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                  <h6 class="mb-0" id="resNama">-</h6>
+                  <span class="badge bg-light text-dark" id="resNip">NIP: -</span>
+                </div>
+                <div class="card-body">
+                  <div class="row text-center">
+                    <div class="col-md-4 border-end mb-3 mb-md-0">
+                      <span class="text-muted small">Status Pembayaran</span>
+                      <h6 class="text-success mt-1 mb-0" id="resLunas">Lunas s.d -</h6>
+                    </div>
+                    <div class="col-md-4 border-end mb-3 mb-md-0">
+                      <span class="text-muted small">Status Setoran Kas</span>
+                      <h6 class="text-primary mt-1 mb-0" id="resSetor">Disetor s.d -</h6>
+                    </div>
+                    <div class="col-md-4">
+                      <span class="text-muted small">Saldo Deposit</span>
+                      <h6 class="text-warning text-dark mt-1 mb-0" id="resDeposit">Rp 0</h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: PANEL ADMIN (KHUSUS ADMIN TERAUTENTIKASI) -->
+    <div id="adminSection" class="d-none">
+      <div class="card card-custom p-4">
+        
+        <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+          <li class="nav-item">
+            <button class="nav-link active fw-bold" id="tab-masuk" data-bs-toggle="tab" data-bs-target="#panelMasuk">
+              <i class="fa-solid fa-hand-holding-dollar me-2"></i> Input Pembayaran Iuran
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-bold" id="tab-setor" data-bs-toggle="tab" data-bs-target="#panelSetor">
+              <i class="fa-solid fa-building-columns me-2"></i> Input Setoran Kas
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="adminTabsContent">
+          
+          <!-- TAB 1: INPUT PEMBAYARAN IURAN -->
+          <div class="tab-pane fade show active" id="panelMasuk">
+            <form id="formMasuk" onsubmit="submitFormMasuk(event)">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Pilih Anggota</label>
+                  <select id="masukAnggota" class="form-select" required onchange="onSelectAnggotaMasuk()">
+                    <option value="">-- Pilih Anggota --</option>
+                  </select>
+                </div>
+                
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Tahun Periode</label>
+                  <select id="masukTahun" class="form-select" required onchange="hitungKalkulasiBayar()">
+                    <!-- Populated by JS -->
+                  </select>
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Bulan Dari</label>
+                  <select id="masukBulanDari" class="form-select" required onchange="hitungKalkulasiBayar()">
+                    <!-- Populated by JS -->
+                  </select>
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Bulan Sampai</label>
+                  <select id="masukBulanSampai" class="form-select" required onchange="hitungKalkulasiBayar()">
+                    <!-- Populated by JS -->
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Total Pagu Seharusnya (Rp)</label>
+                  <input type="text" id="masukPaguTotal" class="form-control bg-light" readonly value="0">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Nominal Uang Diterima (Rp)</label>
+                  <input type="number" id="masukNominal" class="form-control" placeholder="Contoh: 180000" required oninput="hitungKalkulasiBayar()">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Pengalokasian Sisa / Kelebihan Uang</label>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="alokasiSisa" id="radioKembalian" value="cash" checked onchange="hitungKalkulasiBayar()">
+                    <label class="form-check-label" for="radioKembalian">Dikembalikan Tunai (Cash)</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="alokasiSisa" id="radioDeposit" value="deposit" onchange="hitungKalkulasiBayar()">
+                    <label class="form-check-label" for="radioDeposit">Disimpan ke Saldo Deposit</label>
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Kembalian Cash (Rp)</label>
+                  <input type="text" id="masukKembalian" class="form-control bg-light" readonly value="0">
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Masuk Deposit (Rp)</label>
+                  <input type="text" id="masukDepositVal" class="form-control bg-light" readonly value="0">
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label fw-bold">Catatan (Opsional)</label>
+                  <input type="text" id="masukCatatan" class="form-control" placeholder="Misal: Pembayaran Tunai Semester 1">
+                </div>
+
+                <div class="col-12 text-end mt-4">
+                  <button type="submit" class="btn btn-navy px-4" id="btnSimpanMasuk">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Transaksi Masuk
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- TAB 2: INPUT SETORAN KAS KE BENDAHARA -->
+          <div class="tab-pane fade" id="panelSetor">
+            <form id="formSetor" onsubmit="submitFormSetor(event)">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Pilih Anggota</label>
+                  <select id="setorAnggota" class="form-select" required onchange="onSelectAnggotaSetor()">
+                    <option value="">-- Pilih Anggota --</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Tahun Periode Setoran</label>
+                  <select id="setorTahun" class="form-select" required>
+                    <!-- Populated by JS -->
+                  </select>
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Bulan Disetor Dari</label>
+                  <select id="setorBulanDari" class="form-select" required>
+                    <!-- Populated by JS -->
+                  </select>
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Bulan Disetor Sampai</label>
+                  <select id="setorBulanSampai" class="form-select" required>
+                    <!-- Populated by JS -->
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Nominal Disetor (Rp)</label>
+                  <input type="number" id="setorNominal" class="form-control" placeholder="Contoh: 180000" required>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Penerima Setoran</label>
+                  <input type="text" id="setorPenerima" class="form-control" value="Bendahara Pusat" required>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Catatan / Bukti Setor</label>
+                  <input type="text" id="setorCatatan" class="form-control" placeholder="Misal: Bukti Kwitansi / Transfer">
+                </div>
+
+                <div class="col-12 text-end mt-4">
+                  <button type="submit" class="btn btn-navy px-4" id="btnSimpanSetor">
+                    <i class="fa-solid fa-paper-plane me-1"></i> Catat Setoran Kas
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL LOGIN ADMIN -->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header bg-navy text-white" style="background-color: #1F4E79;">
+          <h5 class="modal-title"><i class="fa-solid fa-lock me-2"></i> PIN Admin</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p class="small text-muted mb-3">Masukkan PIN khusus Admin untuk menginput transaksi.</p>
+          <input type="password" id="inputPin" class="form-control form-control-lg text-center" placeholder="******" maxlength="10">
+          <div id="loginAlert" class="alert alert-danger mt-3 py-2 small d-none"></div>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" class="btn btn-navy w-100" onclick="processLogin()">Masuk Mode Admin</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- APP SCRIPT JAVASCRIPT LOGIC -->
+  <script>
+    var globalPaguMap = {};
+    var globalAnggotaList = [];
+    var namaBulanList = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+    document.addEventListener("DOMContentLoaded", function() {
+      initDropdownOptions();
+    });
+
+    function initDropdownOptions() {
+      var thnSelects = [document.getElementById("masukTahun"), document.getElementById("setorTahun")];
+      var currentYear = new Date().getFullYear();
+      
+      thnSelects.forEach(function(sel) {
+        sel.innerHTML = "";
+        for (var y = 2021; y <= 2030; y++) {
+          var opt = document.createElement("option");
+          opt.value = y;
+          opt.textContent = y;
+          if (y === currentYear) opt.selected = true;
+          sel.appendChild(opt);
+        }
+      });
+
+      var blnSelects = [
+        document.getElementById("masukBulanDari"), document.getElementById("masukBulanSampai"),
+        document.getElementById("setorBulanDari"), document.getElementById("setorBulanSampai")
+      ];
+
+      blnSelects.forEach(function(sel) {
+        sel.innerHTML = "";
+        for (var b = 1; b <= 12; b++) {
+          var opt = document.createElement("option");
+          opt.value = b;
+          opt.textContent = namaBulanList[b];
+          sel.appendChild(opt);
+        }
+      });
+    }
+
+    // SEARCH PUBLIK
+    function handleSearchEnter(e) { if (e.key === 'Enter') doSearch(); }
+    
+    function doSearch() {
+      var kw = document.getElementById("searchKeyword").value.trim();
+      if (!kw) return alert("Masukkan Nama atau NIP terlebih dahulu!");
+
+      document.getElementById("searchLoader").classList.remove("loader");
+      document.getElementById("searchResult").classList.add("d-none");
+
+      google.script.run.withSuccessHandler(function(res) {
+        document.getElementById("searchLoader").classList.add("loader");
+        if (res.success) {
+          document.getElementById("resNama").textContent = res.data.nama;
+          document.getElementById("resNip").textContent = "NIP: " + (res.data.nip || "-");
+          document.getElementById("resLunas").textContent = "Lunas s.d " + res.data.lunasSampai;
+          document.getElementById("resSetor").textContent = "Disetor s.d " + res.data.setorSampai;
+          document.getElementById("resDeposit").textContent = "Rp " + res.data.saldoDeposit.toLocaleString('id-ID');
+          document.getElementById("searchResult").classList.remove("d-none");
+        } else {
+          alert(res.message);
+        }
+      }).checkStatusAnggota(kw);
+    }
+
+    // AUTH ADMIN
+    function openLoginModal() {
+      var modal = new bootstrap.Modal(document.getElementById('loginModal'));
+      document.getElementById("inputPin").value = "";
+      document.getElementById("loginAlert").classList.add("d-none");
+      modal.show();
+    }
+
+    function processLogin() {
+      var pin = document.getElementById("inputPin").value;
+      if (!pin) return;
+
+      google.script.run.withSuccessHandler(function(res) {
+        if (res.success) {
+          bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+          document.getElementById("btnAdminAuth").classList.add("d-none");
+          document.getElementById("btnLogout").classList.remove("d-none");
+          document.getElementById("adminSection").classList.remove("d-none");
+          loadAdminData();
+        } else {
+          var al = document.getElementById("loginAlert");
+          al.textContent = res.message;
+          al.classList.remove("d-none");
+        }
+      }).verifyAdminPin(pin);
+    }
+
+    function logoutAdmin() {
+      document.getElementById("btnAdminAuth").classList.remove("d-none");
+      document.getElementById("btnLogout").classList.add("d-none");
+      document.getElementById("adminSection").classList.add("d-none");
+    }
+
+    function loadAdminData() {
+      google.script.run.withSuccessHandler(function(pagu) {
+        globalPaguMap = pagu;
+      }).getMatrixPaguMap();
+
+      google.script.run.withSuccessHandler(function(list) {
+        globalAnggotaList = list;
+        populateAnggotaDropdowns();
+      }).getAllAnggota();
+    }
+
+    function populateAnggotaDropdowns() {
+      var selMasuk = document.getElementById("masukAnggota");
+      var selSetor = document.getElementById("setorAnggota");
+
+      selMasuk.innerHTML = '<option value="">-- Pilih Anggota --</option>';
+      selSetor.innerHTML = '<option value="">-- Pilih Anggota --</option>';
+
+      globalAnggotaList.forEach(function(a) {
+        var opt1 = document.createElement("option");
+        opt1.value = a.id;
+        opt1.textContent = a.id + " - " + a.nama + " (" + a.nip + ")";
+        selMasuk.appendChild(opt1);
+
+        var opt2 = document.createElement("option");
+        opt2.value = a.id;
+        opt2.textContent = a.id + " - " + a.nama + " (" + a.nip + ")";
+        selSetor.appendChild(opt2);
+      });
+    }
+
+    function onSelectAnggotaMasuk() {
+      var id = document.getElementById("masukAnggota").value;
+      var a = globalAnggotaList.find(x => String(x.id) === String(id));
+      if (a) {
+        var nextBln = (a.bayarBln >= 12) ? 1 : (a.bayarBln + 1);
+        var nextThn = (a.bayarBln >= 12) ? (a.bayarThn + 1) : (a.bayarThn || new Date().getFullYear());
+        
+        document.getElementById("masukTahun").value = nextThn;
+        document.getElementById("masukBulanDari").value = nextBln;
+        document.getElementById("masukBulanSampai").value = nextBln;
+        hitungKalkulasiBayar();
+      }
+    }
+
+    function onSelectAnggotaSetor() {
+      var id = document.getElementById("setorAnggota").value;
+      var a = globalAnggotaList.find(x => String(x.id) === String(id));
+      if (a) {
+        var nextBln = (a.setorBln >= 12) ? 1 : (a.setorBln + 1);
+        var nextThn = (a.setorBln >= 12) ? (a.setorThn + 1) : (a.setorThn || new Date().getFullYear());
+
+        document.getElementById("setorTahun").value = nextThn;
+        document.getElementById("setorBulanDari").value = nextBln;
+        document.getElementById("setorBulanSampai").value = nextBln;
+      }
+    }
+
+    function hitungKalkulasiBayar() {
+      var thn = document.getElementById("masukTahun").value;
+      var blnDari = parseInt(document.getElementById("masukBulanDari").value);
+      var blnSampai = parseInt(document.getElementById("masukBulanSampai").value);
+      var nominal = parseFloat(document.getElementById("masukNominal").value) || 0;
+
+      if (blnSampai < blnDari) {
+        document.getElementById("masukBulanSampai").value = blnDari;
+        blnSampai = blnDari;
+      }
+
+      var totalPagu = 0;
+      for (var b = blnDari; b <= blnSampai; b++) {
+        var key = thn + "_" + b;
+        totalPagu += (globalPaguMap[key] || 30000);
+      }
+
+      document.getElementById("masukPaguTotal").value = "Rp " + totalPagu.toLocaleString('id-ID');
+
+      var sisa = nominal - totalPagu;
+      var isDeposit = document.getElementById("radioDeposit").checked;
+
+      if (sisa >= 0) {
+        if (isDeposit) {
+          document.getElementById("masukKembalian").value = "Rp 0";
+          document.getElementById("masukDepositVal").value = "Rp " + sisa.toLocaleString('id-ID');
+        } else {
+          document.getElementById("masukKembalian").value = "Rp " + sisa.toLocaleString('id-ID');
+          document.getElementById("masukDepositVal").value = "Rp 0";
+        }
+      } else {
+        document.getElementById("masukKembalian").value = "Rp 0";
+        document.getElementById("masukDepositVal").value = "Rp 0";
+      }
+    }
+
+    function submitFormMasuk(e) {
+      e.preventDefault();
+      var btn = document.getElementById("btnSimpanMasuk");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
+
+      var formObj = {
+        idAnggota: document.getElementById("masukAnggota").value,
+        tahunPeriode: document.getElementById("masukTahun").value,
+        bulanDari: document.getElementById("masukBulanDari").value,
+        bulanSampai: document.getElementById("masukBulanSampai").value,
+        nominalDiterima: document.getElementById("masukNominal").value,
+        iuranTerpakai: parseCurrency(document.getElementById("masukPaguTotal").value),
+        kembalianCash: parseCurrency(document.getElementById("masukKembalian").value),
+        masukDeposit: parseCurrency(document.getElementById("masukDepositVal").value),
+        catatan: document.getElementById("masukCatatan").value
+      };
+
+      google.script.run.withSuccessHandler(function(res) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Simpan Transaksi Masuk';
+        alert(res.message);
+        if (res.success) {
+          document.getElementById("formMasuk").reset();
+          loadAdminData();
+        }
+      }).simpanTransaksiMasuk(formObj);
+    }
+
+    function submitFormSetor(e) {
+      e.preventDefault();
+      var btn = document.getElementById("btnSimpanSetor");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mencatat...';
+
+      var formObj = {
+        idAnggota: document.getElementById("setorAnggota").value,
+        tahunPeriode: document.getElementById("setorTahun").value,
+        bulanDari: document.getElementById("setorBulanDari").value,
+        bulanSampai: document.getElementById("setorBulanSampai").value,
+        nominalDisetor: document.getElementById("setorNominal").value,
+        penerimaSetor: document.getElementById("setorPenerima").value,
+        catatan: document.getElementById("setorCatatan").value
+      };
+
+      google.script.run.withSuccessHandler(function(res) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Catat Setoran Kas';
+        alert(res.message);
+        if (res.success) {
+          document.getElementById("formSetor").reset();
+          loadAdminData();
+        }
+      }).simpanTransaksiSetor(formObj);
+    }
+
+    function parseCurrency(str) {
+      return parseFloat(str.replace(/[^0-9]/g, '')) || 0;
+    }
+  </script>
+</body>
+</html>
