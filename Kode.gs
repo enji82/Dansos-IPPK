@@ -138,39 +138,71 @@ function checkStatusAnggota(keyword) {
     var idAnggota = foundRow[0];
     var namaAnggota = foundRow[1];
     var nip = foundRow[2];
-    var depositAwal = Number(foundRow[7]) || 0;
     var cutoffBayarBln = Number(foundRow[8]) || 0;
     var cutoffBayarThn = Number(foundRow[9]) || 0;
-    var cutoffSetorBln = Number(foundRow[10]) || 0;
-    var cutoffSetorThn = Number(foundRow[11]) || 0;
-    
-    var sheetMasuk = ss.getSheetByName(SHEET_MASUK);
-    var totalBayarBaru = 0;
-    var depositBaru = 0;
-    
-    if (sheetMasuk) {
-      var dataMasuk = sheetMasuk.getDataRange().getValues();
-      for (var j = 1; j < dataMasuk.length; j++) {
-        if (String(dataMasuk[j][2]) === String(idAnggota)) {
-          totalBayarBaru += Number(dataMasuk[j][8]) || 0;
-          depositBaru += Number(dataMasuk[j][10]) || 0;
-        }
+
+    var paguMap = getMatrixPaguMap();
+    var now = new Date();
+    var currentYear = now.getFullYear();
+    var currentMonth = now.getMonth() + 1; // 1 - 12
+
+    // Hitung tunggakan / kekurangan pembayaran sampai bulan ini
+    var startThn = cutoffBayarThn;
+    var startBln = cutoffBayarBln + 1;
+
+    if (cutoffBayarThn === 0 || cutoffBayarBln === 0) {
+      var paguYears = Object.keys(paguMap).map(function(k) { return parseInt(k.split("_")[0]); }).filter(Boolean);
+      startThn = paguYears.length > 0 ? Math.min.apply(null, paguYears) : currentYear;
+      startBln = 1;
+    } else if (startBln > 12) {
+      startBln = 1;
+      startThn = cutoffBayarThn + 1;
+    }
+
+    var totalTunggakan = 0;
+    var rincianPerTahun = {};
+
+    var currY = startThn;
+    var currM = startBln;
+
+    while (currY < currentYear || (currY === currentYear && currM <= currentMonth)) {
+      var key = currY + "_" + currM;
+      var paguNominal = Number(paguMap[key]);
+      if (isNaN(paguNominal) || paguNominal <= 0) {
+        paguNominal = 30000;
+      }
+
+      totalTunggakan += paguNominal;
+
+      if (!rincianPerTahun[currY]) {
+        rincianPerTahun[currY] = {
+          tahun: currY,
+          total: 0,
+          bulanDari: currM,
+          bulanSampai: currM
+        };
+      }
+      rincianPerTahun[currY].total += paguNominal;
+      rincianPerTahun[currY].bulanSampai = currM;
+
+      currM++;
+      if (currM > 12) {
+        currM = 1;
+        currY++;
       }
     }
-    
-    var sheetSetor = ss.getSheetByName(SHEET_SETOR);
-    var totalDisetorBaru = 0;
-    
-    if (sheetSetor) {
-      var dataSetor = sheetSetor.getDataRange().getValues();
-      for (var k = 1; k < dataSetor.length; k++) {
-        if (String(dataSetor[k][2]) === String(idAnggota)) {
-          totalDisetorBaru += Number(dataSetor[k][4]) || 0;
-        }
-      }
-    }
-    
-    var totalSaldoDeposit = depositAwal + depositBaru;
+
+    var rincianTunggakanList = Object.keys(rincianPerTahun).map(function(y) {
+      var r = rincianPerTahun[y];
+      var rentangBulan = (r.bulanDari === r.bulanSampai) 
+        ? getNamaBulan(r.bulanDari) 
+        : (getNamaBulan(r.bulanDari) + " - " + getNamaBulan(r.bulanSampai));
+      return {
+        tahun: r.tahun,
+        total: r.total,
+        rentangBulan: rentangBulan
+      };
+    });
     
     return {
       success: true,
@@ -179,12 +211,9 @@ function checkStatusAnggota(keyword) {
         nama: namaAnggota,
         nip: nip,
         lunasSampai: (cutoffBayarBln > 0 && cutoffBayarThn > 0) ? (getNamaBulan(cutoffBayarBln) + " " + cutoffBayarThn) : "Belum Ada Catatan",
-        setorSampai: (cutoffSetorBln > 0 && cutoffSetorThn > 0) ? (getNamaBulan(cutoffSetorBln) + " " + cutoffSetorThn) : "Belum Disetor",
-        cutoffBln: cutoffBayarBln,
-        cutoffThn: cutoffBayarThn,
-        saldoDeposit: totalSaldoDeposit,
-        totalBayarBaru: totalBayarBaru,
-        totalDisetorBaru: totalDisetorBaru
+        totalTunggakan: totalTunggakan,
+        rincianTunggakan: rincianTunggakanList,
+        bulanIniStr: getNamaBulan(currentMonth) + " " + currentYear
       }
     };
   } catch (err) {
