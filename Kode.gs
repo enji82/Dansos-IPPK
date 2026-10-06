@@ -225,9 +225,19 @@ function getAllAnggota() {
  */
 function simpanTransaksiMasuk(form) {
   try {
+    // Verifikasi Otorisasi PIN Admin
+    var authCheck = verifyAdminPin(form ? form.adminPin : "");
+    if (!authCheck.success) {
+      return { success: false, message: "Akses Ditolak: PIN Admin tidak valid!" };
+    }
+
     var ss = getSS();
     var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
     var sheetMasuk = ss.getSheetByName(SHEET_MASUK);
+    
+    if (!sheetAnggota || !sheetMasuk) {
+      return { success: false, message: "Lembar data Master_Anggota atau Transaksi_Masuk tidak ditemukan!" };
+    }
     
     var idAnggota = form.idAnggota;
     var nominalDiterima = Number(form.nominalDiterima) || 0;
@@ -268,9 +278,8 @@ function simpanTransaksiMasuk(form) {
     ]);
     
     var newDeposit = currentDeposit + masukDeposit;
-    sheetAnggota.getRange(targetRowIdx, 8).setValue(newDeposit);
-    sheetAnggota.getRange(targetRowIdx, 9).setValue(bulanSampai);
-    sheetAnggota.getRange(targetRowIdx, 10).setValue(tahunPeriode);
+    // Batch update: Saldo Deposit (kolom 8), Cutoff Bayar Bulan (kolom 9), Cutoff Bayar Tahun (kolom 10)
+    sheetAnggota.getRange(targetRowIdx, 8, 1, 3).setValues([[newDeposit, bulanSampai, tahunPeriode]]);
     
     return { success: true, message: "Transaksi Pembayaran Berhasil Disimpan! ID: " + idTrx };
   } catch (err) {
@@ -283,9 +292,19 @@ function simpanTransaksiMasuk(form) {
  */
 function simpanTransaksiSetor(form) {
   try {
+    // Verifikasi Otorisasi PIN Admin
+    var authCheck = verifyAdminPin(form ? form.adminPin : "");
+    if (!authCheck.success) {
+      return { success: false, message: "Akses Ditolak: PIN Admin tidak valid!" };
+    }
+
     var ss = getSS();
     var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
     var sheetSetor = ss.getSheetByName(SHEET_SETOR);
+    
+    if (!sheetAnggota || !sheetSetor) {
+      return { success: false, message: "Lembar data Master_Anggota atau Transaksi_Setor tidak ditemukan!" };
+    }
     
     var idAnggota = form.idAnggota;
     var nominalDisetor = Number(form.nominalDisetor) || 0;
@@ -320,8 +339,8 @@ function simpanTransaksiSetor(form) {
       tahunPeriode, bulanDari, bulanSampai, penerimaSetor, catatan
     ]);
     
-    sheetAnggota.getRange(targetRowIdx, 11).setValue(bulanSampai);
-    sheetAnggota.getRange(targetRowIdx, 12).setValue(tahunPeriode);
+    // Batch update: Cutoff Setor Bulan (kolom 11), Cutoff Setor Tahun (kolom 12)
+    sheetAnggota.getRange(targetRowIdx, 11, 1, 2).setValues([[bulanSampai, tahunPeriode]]);
     
     return { success: true, message: "Setoran Kas Berhasil Dicatat! ID: " + idSetor };
   } catch (err) {

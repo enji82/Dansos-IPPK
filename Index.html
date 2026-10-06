@@ -274,6 +274,7 @@
   <script>
     var globalPaguMap = {};
     var globalAnggotaList = [];
+    var currentAdminPin = "";
     var namaBulanList = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -350,6 +351,7 @@
 
       google.script.run.withSuccessHandler(function(res) {
         if (res.success) {
+          currentAdminPin = pin;
           bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
           document.getElementById("btnAdminAuth").classList.add("d-none");
           document.getElementById("btnLogout").classList.remove("d-none");
@@ -364,6 +366,7 @@
     }
 
     function logoutAdmin() {
+      currentAdminPin = "";
       document.getElementById("btnAdminAuth").classList.remove("d-none");
       document.getElementById("btnLogout").classList.add("d-none");
       document.getElementById("adminSection").classList.add("d-none");
@@ -470,6 +473,7 @@
       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
 
       var formObj = {
+        adminPin: currentAdminPin,
         idAnggota: document.getElementById("masukAnggota").value,
         tahunPeriode: document.getElementById("masukTahun").value,
         bulanDari: document.getElementById("masukBulanDari").value,
@@ -499,6 +503,7 @@
       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mencatat...';
 
       var formObj = {
+        adminPin: currentAdminPin,
         idAnggota: document.getElementById("setorAnggota").value,
         tahunPeriode: document.getElementById("setorTahun").value,
         bulanDari: document.getElementById("setorBulanDari").value,
