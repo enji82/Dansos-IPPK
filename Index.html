@@ -106,7 +106,7 @@
         <div class="col-md-8">
           <div class="card card-custom p-4 mb-4">
             <h4 class="text-center senior-title mb-2"><i class="fa-solid fa-magnifying-glass me-2"></i> Cek Status Pembayaran Iuran</h4>
-            <p class="text-muted text-center fs-6 mb-4">Masukkan Nama, NIP, atau ID Anggota Anda untuk melihat posisi pembayaran.</p>
+            <p class="text-muted text-center fs-5 fw-medium mb-4">Isikan Nama pada Kolom di Bawah ini.</p>
             
             <div class="position-relative mb-3">
               <div class="input-group input-group-lg">
@@ -596,9 +596,9 @@
       if (data.rincianTunggakan && data.rincianTunggakan.length > 0) {
         data.rincianTunggakan.forEach(function(item) {
           var div = document.createElement("div");
-          div.className = "list-group-item d-flex justify-content-between align-items-center py-2 bg-light rounded mb-2 border-0 shadow-sm";
-          div.innerHTML = '<div><strong class="text-dark">Tahun ' + item.tahun + '</strong> <span class="text-muted small ms-1">(' + item.rentangBulan + ')</span></div>' +
-                          '<span class="badge bg-danger rounded-pill px-3 py-2 fs-6">Rp ' + item.total.toLocaleString('id-ID') + '</span>';
+          div.className = "list-group-item d-flex justify-content-between align-items-center py-3 bg-light rounded-3 mb-2 border-0 shadow-sm";
+          div.innerHTML = '<div class="py-1"><span class="fw-bold text-dark fs-5">Tahun ' + item.tahun + '</span> <span class="text-secondary fs-5 fw-medium ms-2">(' + item.rentangBulan + ')</span></div>' +
+                          '<span class="badge bg-danger rounded-pill px-3 py-2 fs-5 fw-bold ms-2">Rp ' + item.total.toLocaleString('id-ID') + '</span>';
           listEl.appendChild(div);
         });
       } else {
