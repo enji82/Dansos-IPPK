@@ -383,9 +383,10 @@ function simpanTransaksiMasuk(form) {
       return { success: false, message: "Data Anggota tidak ditemukan!" };
     }
     
-    var rincianBulanStr = (tahunDari === tahunSampai)
-      ? ("bulan " + getNamaBulan(bulanDari) + (bulanDari !== bulanSampai ? (" s/d " + getNamaBulan(bulanSampai)) : "") + " " + tahunDari)
-      : ("bulan " + getNamaBulan(bulanDari) + " " + tahunDari + " s/d " + getNamaBulan(bulanSampai) + " " + tahunSampai);
+    var jmlBulan = (tahunSampai - tahunDari) * 12 + (bulanSampai - bulanDari) + 1;
+    var rincianBulanStr = "Iuran Dana Sosial Setia Kawan Bulan " + getNamaBulan(bulanDari) + " " + tahunDari + 
+      ((bulanDari !== bulanSampai || tahunDari !== tahunSampai) ? (" s.d. " + getNamaBulan(bulanSampai) + " " + tahunSampai) : "") + 
+      " (" + jmlBulan + " bulan)";
 
     var periodeStr = (tahunDari === tahunSampai) 
       ? (tahunDari + " (" + getNamaBulan(bulanDari) + " - " + getNamaBulan(bulanSampai) + ")")
@@ -811,15 +812,15 @@ function generateAndSaveKuitansiPDF(data) {
           }
           .kw-pos-tanggal {
             position: absolute;
-            top: 59mm;
-            left: 120mm;
-            width: 60mm;
+            top: 60mm;
+            left: 132mm;
+            width: 55mm;
             font-size: 11pt;
             text-align: left;
           }
           .kw-pos-nominal {
             position: absolute;
-            top: 78mm;
+            top: 76mm;
             left: ${isKwitansiMode ? '83mm' : '83mm'};
             font-size: 13pt;
             font-weight: bold;
