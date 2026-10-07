@@ -597,6 +597,71 @@ function getAdminRekapLaporan(pin, filterTahun) {
 }
 
 /**
+ * 9B. AMBIL RIWAYAT PEMBAYARAN IURAN LENGKAP UNTUK MENU RIWAYAT
+ */
+function getRiwayatPembayaranAdmin(pin, filterTahun) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheetMasuk = ss.getSheetByName(SHEET_MASUK);
+    var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
+
+    var nipMap = {};
+    if (sheetAnggota) {
+      var dataA = sheetAnggota.getDataRange().getValues();
+      for (var k = 1; k < dataA.length; k++) {
+        if (dataA[k][0]) {
+          nipMap[String(dataA[k][0])] = dataA[k][2] ? String(dataA[k][2]) : "-";
+        }
+      }
+    }
+
+    var listRiwayat = [];
+    var totalNominal = 0;
+
+    if (sheetMasuk) {
+      var dataM = sheetMasuk.getDataRange().getValues();
+      for (var i = dataM.length - 1; i >= 1; i--) { // Urutan terbaru di atas
+        var r = dataM[i];
+        if (!r[0]) continue;
+        var thn = Number(r[5]);
+        if (!filterTahun || filterTahun === "semua" || thn === Number(filterTahun)) {
+          var nom = Number(r[4]) || 0;
+          totalNominal += nom;
+          var bDari = Number(r[6]);
+          var bSampai = Number(r[7]);
+          var rincianBlnStr = "bulan " + getNamaBulan(bDari) + (bDari !== bSampai ? (" s/d " + getNamaBulan(bSampai)) : "") + " " + thn;
+
+          listRiwayat.push({
+            idTrx: r[0],
+            tanggal: r[1] ? Utilities.formatDate(new Date(r[1]), ss.getSpreadsheetTimeZone(), "yyyy-MM-dd") : "-",
+            idAnggota: r[2],
+            nama: r[3],
+            nip: nipMap[String(r[2])] || "-",
+            nominal: nom,
+            tahun: thn,
+            periode: getNamaBulan(bDari) + " - " + getNamaBulan(bSampai),
+            rincianBulan: rincianBlnStr,
+            catatan: r[11] || "-"
+          });
+        }
+      }
+    }
+
+    return {
+      success: true,
+      totalNominal: totalNominal,
+      count: listRiwayat.length,
+      data: listRiwayat
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal mengambil riwayat pembayaran: " + err.message };
+  }
+}
+
+/**
  * 10. TAMBAH ANGGOTA BARU (KHUSUS ADMIN)
  */
 function simpanAnggotaBaru(form) {
