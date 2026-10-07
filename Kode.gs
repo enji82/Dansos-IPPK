@@ -748,7 +748,7 @@ function generateAndSaveKuitansiPDF(data) {
     var gunaLine1 = "", gunaLine2 = "", gunaLine3 = "";
     for (var i = 0; i < words.length; i++) {
       var word = words[i];
-      if ((gunaLine1 + " " + word).trim().length <= 48) {
+      if ((gunaLine1 + " " + word).trim().length <= 38) {
         gunaLine1 = (gunaLine1 + " " + word).trim();
       } else if ((gunaLine2 + " " + word).trim().length <= 68) {
         gunaLine2 = (gunaLine2 + " " + word).trim();
