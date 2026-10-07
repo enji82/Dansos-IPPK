@@ -731,6 +731,7 @@ function generateAndSaveKuitansiPDF(data) {
     var rincianTeks = data.rincianTeks || "iuran dansos pensiun bulan Januari s/d Maret 2026.";
     var tglFormatted = data.tglFormatted || "1 April 2026";
     var penandatangan = data.penandatangan || "Puji Purnomo";
+    var isKwitansiMode = (data.printMode === 'kwitansi');
 
     var folder = DriveApp.getFolderById(KUITANSI_FOLDER_ID);
     if (!folder) {
@@ -757,7 +758,7 @@ function generateAndSaveKuitansiPDF(data) {
             height: 100mm;
             box-sizing: border-box;
             color: #0f172a;
-            border: 2px solid #1F4E79;
+            ${isKwitansiMode ? 'border: none;' : 'border: 2px solid #1F4E79;'}
           }
           .kw-row {
             margin-bottom: 4mm;
@@ -772,13 +773,14 @@ function generateAndSaveKuitansiPDF(data) {
             min-height: 8mm;
           }
           .kw-label {
-            display: inline-block;
+            display: ${isKwitansiMode ? 'none' : 'inline-block'};
             width: 42mm;
             color: #334155;
             font-weight: bold;
           }
           .kw-val {
             color: #000000;
+            ${isKwitansiMode ? 'margin-left: 42mm; display: inline-block;' : ''}
           }
           .kw-tanggal {
             font-size: 11pt;
@@ -794,8 +796,7 @@ function generateAndSaveKuitansiPDF(data) {
           .kw-terbilang-rp {
             display: table-cell;
             vertical-align: bottom;
-            border-top: 2px solid #000;
-            border-bottom: 2px solid #000;
+            ${isKwitansiMode ? 'border: none;' : 'border-top: 2px solid #000; border-bottom: 2px solid #000;'}
             padding: 4px 12px;
             font-size: 13pt;
             font-weight: bold;
@@ -832,15 +833,15 @@ function generateAndSaveKuitansiPDF(data) {
         </div>
 
         <div class="kw-row kw-tanggal">
-          <span class="kw-val">Secang, ${tglFormatted}</span>
+          <span class="kw-val" style="${isKwitansiMode ? 'margin-left: 0;' : ''}">Secang, ${tglFormatted}</span>
         </div>
 
         <div class="kw-footer">
           <div class="kw-terbilang-rp">
-            Terbilang Rp. ${Number(nominal).toLocaleString('id-ID')},-
+            ${isKwitansiMode ? '' : 'Terbilang '}Rp. ${Number(nominal).toLocaleString('id-ID')},-
           </div>
           <div class="kw-ttd">
-            <span class="kw-val" style="font-weight: bold; display: block;">( ${penandatangan} )</span>
+            <span class="kw-val" style="font-weight: bold; display: block; ${isKwitansiMode ? 'margin-left: 0;' : ''}">( ${penandatangan} )</span>
           </div>
         </div>
       </body>
