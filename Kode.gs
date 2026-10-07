@@ -1055,7 +1055,12 @@ function generateAndSaveKuitansiPDF(data) {
 }
 
 /**
- * REKAP DATA ANGGOTA BELUM SETOR (UNPAID DUES UP TO CURRENT MONTH/YEAR)
+ * REKAP DATA ANGGOTA BELUM SETOR (IURAN ANGGOTA TERBAYAR TAPI BELUM DISETORKAN)
+ * Dibaca dari Master_Anggota:
+ * - Column I (index 8): bayar_terakhir_bulan
+ * - Column J (index 9): bayar_terakhir_tahun
+ * - Column K (index 10): setor_terakhir_bulan
+ * - Column L (index 11): setor_terakhir_tahun
  */
 function getDataBelumSetor(pin) {
   var authCheck = verifyAdminPin(pin);
@@ -1067,10 +1072,6 @@ function getDataBelumSetor(pin) {
     if (!sheetAnggota) return { success: false, message: "Sheet Master_Anggota tidak ditemukan!" };
 
     var paguMap = getMatrixPaguMap();
-    var now = new Date();
-    var currentYear = now.getFullYear();
-    var currentMonth = now.getMonth() + 1; // 1 - 12
-
     var dataA = sheetAnggota.getDataRange().getValues();
     var resultList = [];
     var totalSeluruhTunggakan = 0;
@@ -1082,21 +1083,31 @@ function getDataBelumSetor(pin) {
 
       var nama = row[1] || "-";
       var nip = row[2] ? String(row[2]) : "-";
-      var cutoffBln = Number(row[8]) || 0;
-      var cutoffThn = Number(row[9]) || 0;
 
-      // Hitung tunggakan dari (cutoff + 1 bulan) s/d (currentMonth currentYear)
-      var startThn = cutoffThn;
-      var startBln = cutoffBln + 1;
+      var bayarBln = Number(row[8]) || 0;
+      var bayarThn = Number(row[9]) || 0;
+      var setorBln = Number(row[10]) || 0;
+      var setorThn = Number(row[11]) || 0;
 
-      if (cutoffThn === 0 || cutoffBln === 0) {
+      // Jika anggota belum pernah membayar iuran sama sekali, tidak ada dana terbayar yang belum disetor
+      if (bayarThn === 0 || bayarBln === 0) continue;
+
+      // Tentukan bulan awal belum disetor (setor_terakhir + 1 bulan)
+      var startThn = setorThn;
+      var startBln = setorBln + 1;
+
+      if (setorThn === 0 || setorBln === 0) {
         var paguYears = Object.keys(paguMap).map(function(k) { return parseInt(k.split("_")[0]); }).filter(Boolean);
-        startThn = paguYears.length > 0 ? Math.min.apply(null, paguYears) : currentYear;
+        startThn = paguYears.length > 0 ? Math.min.apply(null, paguYears) : bayarThn;
         startBln = 1;
       } else if (startBln > 12) {
         startBln = 1;
-        startThn = cutoffThn + 1;
+        startThn = setorThn + 1;
       }
+
+      // Tentukan bulan akhir belum disetor (bayar_terakhir)
+      var endThn = bayarThn;
+      var endBln = bayarBln;
 
       var totalIuran = 0;
       var jumlahBulan = 0;
@@ -1106,7 +1117,7 @@ function getDataBelumSetor(pin) {
       var currY = startThn;
       var currM = startBln;
 
-      while (currY < currentYear || (currY === currentYear && currM <= currentMonth)) {
+      while (currY < endThn || (currY === endThn && currM <= endBln)) {
         var key = currY + "_" + currM;
         var paguNominal = Number(paguMap[key]) || 30000;
 
@@ -1125,7 +1136,7 @@ function getDataBelumSetor(pin) {
         }
       }
 
-      // HANYA tampilkan anggota yang memilki tunggakan (jumlahBulan > 0)
+      // HANYA tampilkan anggota yang memiliki dana terbayar tetapi belum disetor (jumlahBulan > 0)
       if (jumlahBulan > 0 && totalIuran > 0) {
         totalSeluruhTunggakan += totalIuran;
         resultList.push({
@@ -1144,8 +1155,7 @@ function getDataBelumSetor(pin) {
       success: true,
       data: resultList,
       totalAnggota: resultList.length,
-      totalSeluruhTunggakan: totalSeluruhTunggakan,
-      periodeCutoffStr: getNamaBulan(currentMonth) + " " + currentYear
+      totalSeluruhTunggakan: totalSeluruhTunggakan
     };
   } catch (err) {
     return { success: false, message: "Error: " + err.toString() };
