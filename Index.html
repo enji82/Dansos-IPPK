@@ -730,12 +730,9 @@
         // Update pilihan bulan yang belum lunas (disable bulan yang sudah lunas)
         updatePeriodeMasukOptions(a.bayarThn || 0, a.bayarBln || 0, nextThn, nextBln);
 
-        // Reset nominal & reset pagu ke 0 sebelum diisi nominal uang oleh admin
+        // Reset nominal
         document.getElementById("masukNominal").value = "";
-        document.getElementById("masukPaguTotal").value = "Rp 0";
-        document.getElementById("masukKembalian").value = "0";
-        document.getElementById("masukDepositVal").value = "0";
-        document.getElementById("masukJumlahBulanInfo").textContent = "Silakan isi Nominal Uang Diterima terlebih dahulu.";
+        hitungKalkulasiBayar();
       }
     }
 
@@ -863,15 +860,6 @@
         blnSampai = blnDari;
       }
 
-      // Jika nominal belum diisi admin, jangan tampilkan hitungan pagu & kembalian otomatis
-      if (!nominalVal || nominal <= 0) {
-        document.getElementById("masukPaguTotal").value = "Rp 0";
-        document.getElementById("masukKembalian").value = "0";
-        document.getElementById("masukDepositVal").value = "0";
-        document.getElementById("masukJumlahBulanInfo").textContent = "Silakan isi Nominal Uang Diterima terlebih dahulu.";
-        return;
-      }
-
       var totalPagu = 0;
       var countBulan = 0;
 
@@ -890,8 +878,16 @@
         }
       }
 
+      // Selalu tampilkan Total Pagu Seharusnya sesuai periode bulan yang dipilih
       document.getElementById("masukPaguTotal").value = "Rp " + totalPagu.toLocaleString('id-ID');
       document.getElementById("masukJumlahBulanInfo").textContent = "Total: " + countBulan + " Bulan iuran (" + getNamaBulan(blnDari) + " " + thnDari + " s.d " + getNamaBulan(blnSampai) + " " + thnSampai + ")";
+
+      // Hitung Kembalian & Deposit jika Nominal Uang Diterima diisi
+      if (!nominalVal || nominal <= 0) {
+        document.getElementById("masukKembalian").value = "0";
+        document.getElementById("masukDepositVal").value = "0";
+        return;
+      }
 
       var sisa = nominal - totalPagu;
       var isDeposit = document.getElementById("radioDeposit").checked;
