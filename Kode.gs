@@ -352,12 +352,14 @@ function simpanTransaksiMasuk(form) {
     
     var dataAnggota = sheetAnggota.getDataRange().getValues();
     var namaAnggota = "";
+    var nipAnggota = "-";
     var targetRowIdx = -1;
     var currentDeposit = 0;
     
     for (var i = 1; i < dataAnggota.length; i++) {
       if (String(dataAnggota[i][0]) === String(idAnggota)) {
         namaAnggota = dataAnggota[i][1];
+        nipAnggota = dataAnggota[i][2] ? String(dataAnggota[i][2]) : "-";
         currentDeposit = Number(dataAnggota[i][7]) || 0;
         targetRowIdx = i + 1;
         break;
@@ -368,6 +370,10 @@ function simpanTransaksiMasuk(form) {
       return { success: false, message: "Data Anggota tidak ditemukan!" };
     }
     
+    var rincianBulanStr = (tahunDari === tahunSampai)
+      ? ("bulan " + getNamaBulan(bulanDari) + (bulanDari !== bulanSampai ? (" s/d " + getNamaBulan(bulanSampai)) : "") + " " + tahunDari)
+      : ("bulan " + getNamaBulan(bulanDari) + " " + tahunDari + " s/d " + getNamaBulan(bulanSampai) + " " + tahunSampai);
+
     var periodeStr = (tahunDari === tahunSampai) 
       ? (tahunDari + " (" + getNamaBulan(bulanDari) + " - " + getNamaBulan(bulanSampai) + ")")
       : (getNamaBulan(bulanDari) + " " + tahunDari + " - " + getNamaBulan(bulanSampai) + " " + tahunSampai);
@@ -382,7 +388,18 @@ function simpanTransaksiMasuk(form) {
     // Batch update: Saldo Deposit (kolom 8), Cutoff Bayar Bulan (kolom 9), Cutoff Bayar Tahun (kolom 10)
     sheetAnggota.getRange(targetRowIdx, 8, 1, 3).setValues([[newDeposit, bulanSampai, tahunSampai]]);
     
-    return { success: true, message: "Transaksi Pembayaran Berhasil Disimpan (" + periodeStr + ")! ID: " + idTrx };
+    return { 
+      success: true, 
+      message: "Transaksi Pembayaran Berhasil Disimpan (" + periodeStr + ")! ID: " + idTrx,
+      kuitansiData: {
+        idTrx: idTrx,
+        tgl: tglStr,
+        nama: namaAnggota,
+        nip: nipAnggota,
+        nominal: nominalDiterima,
+        rincianBulan: rincianBulanStr
+      }
+    };
   } catch (err) {
     return { success: false, message: "Gagal menyimpan transaksi: " + err.message };
   }
@@ -480,6 +497,17 @@ function getAdminRekapLaporan(pin, filterTahun) {
     var ss = getSS();
     var sheetMasuk = ss.getSheetByName(SHEET_MASUK);
     var sheetSetor = ss.getSheetByName(SHEET_SETOR);
+    var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
+
+    var nipMap = {};
+    if (sheetAnggota) {
+      var dataA = sheetAnggota.getDataRange().getValues();
+      for (var k = 1; k < dataA.length; k++) {
+        if (dataA[k][0]) {
+          nipMap[String(dataA[k][0])] = dataA[k][2] ? String(dataA[k][2]) : "-";
+        }
+      }
+    }
     
     var listMasuk = [];
     var totalIuranMasuk = 0;
@@ -492,14 +520,20 @@ function getAdminRekapLaporan(pin, filterTahun) {
         if (!filterTahun || filterTahun === "semua" || thn === Number(filterTahun)) {
           var nom = Number(r[4]) || 0;
           totalIuranMasuk += nom;
+          var bDari = Number(r[6]);
+          var bSampai = Number(r[7]);
+          var rincianBlnStr = "bulan " + getNamaBulan(bDari) + (bDari !== bSampai ? (" s/d " + getNamaBulan(bSampai)) : "") + " " + thn;
+
           listMasuk.push({
             idTrx: r[0],
             tanggal: r[1] ? Utilities.formatDate(new Date(r[1]), ss.getSpreadsheetTimeZone(), "yyyy-MM-dd") : "-",
             idAnggota: r[2],
             nama: r[3],
+            nip: nipMap[String(r[2])] || "-",
             nominal: nom,
             tahun: thn,
-            periode: getNamaBulan(r[6]) + " - " + getNamaBulan(r[7]),
+            periode: getNamaBulan(bDari) + " - " + getNamaBulan(bSampai),
+            rincianBulan: rincianBlnStr,
             catatan: r[11] || "-"
           });
         }

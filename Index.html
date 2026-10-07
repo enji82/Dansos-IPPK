@@ -502,6 +502,7 @@
                     <th>Periode Bulan</th>
                     <th>Nominal</th>
                     <th>Catatan</th>
+                    <th class="text-center">Aksi</th>
                   </tr>
                 </thead>
                 <tbody id="tbodyLaporanMasuk">
@@ -599,6 +600,231 @@
       </div>
     </div>
   </div>
+
+  <!-- MODAL CETAK KUITANSI DIGITAL (19cm x 10cm) -->
+  <div class="modal fade" id="modalCetakKuitansi" tabindex="-1" aria-labelledby="modalCetakKuitansiLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header bg-navy text-white">
+          <h5 class="modal-title fw-bold" id="modalCetakKuitansiLabel">
+            <i class="fa-solid fa-receipt me-2"></i> Pratinjau Kuitansi Pembayaran
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4 bg-light">
+          <!-- Opsi Mode Cetak -->
+          <div class="card p-3 mb-4 border-0 shadow-sm rounded-3 bg-white no-print">
+            <div class="row align-items-center">
+              <div class="col-md-6 mb-2 mb-md-0">
+                <label class="fw-bold text-navy mb-1"><i class="fa-solid fa-sliders me-1"></i> Pilih Mode Cetak Kertas:</label>
+                <div class="btn-group w-100" role="group">
+                  <input type="radio" class="btn-check" name="printMode" id="modeHVS" value="hvs" checked onclick="switchPrintMode('hvs')">
+                  <label class="btn btn-outline-primary fw-bold" for="modeHVS"><i class="fa-solid fa-file-lines me-1"></i> Mode HVS / PDF (Lengkap)</label>
+
+                  <input type="radio" class="btn-check" name="printMode" id="modeKwitansi" value="kwitansi" onclick="switchPrintMode('kwitansi')">
+                  <label class="btn btn-outline-success fw-bold" for="modeKwitansi"><i class="fa-solid fa-stamp me-1"></i> Mode Kertas Kwitansi (Isian Saja)</label>
+                </div>
+              </div>
+              <div class="col-md-6 text-md-end">
+                <span class="badge bg-info text-dark p-2 mb-2 d-inline-block">
+                  <i class="fa-solid fa-ruler-combined me-1"></i> Ukuran Kertas: <strong>19 cm x 10 cm</strong>
+                </span>
+                <div>
+                  <button type="button" class="btn btn-navy px-4 fw-bold shadow-sm" onclick="triggerPrintKuitansi()">
+                    <i class="fa-solid fa-print me-1"></i> Cetak Kuitansi Now
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CONTAINER PRATINJAU KUITANSI (19cm x 10cm) -->
+          <div class="kwitansi-preview-wrapper d-flex justify-content-center overflow-auto pb-2">
+            <div id="kwitansiContainer" class="kwitansi-box print-mode-hvs">
+              <!-- No Kuitansi -->
+              <div class="kw-row kw-no">
+                <span class="kw-label kw-only-hvs">No.</span>
+                <span id="kwValNo" class="kw-val fw-bold">TRX-20261007-001</span>
+              </div>
+
+              <!-- Telah Diterima Dari -->
+              <div class="kw-row kw-diterima">
+                <span class="kw-label kw-only-hvs">Telah diterima dari :</span>
+                <span id="kwValNamaNip" class="kw-val fw-bold fs-6">Ibu Ning Minarni - NIP: 19850112</span>
+              </div>
+
+              <!-- Uang Sebanyak -->
+              <div class="kw-row kw-uang">
+                <span class="kw-label kw-only-hvs">Uang sebanyak :</span>
+                <span id="kwValTerbilangTeks" class="kw-val fst-italic">Sembilan puluh ribu rupiah</span>
+              </div>
+
+              <!-- Guna Membayar -->
+              <div class="kw-row kw-guna">
+                <span class="kw-label kw-only-hvs">Guna membayar :</span>
+                <span id="kwValRincian" class="kw-val">iuran dansos pensiun bulan Januari s/d Maret 2026.</span>
+              </div>
+
+              <!-- Tanggal & Lokasi -->
+              <div class="kw-row kw-tanggal text-end">
+                <span class="kw-val">Secang, <span id="kwValTgl">1 April 2026</span></span>
+              </div>
+
+              <!-- Footer Terbilang Rp & Tanda Tangan -->
+              <div class="kw-row kw-footer d-flex justify-content-between align-items-end">
+                <div class="kw-terbilang-rp">
+                  <span class="kw-label kw-only-hvs">Terbilang</span>
+                  <span class="kw-rp-label">Rp.</span>
+                  <span id="kwValNominalRp" class="kw-val fw-bold fs-5">90.000,-</span>
+                </div>
+                <div class="kw-ttd text-center">
+                  <div class="kw-ttd-line mb-1"></div>
+                  <span id="kwValTtdNama" class="kw-val fw-bold d-block">( Puji Purnomo )</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* CSS PRATINJAU & MEDIA PRINT KUITANSI (19cm x 10cm) */
+    .bg-navy { background-color: #1F4E79 !important; }
+
+    /* Box Kuitansi Fisik Layout (190mm x 100mm) */
+    .kwitansi-box {
+      width: 190mm;
+      height: 100mm;
+      box-sizing: border-box;
+      padding: 8mm 12mm 6mm 20mm;
+      position: relative;
+      background-color: #ffffff;
+      font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+      color: #0f172a;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+
+    /* Standard Mode HVS / PDF Style (Border Lengkap) */
+    .kwitansi-box.print-mode-hvs {
+      border: 2px solid #1F4E79;
+      background-image: radial-gradient(#e2e8f0 1px, transparent 0);
+      background-size: 16px 16px;
+    }
+
+    /* Standard Mode Kuitansi Fisik (Garis & Frame Disembunyikan agar pas di kertas kuitansi toko) */
+    .kwitansi-box.print-mode-kwitansi {
+      border: 1px dashed #cbd5e1;
+      background-image: none;
+    }
+    .kwitansi-box.print-mode-kwitansi .kw-only-hvs {
+      visibility: hidden !important;
+    }
+
+    /* Position Layout Rows */
+    .kw-row {
+      margin-bottom: 4mm;
+      line-height: 1.4;
+    }
+    .kw-no {
+      font-size: 12pt;
+      margin-bottom: 5mm;
+    }
+    .kw-diterima, .kw-uang, .kw-guna {
+      font-size: 11pt;
+      min-height: 8mm;
+    }
+    .kw-label {
+      display: inline-block;
+      width: 42mm;
+      color: #334155;
+      font-weight: 600;
+    }
+    .kw-val {
+      color: #000000;
+    }
+    .kw-tanggal {
+      font-size: 11pt;
+      margin-top: 3mm;
+      padding-right: 15mm;
+    }
+    .kw-footer {
+      margin-top: 4mm;
+    }
+    .kw-terbilang-rp {
+      border-top: 2px solid #000;
+      border-bottom: 2px solid #000;
+      padding: 3px 12px;
+      font-size: 13pt;
+      display: inline-block;
+    }
+    .kw-rp-label {
+      font-weight: bold;
+      margin-left: 6px;
+      margin-right: 4px;
+    }
+    .kw-ttd {
+      width: 55mm;
+      padding-right: 5mm;
+    }
+
+    /* CSS ATURAN CETAK (PRINT MEDIA) */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .no-print, .modal-header, .modal-footer, .btn-close {
+        display: none !important;
+      }
+      #modalCetakKuitansi, #modalCetakKuitansi .modal-dialog, #modalCetakKuitansi .modal-content, #modalCetakKuitansi .modal-body {
+        visibility: visible !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      .kwitansi-preview-wrapper {
+        visibility: visible !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .kwitansi-box {
+        visibility: visible !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 190mm !important;
+        height: 100mm !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        page-break-after: always;
+      }
+      .kwitansi-box.print-mode-kwitansi {
+        border: none !important;
+      }
+      .kwitansi-box.print-mode-kwitansi .kw-terbilang-rp {
+        border: none !important;
+      }
+      @page {
+        size: 190mm 100mm;
+        margin: 0;
+      }
+    }
+  </style>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -944,16 +1170,25 @@
         btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Simpan Transaksi Masuk';
         
         if (res.success) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Transaksi Berhasil Disimpan',
-            text: res.message,
-            confirmButtonColor: '#1F4E79'
-          });
           document.getElementById("formMasuk").reset();
           document.getElementById("masukAnggota").value = "";
           document.getElementById("masukAnggotaSelectedBadge").classList.add("d-none");
           loadAdminData();
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Transaksi Berhasil Disimpan',
+            text: res.message,
+            showCancelButton: true,
+            confirmButtonColor: '#1F4E79',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fa-solid fa-print me-1"></i> Cetak Kuitansi',
+            cancelButtonText: 'Selesai'
+          }).then(function(result) {
+            if (result.isConfirmed && res.kuitansiData) {
+              showKuitansiModal(res.kuitansiData);
+            }
+          });
         } else {
           Swal.fire({
             icon: 'error',
@@ -1648,9 +1883,10 @@
           // Render Tabel Masuk
           tbM.innerHTML = "";
           if (res.transaksiMasuk.length === 0) {
-            tbM.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-2">Belum ada transaksi iuran masuk.</td></tr>';
+            tbM.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-2">Belum ada transaksi iuran masuk.</td></tr>';
           } else {
             res.transaksiMasuk.forEach(function(m) {
+              var itemJson = escapeQuotes(JSON.stringify(m));
               tbM.innerHTML += '<tr>' +
                 '<td><span class="badge bg-secondary">' + m.idTrx + '</span></td>' +
                 '<td>' + m.tanggal + '</td>' +
@@ -1659,6 +1895,11 @@
                 '<td>' + m.periode + '</td>' +
                 '<td><strong class="text-success">Rp ' + m.nominal.toLocaleString('id-ID') + '</strong></td>' +
                 '<td>' + m.catatan + '</td>' +
+                '<td class="text-center">' +
+                  '<button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="printKuitansiFromRow(' + itemJson + ')">' +
+                    '<i class="fa-solid fa-print me-1"></i> Kuitansi' +
+                  '</button>' +
+                '</td>' +
               '</tr>';
             });
           }
@@ -1689,6 +1930,64 @@
           });
         }
       }).getAdminRekapLaporan(currentAdminPin, thn);
+    }
+
+    function printKuitansiFromRow(item) {
+      showKuitansiModal({
+        idTrx: item.idTrx,
+        tgl: item.tanggal,
+        nama: item.nama,
+        nip: item.nip || "-",
+        nominal: item.nominal,
+        rincianBulan: item.rincianBulan || ("periode " + item.periode + " " + item.tahun)
+      });
+    }
+
+    function showKuitansiModal(data) {
+      document.getElementById("kwValNo").textContent = data.idTrx;
+      document.getElementById("kwValNamaNip").textContent = data.nama + (data.nip && data.nip !== "-" ? (" - NIP: " + data.nip) : "");
+      document.getElementById("kwValTerbilangTeks").textContent = terbilang(data.nominal) + " rupiah";
+      document.getElementById("kwValRincian").textContent = "iuran dansos pensiun " + data.rincianBulan + ".";
+      document.getElementById("kwValNominalRp").textContent = data.nominal.toLocaleString('id-ID') + ",-";
+      
+      // Format tanggal Indonesia (Secang, TGL)
+      var tglObj = data.tgl ? new Date(data.tgl) : new Date();
+      if (isNaN(tglObj.getTime())) tglObj = new Date();
+      var tglFormatted = tglObj.getDate() + " " + namaBulanList[tglObj.getMonth() + 1] + " " + tglObj.getFullYear();
+      document.getElementById("kwValTgl").textContent = tglFormatted;
+
+      switchPrintMode('hvs');
+      document.getElementById("modeHVS").checked = true;
+
+      var modal = new bootstrap.Modal(document.getElementById('modalCetakKuitansi'));
+      modal.show();
+    }
+
+    function switchPrintMode(mode) {
+      var box = document.getElementById("kwitansiContainer");
+      if (mode === 'kwitansi') {
+        box.className = "kwitansi-box print-mode-kwitansi";
+      } else {
+        box.className = "kwitansi-box print-mode-hvs";
+      }
+    }
+
+    function triggerPrintKuitansi() {
+      window.print();
+    }
+
+    function terbilang(angka) {
+      var bil = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+      angka = Math.floor(Math.abs(angka));
+      if (angka < 12) return bil[angka];
+      if (angka < 20) return terbilang(angka - 10) + " Belas";
+      if (angka < 100) return terbilang(Math.floor(angka / 10)) + " Puluh " + bil[angka % 10];
+      if (angka < 200) return "Seratus " + terbilang(angka - 100);
+      if (angka < 1000) return terbilang(Math.floor(angka / 100)) + " Ratus " + terbilang(angka % 100);
+      if (angka < 2000) return "Seribu " + terbilang(angka - 1000);
+      if (angka < 1000000) return terbilang(Math.floor(angka / 1000)) + " Ribu " + terbilang(angka % 1000);
+      if (angka < 1000000000) return terbilang(Math.floor(angka / 1000000)) + " Juta " + terbilang(angka % 1000000);
+      return String(angka);
     }
 
     function parseCurrency(str) {
