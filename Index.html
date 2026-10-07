@@ -83,6 +83,32 @@
     .suggestion-item:hover, .suggestion-item:focus {
       background-color: #f1f5f9;
     }
+
+    /* CSS Khusus Panel Admin: Tipografi Kompak, Rapi & Ringkas */
+    #adminSection .card-custom {
+      padding: 1.25rem !important;
+    }
+    #adminSection .nav-pills .nav-link {
+      font-size: 0.88rem !important;
+      padding: 7px 12px !important;
+    }
+    #adminSection table {
+      font-size: 0.875rem !important;
+    }
+    #adminSection table th {
+      font-weight: 700;
+      color: #334155;
+      font-size: 0.815rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    #adminSection .badge {
+      font-size: 0.78rem;
+    }
+    #adminSection .alert {
+      margin-bottom: 0.85rem !important;
+      padding: 0.75rem 1.15rem !important;
+    }
   </style>
 </head>
 <body>
@@ -184,36 +210,36 @@
     <div id="adminSection" class="d-none">
       <div class="card card-custom p-4">
         
-        <!-- NAV TABS 5 MENU ADMIN -->
-        <ul class="nav nav-pills nav-fill mb-4 p-2 bg-light rounded-4 border shadow-sm" id="adminTabs" role="tablist">
+        <!-- NAV TABS 6 MENU ADMIN -->
+        <ul class="nav nav-pills nav-fill mb-3 p-1.5 bg-light rounded-3 border shadow-sm" id="adminTabs" role="tablist">
           <li class="nav-item me-1 mb-1 mb-md-0">
-            <button class="nav-link active fw-bold py-2 px-3 fs-6" id="tab-cek" data-bs-toggle="tab" data-bs-target="#panelCek" onclick="onSwitchAdminTab('cek')">
-              <i class="fa-solid fa-magnifying-glass me-2 text-primary"></i>Cek Pembayaran
+            <button class="nav-link active fw-bold py-2 px-2" id="tab-cek" data-bs-toggle="tab" data-bs-target="#panelCek" onclick="onSwitchAdminTab('cek')">
+              <i class="fa-solid fa-magnifying-glass me-1 text-primary"></i>Cek Pembayaran
             </button>
           </li>
           <li class="nav-item me-1 mb-1 mb-md-0">
-            <button class="nav-link fw-bold py-2 px-3 fs-6" id="tab-masuk" data-bs-toggle="tab" data-bs-target="#panelMasuk" onclick="onSwitchAdminTab('masuk')">
-              <i class="fa-solid fa-hand-holding-dollar me-2 text-success"></i>Input Pembayaran
+            <button class="nav-link fw-bold py-2 px-2" id="tab-masuk" data-bs-toggle="tab" data-bs-target="#panelMasuk" onclick="onSwitchAdminTab('masuk')">
+              <i class="fa-solid fa-hand-holding-dollar me-1 text-success"></i>Input Pembayaran
             </button>
           </li>
           <li class="nav-item me-1 mb-1 mb-md-0">
-            <button class="nav-link fw-bold py-2 px-3 fs-6" id="tab-setor" data-bs-toggle="tab" data-bs-target="#panelSetor" onclick="onSwitchAdminTab('setor')">
-              <i class="fa-solid fa-building-columns me-2 text-warning"></i>Input Setoran
+            <button class="nav-link fw-bold py-2 px-2" id="tab-setor" data-bs-toggle="tab" data-bs-target="#panelSetor" onclick="onSwitchAdminTab('setor')">
+              <i class="fa-solid fa-building-columns me-1 text-warning"></i>Input Setoran
             </button>
           </li>
           <li class="nav-item me-1 mb-1 mb-md-0">
-            <button class="nav-link fw-bold py-2 px-3 fs-6" id="tab-riwayat" data-bs-toggle="tab" data-bs-target="#panelRiwayat" onclick="onSwitchAdminTab('riwayat')">
-              <i class="fa-solid fa-clock-rotate-left me-2 text-purple" style="color: #6f42c1;"></i>Riwayat Pembayaran
+            <button class="nav-link fw-bold py-2 px-2" id="tab-riwayat" data-bs-toggle="tab" data-bs-target="#panelRiwayat" onclick="onSwitchAdminTab('riwayat')">
+              <i class="fa-solid fa-clock-rotate-left me-1 text-purple" style="color: #6f42c1;"></i>Riwayat Pembayaran
             </button>
           </li>
           <li class="nav-item me-1 mb-1 mb-md-0">
-            <button class="nav-link fw-bold py-2 px-3 fs-6" id="tab-anggota" data-bs-toggle="tab" data-bs-target="#panelAnggota" onclick="onSwitchAdminTab('anggota')">
-              <i class="fa-solid fa-users me-2 text-info"></i>Data Anggota
+            <button class="nav-link fw-bold py-2 px-2" id="tab-anggota" data-bs-toggle="tab" data-bs-target="#panelAnggota" onclick="onSwitchAdminTab('anggota')">
+              <i class="fa-solid fa-users me-1 text-info"></i>Data Anggota
             </button>
           </li>
           <li class="nav-item mb-1 mb-md-0">
-            <button class="nav-link fw-bold py-2 px-3 fs-6" id="tab-laporan" data-bs-toggle="tab" data-bs-target="#panelLaporan" onclick="onSwitchAdminTab('laporan')">
-              <i class="fa-solid fa-print me-2 text-danger"></i>Cetak Laporan
+            <button class="nav-link fw-bold py-2 px-2" id="tab-laporan" data-bs-toggle="tab" data-bs-target="#panelLaporan" onclick="onSwitchAdminTab('laporan')">
+              <i class="fa-solid fa-print me-1 text-danger"></i>Cetak Laporan
             </button>
           </li>
         </ul>
