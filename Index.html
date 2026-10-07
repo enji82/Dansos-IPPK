@@ -769,10 +769,8 @@
               <div id="kwValNamaNip" class="kw-val kw-pos-diterima fw-bold fs-6">Ibu Ning Minarni - NIP: 19850112</div>
               <div id="kwValTerbilangTeks" class="kw-val kw-pos-uang fst-italic">Sembilan puluh ribu rupiah</div>
               
-              <!-- Guna Membayar 3 Baris Absolut -->
-              <div id="kwValRincianLine1" class="kw-val kw-pos-guna1"></div>
-              <div id="kwValRincianLine2" class="kw-val kw-pos-guna2"></div>
-              <div id="kwValRincianLine3" class="kw-val kw-pos-guna3"></div>
+              <!-- Guna Membayar Block Absolut Dynamic Wrap -->
+              <div id="kwValRincian" class="kw-val kw-pos-guna">iuran dansos pensiun bulan Januari s/d Maret 2026.</div>
 
               <div class="kw-val kw-pos-tanggal">Secang, <span id="kwValTgl">1 April 2026</span></div>
               <div id="kwValNominalRpContainer" class="kw-val kw-pos-nominal fw-bold fs-5">
@@ -859,33 +857,17 @@
       width: 92mm;
       font-size: 10.5pt;
     }
-    /* Guna Membayar 3 Baris Absolut Presisi */
-    .kw-pos-guna1 {
+    /* Guna Membayar Block Dinamis dengan Indent Baris Pertama */
+    .kw-pos-guna {
       position: absolute;
       top: 36mm;
-      left: 85mm;
-      width: 97mm;
-      font-size: 10.5pt;
-      white-space: nowrap;
-      overflow: hidden;
-    }
-    .kw-pos-guna2 {
-      position: absolute;
-      top: 44mm;
       left: 45mm;
       width: 137mm;
       font-size: 10.5pt;
-      white-space: nowrap;
-      overflow: hidden;
-    }
-    .kw-pos-guna3 {
-      position: absolute;
-      top: 51mm;
-      left: 45mm;
-      width: 137mm;
-      font-size: 10.5pt;
-      white-space: nowrap;
-      overflow: hidden;
+      line-height: 7.7mm;
+      text-indent: 40mm;
+      word-wrap: break-word;
+      word-break: normal;
     }
     .kw-pos-tanggal {
       position: absolute;
@@ -2106,34 +2088,12 @@
       });
     }
 
-    function splitTextForKuitansiGuna(text) {
-      var words = text.split(" ");
-      var line1 = "", line2 = "", line3 = "";
-      
-      for (var i = 0; i < words.length; i++) {
-        var word = words[i];
-        if ((line1 + " " + word).trim().length <= 38) {
-          line1 = (line1 + " " + word).trim();
-        } else if ((line2 + " " + word).trim().length <= 68) {
-          line2 = (line2 + " " + word).trim();
-        } else {
-          line3 = (line3 + " " + word).trim();
-        }
-      }
-      return { line1: line1, line2: line2, line3: line3 };
-    }
-
     function showKuitansiModal(data) {
       currentKuitansiData = data;
       document.getElementById("kwValNo").textContent = data.idTrx;
       document.getElementById("kwValNamaNip").textContent = data.nama + (data.nip && data.nip !== "-" ? (" - NIP: " + data.nip) : "");
       document.getElementById("kwValTerbilangTeks").textContent = terbilang(data.nominal) + " rupiah";
-      
-      var splitGuna = splitTextForKuitansiGuna(data.rincianBulan || "");
-      document.getElementById("kwValRincianLine1").textContent = splitGuna.line1;
-      document.getElementById("kwValRincianLine2").textContent = splitGuna.line2;
-      document.getElementById("kwValRincianLine3").textContent = splitGuna.line3;
-
+      document.getElementById("kwValRincian").textContent = data.rincianBulan;
       document.getElementById("kwValNominalRp").textContent = data.nominal.toLocaleString('id-ID') + ",-";
       
       // Format tanggal Indonesia (Secang, TGL)

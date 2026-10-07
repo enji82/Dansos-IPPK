@@ -743,20 +743,6 @@ function generateAndSaveKuitansiPDF(data) {
 
     var filename = "Kuitansi_" + idTrx + "_" + nama.replace(/[^a-zA-Z0-9]/g, "_") + ".pdf";
 
-    // Helper memecah rincian teks ke 3 baris
-    var words = String(rincianTeks).split(" ");
-    var gunaLine1 = "", gunaLine2 = "", gunaLine3 = "";
-    for (var i = 0; i < words.length; i++) {
-      var word = words[i];
-      if ((gunaLine1 + " " + word).trim().length <= 38) {
-        gunaLine1 = (gunaLine1 + " " + word).trim();
-      } else if ((gunaLine2 + " " + word).trim().length <= 68) {
-        gunaLine2 = (gunaLine2 + " " + word).trim();
-      } else {
-        gunaLine3 = (gunaLine3 + " " + word).trim();
-      }
-    }
-
     var htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -816,29 +802,16 @@ function generateAndSaveKuitansiPDF(data) {
             font-size: 10.5pt;
             font-style: italic;
           }
-          .kw-pos-guna1 {
+          .kw-pos-guna {
             position: absolute;
             top: 36mm;
-            left: 85mm;
-            width: 97mm;
-            font-size: 10.5pt;
-            white-space: nowrap;
-          }
-          .kw-pos-guna2 {
-            position: absolute;
-            top: 44mm;
             left: 45mm;
             width: 137mm;
             font-size: 10.5pt;
-            white-space: nowrap;
-          }
-          .kw-pos-guna3 {
-            position: absolute;
-            top: 51mm;
-            left: 45mm;
-            width: 137mm;
-            font-size: 10.5pt;
-            white-space: nowrap;
+            line-height: 7.7mm;
+            text-indent: 40mm;
+            word-wrap: break-word;
+            word-break: normal;
           }
           .kw-pos-tanggal {
             position: absolute;
@@ -879,9 +852,7 @@ function generateAndSaveKuitansiPDF(data) {
         <div class="kw-pos-no">${idTrx}</div>
         <div class="kw-pos-diterima">${nama} ${nip && nip !== '-' ? (' - NIP: ' + nip) : ''}</div>
         <div class="kw-pos-uang">${terbilangTeks}</div>
-        <div class="kw-pos-guna1">${gunaLine1}</div>
-        <div class="kw-pos-guna2">${gunaLine2}</div>
-        <div class="kw-pos-guna3">${gunaLine3}</div>
+        <div class="kw-pos-guna">${rincianTeks}</div>
         <div class="kw-pos-tanggal">Secang, ${tglFormatted}</div>
         <div class="kw-pos-nominal">Rp. ${Number(nominal).toLocaleString('id-ID')},-</div>
         <div class="kw-pos-ttd">( ${penandatangan} )</div>
