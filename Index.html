@@ -132,14 +132,16 @@
       touch-action: pan-x pan-y;
       position: relative;
     }
-    #tableDataPembayaran thead th {
+    #tableDataPembayaran thead th,
+    #tableDataBelumSetor thead th {
       position: sticky;
       top: 0;
       z-index: 3;
       background-color: #f8fafc;
       box-shadow: 0 2px 3px -1px rgba(0, 0, 0, 0.1);
     }
-    #tableDataPembayaran .sticky-col-1 {
+    #tableDataPembayaran .sticky-col-1,
+    #tableDataBelumSetor .sticky-col-1 {
       position: sticky;
       left: 0;
       z-index: 2;
@@ -147,14 +149,16 @@
       width: 45px;
       min-width: 45px;
     }
-    #tableDataPembayaran th.sticky-col-1 {
+    #tableDataPembayaran th.sticky-col-1,
+    #tableDataBelumSetor th.sticky-col-1 {
       position: sticky;
       top: 0;
       left: 0;
       z-index: 6;
       background-color: #f8fafc;
     }
-    #tableDataPembayaran .sticky-col-2 {
+    #tableDataPembayaran .sticky-col-2,
+    #tableDataBelumSetor .sticky-col-2 {
       position: sticky;
       left: 45px;
       z-index: 2;
@@ -162,7 +166,8 @@
       border-right: 2px solid #cbd5e1 !important;
       box-shadow: 3px 0 6px -2px rgba(0, 0, 0, 0.1);
     }
-    #tableDataPembayaran th.sticky-col-2 {
+    #tableDataPembayaran th.sticky-col-2,
+    #tableDataBelumSetor th.sticky-col-2 {
       position: sticky;
       top: 0;
       left: 45px;
@@ -171,14 +176,16 @@
       border-right: 2px solid #cbd5e1 !important;
       box-shadow: 3px 2px 6px -2px rgba(0, 0, 0, 0.15);
     }
-    #tableDataPembayaran tfoot td {
+    #tableDataPembayaran tfoot td,
+    #tableDataBelumSetor tfoot td {
       position: sticky;
       bottom: 0;
       z-index: 3;
       background-color: #e2e8f0;
       border-top: 2px solid #cbd5e1 !important;
     }
-    #tableDataPembayaran tfoot td.sticky-col-footer {
+    #tableDataPembayaran tfoot td.sticky-col-footer,
+    #tableDataBelumSetor tfoot td.sticky-col-footer {
       position: sticky;
       bottom: 0;
       left: 0;
@@ -306,6 +313,11 @@
         <li class="nav-item me-1 mb-1 mb-md-0">
           <button class="nav-link fw-bold py-2 px-2" id="tab-pembayaran" data-bs-toggle="tab" data-bs-target="#panelPembayaran" onclick="onSwitchAdminTab('pembayaran')">
             <i class="fa-solid fa-table-list me-1 text-teal" style="color: #0d6efd;"></i>Data Pembayaran
+          </button>
+        </li>
+        <li class="nav-item me-1 mb-1 mb-md-0">
+          <button class="nav-link fw-bold py-2 px-2" id="tab-belum-setor" data-bs-toggle="tab" data-bs-target="#panelBelumSetor" onclick="onSwitchAdminTab('belum-setor')">
+            <i class="fa-solid fa-file-circle-exclamation me-1 text-warning"></i>Data Belum Setor
           </button>
         </li>
         <li class="nav-item me-1 mb-1 mb-md-0">
@@ -709,6 +721,53 @@
                     <!-- Populated dynamically -->
                   </tbody>
                   <tfoot id="tfootDataPembayaran" class="table-secondary fw-bold text-end align-middle">
+                    <!-- Populated dynamically -->
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- MENU BARU: DATA ANGGOTA BELUM SETOR -->
+          <div class="tab-pane fade" id="panelBelumSetor">
+            <div class="card card-custom p-3 p-md-4">
+              <div class="alert alert-warning border-0 rounded-3 mb-4 shadow-sm" style="background-color: #fff3cd; color: #664d03;">
+                <h5 class="fw-bold mb-1"><i class="fa-solid fa-file-circle-exclamation me-2 text-warning"></i> Data Anggota Belum Setor</h5>
+                <p class="small mb-0 text-secondary">Tabel daftar anggota yang masih memiliki tunggakan/belum disetorkan hingga bulan ini.</p>
+              </div>
+
+              <!-- Search & Summary Badges -->
+              <div class="row g-3 align-items-center mb-3">
+                <div class="col-md-6">
+                  <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                    <input type="text" id="filterBelumSetorSearch" class="form-control border-start-0" placeholder="Cari nama, NIP, atau ID..." oninput="filterTableDataBelumSetor()">
+                  </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                  <span class="badge bg-secondary px-3 py-2 fs-6 shadow-sm me-2" id="belumSetorCountInfo">0 Anggota</span>
+                  <span class="badge bg-danger px-3 py-2 fs-6 shadow-sm" id="belumSetorTotalInfo">Total: Rp 0</span>
+                </div>
+              </div>
+
+              <!-- Tabel Data Belum Setor -->
+              <div class="table-responsive table-responsive-matrix rounded-3 border shadow-sm">
+                <table class="table table-bordered table-hover align-middle mb-0 text-nowrap" id="tableDataBelumSetor" style="font-size: 0.9rem;">
+                  <thead class="table-light text-center align-middle">
+                    <tr>
+                      <th class="sticky-col-1" style="width: 45px;">No.</th>
+                      <th class="sticky-col-2">Nama</th>
+                      <th>NIP</th>
+                      <th>Bulan Awal</th>
+                      <th>Bulan Akhir</th>
+                      <th style="width: 130px;">Jumlah Bulan</th>
+                      <th style="width: 150px;" class="table-warning text-dark fw-bold">Jumlah Iuran</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyDataBelumSetor">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                  <tfoot id="tfootDataBelumSetor" class="table-light align-middle">
                     <!-- Populated dynamically -->
                   </tfoot>
                 </table>
@@ -1888,6 +1947,8 @@
       } else if (tabName === 'pembayaran') {
         initFilterTahunMatrix();
         loadDataPembayaranMatrixAdmin();
+      } else if (tabName === 'belum-setor') {
+        loadDataBelumSetorAdmin();
       } else if (tabName === 'laporan') {
         initFilterTahunLaporan();
         loadRekapLaporanAdmin();
@@ -2259,6 +2320,100 @@
     function filterTableDataPembayaran() {
       if (globalMatrixDataCache) {
         renderDataPembayaranMatrixTable(globalMatrixDataCache);
+      }
+    }
+
+    // MENU BARU: DATA ANGGOTA BELUM SETOR
+    var globalBelumSetorDataCache = null;
+
+    function loadDataBelumSetorAdmin() {
+      var tbody = document.getElementById("tbodyDataBelumSetor");
+      var tfoot = document.getElementById("tfootDataBelumSetor");
+      var countInfo = document.getElementById("belumSetorCountInfo");
+      var totalInfo = document.getElementById("belumSetorTotalInfo");
+
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-primary"><div class="spinner-border spinner-border-sm me-2"></div>Memuat data anggota belum setor...</td></tr>';
+      tfoot.innerHTML = '';
+      countInfo.textContent = "0 Anggota";
+      totalInfo.textContent = "Total: Rp 0";
+
+      google.script.run.withSuccessHandler(function(res) {
+        if (res.success) {
+          globalBelumSetorDataCache = res;
+          renderDataBelumSetorTable(res);
+        } else {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-3">Gagal memuat data: ' + escapeQuotes(res.message) + '</td></tr>';
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Memuat Data',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
+        }
+      }).getDataBelumSetor(currentAdminPin);
+    }
+
+    function renderDataBelumSetorTable(res) {
+      var tbody = document.getElementById("tbodyDataBelumSetor");
+      var tfoot = document.getElementById("tfootDataBelumSetor");
+      var countInfo = document.getElementById("belumSetorCountInfo");
+      var totalInfo = document.getElementById("belumSetorTotalInfo");
+
+      countInfo.textContent = res.totalAnggota + " Anggota Belum Setor";
+      totalInfo.textContent = "Total: Rp " + res.totalSeluruhTunggakan.toLocaleString('id-ID');
+
+      var searchKw = (document.getElementById("filterBelumSetorSearch").value || "").trim().toLowerCase();
+      var filteredList = res.data;
+
+      if (searchKw) {
+        filteredList = res.data.filter(function(row) {
+          return String(row.nama||'').toLowerCase().includes(searchKw) || 
+                 String(row.nip||'').toLowerCase().includes(searchKw) || 
+                 String(row.id||'').toLowerCase().includes(searchKw);
+        });
+      }
+
+      tbody.innerHTML = "";
+      if (filteredList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">Tidak ada data anggota belum setor.</td></tr>';
+        tfoot.innerHTML = "";
+        return;
+      }
+
+      var totBulan = 0;
+      var totIuran = 0;
+
+      filteredList.forEach(function(row, idx) {
+        totBulan += row.jumlahBulan;
+        totIuran += row.jumlahIuran;
+
+        var htmlRow = '<tr class="align-middle">' +
+          '<td class="text-center sticky-col-1">' + (idx + 1) + '</td>' +
+          '<td class="sticky-col-2"><strong class="text-navy">' + row.nama + '</strong></td>' +
+          '<td class="text-secondary small">' + row.nip + '</td>' +
+          '<td class="text-center"><span class="badge bg-light text-dark border">' + row.bulanAwal + '</span></td>' +
+          '<td class="text-center"><span class="badge bg-light text-dark border">' + row.bulanAkhir + '</span></td>' +
+          '<td class="text-center fw-bold text-dark">' + row.jumlahBulan + ' Bulan</td>' +
+          '<td class="text-end fw-bold text-danger table-warning">Rp ' + row.jumlahIuran.toLocaleString('id-ID') + '</td>' +
+          '</tr>';
+
+        tbody.innerHTML += htmlRow;
+      });
+
+      // Render Baris Jumlah di Paling Bawah (tfoot)
+      var tfootHtml = '<tr>' +
+        '<td colspan="2" class="text-center fw-bold fs-6 sticky-col-footer">JUMLAH TOTAL (' + filteredList.length + ' Anggota)</td>' +
+        '<td colspan="3" class="text-end fw-bold text-muted"></td>' +
+        '<td class="text-center fw-bold fs-6 text-dark">' + totBulan + ' Bulan</td>' +
+        '<td class="text-end fw-bold fs-6 text-danger table-warning">Rp ' + totIuran.toLocaleString('id-ID') + '</td>' +
+        '</tr>';
+
+      tfoot.innerHTML = tfootHtml;
+    }
+
+    function filterTableDataBelumSetor() {
+      if (globalBelumSetorDataCache) {
+        renderDataBelumSetorTable(globalBelumSetorDataCache);
       }
     }
 

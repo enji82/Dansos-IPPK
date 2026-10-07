@@ -1053,3 +1053,101 @@ function generateAndSaveKuitansiPDF(data) {
     return { success: false, message: "Gagal membuat PDF: " + err.message };
   }
 }
+
+/**
+ * REKAP DATA ANGGOTA BELUM SETOR (UNPAID DUES UP TO CURRENT MONTH/YEAR)
+ */
+function getDataBelumSetor(pin) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
+    if (!sheetAnggota) return { success: false, message: "Sheet Master_Anggota tidak ditemukan!" };
+
+    var paguMap = getMatrixPaguMap();
+    var now = new Date();
+    var currentYear = now.getFullYear();
+    var currentMonth = now.getMonth() + 1; // 1 - 12
+
+    var dataA = sheetAnggota.getDataRange().getValues();
+    var resultList = [];
+    var totalSeluruhTunggakan = 0;
+
+    for (var i = 1; i < dataA.length; i++) {
+      var row = dataA[i];
+      var id = String(row[0]);
+      if (!id) continue;
+
+      var nama = row[1] || "-";
+      var nip = row[2] ? String(row[2]) : "-";
+      var cutoffBln = Number(row[8]) || 0;
+      var cutoffThn = Number(row[9]) || 0;
+
+      // Hitung tunggakan dari (cutoff + 1 bulan) s/d (currentMonth currentYear)
+      var startThn = cutoffThn;
+      var startBln = cutoffBln + 1;
+
+      if (cutoffThn === 0 || cutoffBln === 0) {
+        var paguYears = Object.keys(paguMap).map(function(k) { return parseInt(k.split("_")[0]); }).filter(Boolean);
+        startThn = paguYears.length > 0 ? Math.min.apply(null, paguYears) : currentYear;
+        startBln = 1;
+      } else if (startBln > 12) {
+        startBln = 1;
+        startThn = cutoffThn + 1;
+      }
+
+      var totalIuran = 0;
+      var jumlahBulan = 0;
+      var bulanAwalStr = "";
+      var bulanAkhirStr = "";
+
+      var currY = startThn;
+      var currM = startBln;
+
+      while (currY < currentYear || (currY === currentYear && currM <= currentMonth)) {
+        var key = currY + "_" + currM;
+        var paguNominal = Number(paguMap[key]) || 30000;
+
+        totalIuran += paguNominal;
+        jumlahBulan++;
+
+        if (jumlahBulan === 1) {
+          bulanAwalStr = getNamaBulan(currM) + " " + currY;
+        }
+        bulanAkhirStr = getNamaBulan(currM) + " " + currY;
+
+        currM++;
+        if (currM > 12) {
+          currM = 1;
+          currY++;
+        }
+      }
+
+      // HANYA tampilkan anggota yang memilki tunggakan (jumlahBulan > 0)
+      if (jumlahBulan > 0 && totalIuran > 0) {
+        totalSeluruhTunggakan += totalIuran;
+        resultList.push({
+          id: id,
+          nama: nama,
+          nip: nip,
+          bulanAwal: bulanAwalStr,
+          bulanAkhir: bulanAkhirStr,
+          jumlahBulan: jumlahBulan,
+          jumlahIuran: totalIuran
+        });
+      }
+    }
+
+    return {
+      success: true,
+      data: resultList,
+      totalAnggota: resultList.length,
+      totalSeluruhTunggakan: totalSeluruhTunggakan,
+      periodeCutoffStr: getNamaBulan(currentMonth) + " " + currentYear
+    };
+  } catch (err) {
+    return { success: false, message: "Error: " + err.toString() };
+  }
+}
