@@ -780,59 +780,59 @@ function generateAndSaveKuitansiPDF(data) {
           /* Field Values (Koordinat Presisi Absolut X, Y dalam mm) */
           .kw-pos-no {
             position: absolute;
-            top: 10mm;
-            left: 65mm;
+            top: 11mm;
+            left: 55mm;
             font-size: 11pt;
             font-weight: bold;
           }
           .kw-pos-diterima {
             position: absolute;
             top: 20mm;
-            left: 65mm;
-            width: 115mm;
+            left: 92mm;
+            width: 90mm;
             font-size: 11pt;
             font-weight: bold;
           }
           .kw-pos-uang {
             position: absolute;
-            top: 29mm;
-            left: 65mm;
-            width: 115mm;
+            top: 28mm;
+            left: 90mm;
+            width: 92mm;
             font-size: 10.5pt;
             font-style: italic;
           }
           .kw-pos-guna {
             position: absolute;
-            top: 38mm;
-            left: 65mm;
-            width: 115mm;
+            top: 36mm;
+            left: 85mm;
+            width: 97mm;
             font-size: 10.5pt;
             line-height: 1.3;
           }
           .kw-pos-tanggal {
             position: absolute;
-            top: 61mm;
-            left: 115mm;
-            width: 65mm;
+            top: 59mm;
+            left: 120mm;
+            width: 60mm;
             font-size: 11pt;
-            text-align: center;
+            text-align: left;
           }
           .kw-pos-nominal {
             position: absolute;
-            top: 76mm;
-            left: ${isKwitansiMode ? '25mm' : '65mm'};
+            top: 78mm;
+            left: ${isKwitansiMode ? '83mm' : '83mm'};
             font-size: 13pt;
             font-weight: bold;
             ${isKwitansiMode ? '' : 'border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 2px 10px;'}
           }
           .kw-pos-ttd {
             position: absolute;
-            top: 77mm;
-            left: 115mm;
-            width: 65mm;
+            top: 85mm;
+            left: 140mm;
+            width: 45mm;
             font-size: 11pt;
             font-weight: bold;
-            text-align: center;
+            text-align: left;
           }
         </style>
       </head>
