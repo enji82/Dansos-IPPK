@@ -906,51 +906,39 @@
       body * {
         visibility: hidden !important;
       }
-      .no-print, .modal-header, .modal-footer, .btn-close {
+      .no-print, .modal-backdrop, .modal-header, .modal-footer, .btn-close {
         display: none !important;
       }
-      #modalCetakKuitansi, 
-      #modalCetakKuitansi *, 
-      .kwitansi-preview-wrapper, 
-      .kwitansi-preview-wrapper * {
+      #modalCetakKuitansi,
+      #modalCetakKuitansi * {
         visibility: visible !important;
       }
-      #modalCetakKuitansi {
-        position: absolute !important;
+      #kwitansiContainer,
+      #kwitansiContainer * {
+        visibility: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      #kwitansiContainer {
+        position: fixed !important;
         left: 0 !important;
         top: 0 !important;
         width: 190mm !important;
         height: 100mm !important;
         margin: 0 !important;
         padding: 0 !important;
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-      }
-      .kwitansi-preview-wrapper {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-      }
-      .kwitansi-box {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 190mm !important;
-        height: 100mm !important;
+        background: #ffffff !important;
+        z-index: 999999 !important;
         box-shadow: none !important;
         border-radius: 0 !important;
       }
       .kwitansi-box.print-mode-kwitansi {
         border: none !important;
-      }
-      .kwitansi-box.print-mode-kwitansi .kw-terbilang-rp {
-        border: none !important;
+        background: transparent !important;
       }
       .kwitansi-box.print-mode-kwitansi .kw-only-hvs {
         display: none !important;
+        visibility: hidden !important;
       }
       @page {
         size: 190mm 100mm;
