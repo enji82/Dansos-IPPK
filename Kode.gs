@@ -664,7 +664,7 @@ function getRiwayatPembayaranAdmin(pin, filterTahun) {
             periode: getNamaBulan(bDari) + " - " + getNamaBulan(bSampai),
             rincianBulan: rincianBlnStr,
             catatan: r[11] || "-",
-            pdfUrl: pdfMap[idTrxStr] || null
+            pdfUrl: pdfMap[idTrxStr.toUpperCase()] || null
           });
         }
       }
