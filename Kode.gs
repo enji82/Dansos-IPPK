@@ -1092,17 +1092,28 @@ function getDataBelumSetor(pin) {
       // Jika anggota belum pernah membayar iuran sama sekali, tidak ada dana terbayar yang belum disetor
       if (bayarThn === 0 || bayarBln === 0) continue;
 
-      // Tentukan bulan awal belum disetor (setor_terakhir + 1 bulan)
-      var startThn = setorThn;
-      var startBln = setorBln + 1;
+      // Hitung indeks bulan absolut
+      var bayarVal = bayarThn * 12 + bayarBln;
+      var setorVal = (setorThn > 0 && setorBln > 0) ? (setorThn * 12 + setorBln) : 0;
 
-      if (setorThn === 0 || setorBln === 0) {
+      // Jika setor_terakhir >= bayar_terakhir, berarti seluruh iuran terbayar SUDAH disetorkan (0 belum disetor)
+      if (setorVal >= bayarVal) continue;
+
+      // Tentukan bulan awal belum disetor (setor_terakhir + 1 bulan)
+      var startBln = 1;
+      var startThn = bayarThn;
+
+      if (setorVal > 0) {
+        startBln = setorBln + 1;
+        startThn = setorThn;
+        if (startBln > 12) {
+          startBln = 1;
+          startThn = setorThn + 1;
+        }
+      } else {
         var paguYears = Object.keys(paguMap).map(function(k) { return parseInt(k.split("_")[0]); }).filter(Boolean);
         startThn = paguYears.length > 0 ? Math.min.apply(null, paguYears) : bayarThn;
         startBln = 1;
-      } else if (startBln > 12) {
-        startBln = 1;
-        startThn = setorThn + 1;
       }
 
       // Tentukan bulan akhir belum disetor (bayar_terakhir)
