@@ -730,7 +730,29 @@ function getDataPembayaranMatrix(pin, targetTahun) {
       memberOrder.push(id);
     }
 
-    // 2. Hitung nominal terbayar per bulan per anggota dari Transaksi_Masuk
+    // 2. Hitung nominal terbayar per bulan per anggota
+    // A. Terlebih dahulu isi dari Master_Anggota (cutoffBln & cutoffThn) berdasarkan Master_Pagu
+    for (var mId in memberMap) {
+      var mem = memberMap[mId];
+      if (mem.cutoffThn > 0 && mem.cutoffBln > 0) {
+        // Jika cutoffThn > selTahun: Berarti anggota SUDAH LUNAS PENUH untuk seluruh 12 bulan di selTahun
+        if (mem.cutoffThn > selTahun) {
+          for (var b = 1; b <= 12; b++) {
+            var pKey = selTahun + "_" + b;
+            mem.bulanMap[b] = Number(paguMap[pKey]) || 30000;
+          }
+        } 
+        // Jika cutoffThn === selTahun: Berarti anggota sudah lunas dari bulan 1 s/d cutoffBln di selTahun
+        else if (mem.cutoffThn === selTahun) {
+          for (var b = 1; b <= mem.cutoffBln; b++) {
+            var pKey = selTahun + "_" + b;
+            mem.bulanMap[b] = Number(paguMap[pKey]) || 30000;
+          }
+        }
+      }
+    }
+
+    // B. Tambahkan/timpa dengan rincian transaksi riil dari Transaksi_Masuk jika ada
     if (sheetMasuk) {
       var dataM = sheetMasuk.getDataRange().getValues();
       for (var j = 1; j < dataM.length; j++) {
@@ -744,8 +766,6 @@ function getDataPembayaranMatrix(pin, targetTahun) {
 
         if (!memberMap[idAng] || nominalTrx <= 0) continue;
 
-        // Hitung total rentang bulan transaksi
-        // Jika bDari > bSampai, transaksi melintasi pergantian tahun (misal thnSampai 2026, bDari 9 (Sep 2025), bSampai 1 (Jan 2026))
         var startYear = thnSampai;
         var startMonth = bDari;
         var totalMonths = 0;
@@ -754,19 +774,18 @@ function getDataPembayaranMatrix(pin, targetTahun) {
           totalMonths = (bSampai - bDari) + 1;
           startYear = thnSampai;
         } else {
-          // Cross-year: misal Sep (9) s.d. Jan (1) di thnSampai (2026) -> Sep, Okt, Nov, Des 2025 (4 bln) + Jan 2026 (1 bln) = 5 bln
           startYear = thnSampai - 1;
           totalMonths = (12 - bDari + 1) + bSampai;
         }
 
         var nominalPerBulan = totalMonths > 0 ? (nominalTrx / totalMonths) : 0;
 
-        // Map setiap bulan ke tahun yang sesuai
         var curY = startYear;
         var curM = startMonth;
         for (var step = 0; step < totalMonths; step++) {
           if (curY === selTahun && curM >= 1 && curM <= 12) {
-            memberMap[idAng].bulanMap[curM] = (memberMap[idAng].bulanMap[curM] || 0) + nominalPerBulan;
+            // Gunakan nilai transaksi riil jika ada
+            memberMap[idAng].bulanMap[curM] = nominalPerBulan;
           }
           curM++;
           if (curM > 12) {
