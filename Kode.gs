@@ -623,13 +623,22 @@ const KUITANSI_FOLDER_ID = "1fHDGNAMQFtmcOCl3oId-R7rF2seo25_g";
 
 function generateAndSaveKuitansiPDF(data) {
   try {
+    data = data || {};
+    var idTrx = data.idTrx || "TRX-TEST";
+    var nama = data.nama || "Tes Anggota";
+    var nip = data.nip || "123456";
+    var nominal = data.nominal || 90000;
+    var terbilangTeks = data.terbilangTeks || "Sembilan puluh ribu rupiah";
+    var rincianTeks = data.rincianTeks || "iuran dansos pensiun bulan Januari s/d Maret 2026.";
+    var tglFormatted = data.tglFormatted || "1 April 2026";
+    var penandatangan = data.penandatangan || "Puji Purnomo";
+
     var folder = DriveApp.getFolderById(KUITANSI_FOLDER_ID);
     if (!folder) {
       return { success: false, message: "Folder Google Drive penyimpan PDF tidak ditemukan!" };
     }
 
-    var penandatangan = data.penandatangan || "Puji Purnomo";
-    var filename = "Kuitansi_" + data.idTrx + "_" + data.nama.replace(/[^a-zA-Z0-9]/g, "_") + ".pdf";
+    var filename = "Kuitansi_" + idTrx + "_" + nama.replace(/[^a-zA-Z0-9]/g, "_") + ".pdf";
 
     var htmlContent = `
       <!DOCTYPE html>
@@ -705,31 +714,31 @@ function generateAndSaveKuitansiPDF(data) {
       <body>
         <div class="kw-row kw-no">
           <span class="kw-label">No.</span>
-          <span class="kw-val" style="font-weight: bold;">${data.idTrx}</span>
+          <span class="kw-val" style="font-weight: bold;">${idTrx}</span>
         </div>
 
         <div class="kw-row kw-diterima">
           <span class="kw-label">Telah diterima dari :</span>
-          <span class="kw-val" style="font-weight: bold;">${data.nama} ${data.nip && data.nip !== '-' ? (' - NIP: ' + data.nip) : ''}</span>
+          <span class="kw-val" style="font-weight: bold;">${nama} ${nip && nip !== '-' ? (' - NIP: ' + nip) : ''}</span>
         </div>
 
         <div class="kw-row kw-uang">
           <span class="kw-label">Uang sebanyak :</span>
-          <span class="kw-val" style="font-style: italic;">${data.terbilangTeks}</span>
+          <span class="kw-val" style="font-style: italic;">${terbilangTeks}</span>
         </div>
 
         <div class="kw-row kw-guna">
           <span class="kw-label">Guna membayar :</span>
-          <span class="kw-val">${data.rincianTeks}</span>
+          <span class="kw-val">${rincianTeks}</span>
         </div>
 
         <div class="kw-row kw-tanggal">
-          <span class="kw-val">Secang, ${data.tglFormatted}</span>
+          <span class="kw-val">Secang, ${tglFormatted}</span>
         </div>
 
         <div class="kw-footer">
           <div class="kw-terbilang-rp">
-            Terbilang Rp. ${Number(data.nominal).toLocaleString('id-ID')},-
+            Terbilang Rp. ${Number(nominal).toLocaleString('id-ID')},-
           </div>
           <div class="kw-ttd">
             <span class="kw-val" style="font-weight: bold; display: block;">( ${penandatangan} )</span>
