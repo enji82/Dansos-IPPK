@@ -755,7 +755,7 @@ function generateAndSaveKuitansiPDF(data) {
           body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 8mm 12mm 6mm 18mm;
+            padding: 10mm 12mm 5mm 24mm;
             width: 190mm;
             height: 100mm;
             box-sizing: border-box;
@@ -763,41 +763,46 @@ function generateAndSaveKuitansiPDF(data) {
             ${isKwitansiMode ? 'border: none;' : 'border: 2px solid #1F4E79;'}
           }
           .kw-row {
-            margin-bottom: 4mm;
-            line-height: 1.4;
+            margin-bottom: 2mm;
+            line-height: 1.3;
           }
           .kw-no {
-            font-size: 12pt;
-            margin-bottom: 5mm;
-          }
-          .kw-diterima, .kw-uang {
             font-size: 11pt;
-            min-height: 8mm;
+            margin-top: 1mm;
+            margin-bottom: 3.5mm;
+          }
+          .kw-diterima {
+            font-size: 11pt;
+            margin-bottom: 3mm;
+          }
+          .kw-uang {
+            font-size: 11pt;
+            margin-bottom: 3.5mm;
           }
           .kw-guna {
-            font-size: 11pt;
+            font-size: 10.5pt;
             min-height: 14mm;
-            margin-bottom: 2mm;
+            margin-bottom: 1mm;
           }
           .kw-label {
             display: ${isKwitansiMode ? 'none' : 'inline-block'};
-            width: 42mm;
+            width: 36mm;
             color: #334155;
             font-weight: bold;
           }
           .kw-val {
             color: #000000;
-            ${isKwitansiMode ? 'margin-left: 42mm; display: inline-block;' : ''}
+            ${isKwitansiMode ? 'margin-left: 36mm; display: inline-block;' : ''}
           }
           .kw-tanggal {
             font-size: 11pt;
-            margin-top: 2mm;
-            margin-bottom: 8mm;
+            margin-top: 0.5mm;
+            margin-bottom: 4mm;
             text-align: right;
             padding-right: 15mm;
           }
           .kw-footer {
-            margin-top: 2mm;
+            margin-top: 0mm;
             display: table;
             width: 100%;
           }
@@ -816,7 +821,7 @@ function generateAndSaveKuitansiPDF(data) {
             text-align: center;
             width: 45%;
             padding-right: 5mm;
-            padding-top: 6mm;
+            padding-top: 2mm;
           }
         </style>
       </head>

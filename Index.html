@@ -817,7 +817,7 @@
       width: 190mm;
       height: 100mm;
       box-sizing: border-box;
-      padding: 8mm 12mm 6mm 20mm;
+      padding: 10mm 12mm 5mm 24mm;
       position: relative;
       background-color: #ffffff;
       font-family: 'Plus Jakarta Sans', Arial, sans-serif;
@@ -844,30 +844,38 @@
     }
     .kwitansi-box.print-mode-kwitansi .kw-val-indent {
       display: inline-block !important;
-      margin-left: 42mm !important;
+      margin-left: 36mm !important;
+    }
+    .kwitansi-box.print-mode-kwitansi .kw-terbilang-rp .kw-val {
+      margin-left: 0 !important;
     }
 
     /* Position Layout Rows */
     .kw-row {
-      margin-bottom: 4mm;
-      line-height: 1.4;
+      margin-bottom: 2mm;
+      line-height: 1.3;
     }
     .kw-no {
-      font-size: 12pt;
-      margin-bottom: 5mm;
-    }
-    .kw-diterima, .kw-uang {
       font-size: 11pt;
-      min-height: 8mm;
+      margin-top: 1mm;
+      margin-bottom: 3.5mm;
+    }
+    .kw-diterima {
+      font-size: 11pt;
+      margin-bottom: 3mm;
+    }
+    .kw-uang {
+      font-size: 11pt;
+      margin-bottom: 3.5mm;
     }
     .kw-guna {
-      font-size: 11pt;
+      font-size: 10.5pt;
       min-height: 14mm;
-      margin-bottom: 2mm;
+      margin-bottom: 1mm;
     }
     .kw-label {
       display: inline-block;
-      width: 42mm;
+      width: 36mm;
       color: #334155;
       font-weight: 600;
     }
@@ -876,12 +884,12 @@
     }
     .kw-tanggal {
       font-size: 11pt;
-      margin-top: 2mm;
-      margin-bottom: 8mm;
+      margin-top: 0.5mm;
+      margin-bottom: 4mm;
       padding-right: 15mm;
     }
     .kw-footer {
-      margin-top: 2mm;
+      margin-top: 0mm;
     }
     .kw-terbilang-rp {
       border-top: 2px solid #000;
@@ -898,7 +906,7 @@
     .kw-ttd {
       width: 55mm;
       padding-right: 5mm;
-      padding-top: 6mm;
+      padding-top: 2mm;
     }
 
     /* CSS ATURAN CETAK (PRINT MEDIA) */
