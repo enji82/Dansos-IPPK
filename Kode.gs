@@ -535,7 +535,8 @@ function getAdminRekapLaporan(pin, filterTahun) {
           totalIuranMasuk += nom;
           var bDari = Number(r[6]);
           var bSampai = Number(r[7]);
-          var rincianBlnStr = "bulan " + getNamaBulan(bDari) + (bDari !== bSampai ? (" s/d " + getNamaBulan(bSampai)) : "") + " " + thn;
+          var jmlBulan = (bSampai - bDari) + 1;
+          var rincianBlnStr = "Iuran Dana Sosial Setia Kawan Bulan " + getNamaBulan(bDari) + " " + thn + (bDari !== bSampai ? (" s.d. " + getNamaBulan(bSampai) + " " + thn) : "") + " (" + jmlBulan + " bulan)";
 
           listMasuk.push({
             idTrx: r[0],
@@ -651,7 +652,8 @@ function getRiwayatPembayaranAdmin(pin, filterTahun) {
           totalNominal += nom;
           var bDari = Number(r[6]);
           var bSampai = Number(r[7]);
-          var rincianBlnStr = "bulan " + getNamaBulan(bDari) + (bDari !== bSampai ? (" s/d " + getNamaBulan(bSampai)) : "") + " " + thn;
+          var jmlBulan = (bSampai - bDari) + 1;
+          var rincianBlnStr = "Iuran Dana Sosial Setia Kawan Bulan " + getNamaBulan(bDari) + " " + thn + (bDari !== bSampai ? (" s.d. " + getNamaBulan(bSampai) + " " + thn) : "") + " (" + jmlBulan + " bulan)";
 
           var idTrxStr = String(r[0]);
           listRiwayat.push({
@@ -768,9 +770,14 @@ function generateAndSaveKuitansiPDF(data) {
             font-size: 12pt;
             margin-bottom: 5mm;
           }
-          .kw-diterima, .kw-uang, .kw-guna {
+          .kw-diterima, .kw-uang {
             font-size: 11pt;
             min-height: 8mm;
+          }
+          .kw-guna {
+            font-size: 11pt;
+            min-height: 14mm;
+            margin-bottom: 2mm;
           }
           .kw-label {
             display: ${isKwitansiMode ? 'none' : 'inline-block'};
@@ -784,12 +791,13 @@ function generateAndSaveKuitansiPDF(data) {
           }
           .kw-tanggal {
             font-size: 11pt;
-            margin-top: 3mm;
+            margin-top: 2mm;
+            margin-bottom: 8mm;
             text-align: right;
             padding-right: 15mm;
           }
           .kw-footer {
-            margin-top: 4mm;
+            margin-top: 2mm;
             display: table;
             width: 100%;
           }
@@ -808,6 +816,7 @@ function generateAndSaveKuitansiPDF(data) {
             text-align: center;
             width: 45%;
             padding-right: 5mm;
+            padding-top: 6mm;
           }
         </style>
       </head>

@@ -738,7 +738,7 @@
               </div>
               <div class="col-md-4">
                 <label class="fw-bold text-navy mb-1"><i class="fa-solid fa-signature me-1"></i> Nama Penandatangan:</label>
-                <input type="text" id="kwInputPenandatangan" class="form-control fw-bold" value="Puji Purnomo" oninput="updatePenandatanganName(this.value)">
+                <input type="text" id="kwInputPenandatangan" class="form-control fw-bold" value="" placeholder="Isi Nama Penandatangan..." oninput="updatePenandatanganName(this.value)">
               </div>
               <div class="col-md-3 text-md-end">
                 <label class="d-none d-md-block mb-1">&nbsp;</label>
@@ -856,9 +856,14 @@
       font-size: 12pt;
       margin-bottom: 5mm;
     }
-    .kw-diterima, .kw-uang, .kw-guna {
+    .kw-diterima, .kw-uang {
       font-size: 11pt;
       min-height: 8mm;
+    }
+    .kw-guna {
+      font-size: 11pt;
+      min-height: 14mm;
+      margin-bottom: 2mm;
     }
     .kw-label {
       display: inline-block;
@@ -871,11 +876,12 @@
     }
     .kw-tanggal {
       font-size: 11pt;
-      margin-top: 3mm;
+      margin-top: 2mm;
+      margin-bottom: 8mm;
       padding-right: 15mm;
     }
     .kw-footer {
-      margin-top: 4mm;
+      margin-top: 2mm;
     }
     .kw-terbilang-rp {
       border-top: 2px solid #000;
@@ -892,6 +898,7 @@
     .kw-ttd {
       width: 55mm;
       padding-right: 5mm;
+      padding-top: 6mm;
     }
 
     /* CSS ATURAN CETAK (PRINT MEDIA) */
@@ -2087,7 +2094,7 @@
       document.getElementById("kwValNo").textContent = data.idTrx;
       document.getElementById("kwValNamaNip").textContent = data.nama + (data.nip && data.nip !== "-" ? (" - NIP: " + data.nip) : "");
       document.getElementById("kwValTerbilangTeks").textContent = terbilang(data.nominal) + " rupiah";
-      document.getElementById("kwValRincian").textContent = "iuran dansos pensiun " + data.rincianBulan + ".";
+      document.getElementById("kwValRincian").textContent = data.rincianBulan;
       document.getElementById("kwValNominalRp").textContent = data.nominal.toLocaleString('id-ID') + ",-";
       
       // Format tanggal Indonesia (Secang, TGL)
@@ -2096,8 +2103,8 @@
       var tglFormatted = tglObj.getDate() + " " + namaBulanList[tglObj.getMonth() + 1] + " " + tglObj.getFullYear();
       document.getElementById("kwValTgl").textContent = tglFormatted;
 
-      var currentTtd = document.getElementById("kwInputPenandatangan").value.trim() || "Puji Purnomo";
-      document.getElementById("kwValTtdNama").textContent = "( " + currentTtd + " )";
+      var currentTtd = document.getElementById("kwInputPenandatangan").value.trim();
+      document.getElementById("kwValTtdNama").textContent = currentTtd ? "( " + currentTtd + " )" : "( ................................. )";
 
       switchPrintMode('hvs');
       document.getElementById("modeHVS").checked = true;
@@ -2121,11 +2128,34 @@
     }
 
     function triggerPrintKuitansi() {
+      var penandatangan = document.getElementById("kwInputPenandatangan").value.trim();
+      if (!penandatangan) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Nama Penandatangan Kosong',
+          text: 'Harap isi Nama Penandatangan terlebih dahulu sebelum mencetak!',
+          confirmButtonColor: '#1F4E79'
+        });
+        document.getElementById("kwInputPenandatangan").focus();
+        return;
+      }
       window.print();
     }
 
     function triggerSavePDF() {
       if (!currentKuitansiData) return;
+
+      var penandatangan = document.getElementById("kwInputPenandatangan").value.trim();
+      if (!penandatangan) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Nama Penandatangan Kosong',
+          text: 'Harap isi Nama Penandatangan terlebih dahulu sebelum membuat PDF!',
+          confirmButtonColor: '#1F4E79'
+        });
+        document.getElementById("kwInputPenandatangan").focus();
+        return;
+      }
 
       var btn = document.getElementById("btnSimpanPDF");
       btn.disabled = true;
@@ -2142,9 +2172,9 @@
         nip: currentKuitansiData.nip,
         nominal: currentKuitansiData.nominal,
         terbilangTeks: terbilang(currentKuitansiData.nominal) + " rupiah",
-        rincianTeks: "iuran dansos pensiun " + currentKuitansiData.rincianBulan + ".",
+        rincianTeks: currentKuitansiData.rincianBulan,
         tglFormatted: tglFormatted,
-        penandatangan: document.getElementById("kwInputPenandatangan").value.trim() || "Puji Purnomo",
+        penandatangan: penandatangan,
         printMode: isModeKwitansi ? 'kwitansi' : 'hvs'
       };
 
