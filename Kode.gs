@@ -775,16 +775,16 @@ function generateAndSaveKuitansiPDF(data) {
           .kw-lbl-no       { top: 11mm; left: 45mm; }
           .kw-lbl-diterima { top: 20mm; left: 45mm; }
           .kw-lbl-uang     { top: 28mm; left: 45mm; }
-          .kw-lbl-guna     { top: 36mm; left: 45mm; }
-          .kw-lbl-terbilang { top: 77mm; left: 45mm; }
+          .kw-lbl-guna     { top: 35mm; left: 45mm; }
+          .kw-lbl-terbilang { top: 78mm; left: 45mm; }
 
           /* Field Values (Koordinat Presisi Absolut X, Y dalam mm) */
           .kw-pos-no {
             position: absolute;
             top: 11mm;
             left: 55mm;
-            font-size: 11pt;
-            font-weight: bold;
+            font-size: 10pt;
+            font-weight: normal;
           }
           .kw-pos-diterima {
             position: absolute;
@@ -804,7 +804,7 @@ function generateAndSaveKuitansiPDF(data) {
           }
           .kw-pos-guna {
             position: absolute;
-            top: 36mm;
+            top: 35mm;
             left: 45mm;
             width: 137mm;
             font-size: 10.5pt;
@@ -823,7 +823,7 @@ function generateAndSaveKuitansiPDF(data) {
           }
           .kw-pos-nominal {
             position: absolute;
-            top: 77mm;
+            top: 78mm;
             left: 83mm;
             font-size: 13pt;
             font-weight: bold;
