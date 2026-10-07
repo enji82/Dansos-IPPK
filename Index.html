@@ -15,11 +15,18 @@
   <!-- SweetAlert2 CSS & JS -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
+    html, body {
+      overscroll-behavior-x: contain;
+    }
     body {
       background-color: #f1f5f9;
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       color: #0f172a;
       letter-spacing: -0.01em;
+    }
+    .table-responsive {
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
     }
     .navbar-custom { background-color: #1F4E79; }
     .card-custom {
@@ -108,6 +115,19 @@
     #adminSection .alert {
       margin-bottom: 0.85rem !important;
       padding: 0.75rem 1.15rem !important;
+    }
+
+    /* Sticky Header & Column for Data Pembayaran Table */
+    #tableDataPembayaran th.sticky-col,
+    #tableDataPembayaran td.sticky-col {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background-color: #ffffff;
+    }
+    #tableDataPembayaran th.sticky-col {
+      background-color: #f8fafc;
+      z-index: 3;
     }
   </style>
 </head>
