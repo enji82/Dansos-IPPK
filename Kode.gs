@@ -618,6 +618,24 @@ function getRiwayatPembayaranAdmin(pin, filterTahun) {
       }
     }
 
+    // Map file PDF tersimpan di Drive folder berdasarkan ID Trx
+    var pdfMap = {};
+    try {
+      var folder = DriveApp.getFolderById(KUITANSI_FOLDER_ID);
+      if (folder) {
+        var files = folder.getFiles();
+        while (files.hasNext()) {
+          var f = files.next();
+          var fn = f.getName(); // Format: Kuitansi_TRX-XXXX_Nama.pdf
+          var parts = fn.split("_");
+          if (parts.length >= 2) {
+            var trxIdFromFile = parts[1];
+            pdfMap[trxIdFromFile] = f.getUrl();
+          }
+        }
+      }
+    } catch(eDrive) {}
+
     var listRiwayat = [];
     var totalNominal = 0;
 
@@ -634,8 +652,9 @@ function getRiwayatPembayaranAdmin(pin, filterTahun) {
           var bSampai = Number(r[7]);
           var rincianBlnStr = "bulan " + getNamaBulan(bDari) + (bDari !== bSampai ? (" s/d " + getNamaBulan(bSampai)) : "") + " " + thn;
 
+          var idTrxStr = String(r[0]);
           listRiwayat.push({
-            idTrx: r[0],
+            idTrx: idTrxStr,
             tanggal: r[1] ? Utilities.formatDate(new Date(r[1]), ss.getSpreadsheetTimeZone(), "yyyy-MM-dd") : "-",
             idAnggota: r[2],
             nama: r[3],
@@ -644,7 +663,8 @@ function getRiwayatPembayaranAdmin(pin, filterTahun) {
             tahun: thn,
             periode: getNamaBulan(bDari) + " - " + getNamaBulan(bSampai),
             rincianBulan: rincianBlnStr,
-            catatan: r[11] || "-"
+            catatan: r[11] || "-",
+            pdfUrl: pdfMap[idTrxStr] || null
           });
         }
       }

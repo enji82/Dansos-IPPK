@@ -2202,6 +2202,25 @@
         kuitansiRowCache[item.idTrx] = item;
         var itemJson = "'" + escapeQuotes(String(item.idTrx)) + "'";
         var tr = document.createElement("tr");
+        
+        var actionBtnHtml = '';
+        if (item.pdfUrl) {
+          actionBtnHtml = 
+            '<div class="btn-group btn-group-sm" role="group">' +
+              '<a href="' + item.pdfUrl + '" target="_blank" class="btn btn-sm btn-navy fw-bold" title="Buka File PDF Arsip Kuitansi">' +
+                '<i class="fa-solid fa-file-pdf me-1 text-danger"></i> Lihat PDF' +
+              '</a>' +
+              '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="printKuitansiFromRow(' + itemJson + ')" title="Cetak Ulang / Preview">' +
+                '<i class="fa-solid fa-print"></i>' +
+              '</button>' +
+            '</div>';
+        } else {
+          actionBtnHtml = 
+            '<button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="viewKuitansiPDF(' + itemJson + ')">' +
+              '<i class="fa-solid fa-eye me-1"></i> Lihat Kuitansi' +
+            '</button>';
+        }
+
         tr.innerHTML = 
           '<td><span class="badge bg-secondary font-monospace">' + item.idTrx + '</span></td>' +
           '<td>' + item.tanggal + '</td>' +
@@ -2211,13 +2230,21 @@
           '<td>' + item.periode + '</td>' +
           '<td><strong class="text-success">Rp ' + item.nominal.toLocaleString('id-ID') + '</strong></td>' +
           '<td><span class="small text-muted">' + item.catatan + '</span></td>' +
-          '<td class="text-center">' +
-            '<button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="printKuitansiFromRow(' + itemJson + ')">' +
-              '<i class="fa-solid fa-print me-1"></i> Kuitansi' +
-            '</button>' +
-          '</td>';
+          '<td class="text-center">' + actionBtnHtml + '</td>';
         tbody.appendChild(tr);
       });
+    }
+
+    function viewKuitansiPDF(key) {
+      var item = (typeof key === 'object') ? key : kuitansiRowCache[key];
+      if (!item) return;
+
+      if (item.pdfUrl) {
+        window.open(item.pdfUrl, '_blank');
+      } else {
+        // Jika PDF belum pernah dibuat, buka modal agar bisa di-generate & disimpan
+        printKuitansiFromRow(item);
+      }
     }
 
     function filterTableRiwayat() {
