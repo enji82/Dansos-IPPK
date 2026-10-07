@@ -12,6 +12,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <!-- SweetAlert2 CSS & JS -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
       background-color: #f1f5f9;
@@ -909,7 +911,15 @@
     function submitFormMasuk(e) {
       e.preventDefault();
       var idAnggota = document.getElementById("masukAnggota").value;
-      if (!idAnggota) return alert("Silakan pilih anggota dari hasil pencarian!");
+      if (!idAnggota) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Anggota Belum Dipilih',
+          text: 'Silakan ketik dan pilih nama anggota dari hasil pencarian terlebih dahulu!',
+          confirmButtonColor: '#1F4E79'
+        });
+        return;
+      }
 
       var btn = document.getElementById("btnSimpanMasuk");
       btn.disabled = true;
@@ -932,12 +942,25 @@
       google.script.run.withSuccessHandler(function(res) {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Simpan Transaksi Masuk';
-        alert(res.message);
+        
         if (res.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Transaksi Berhasil Disimpan',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
           document.getElementById("formMasuk").reset();
           document.getElementById("masukAnggota").value = "";
           document.getElementById("masukAnggotaSelectedBadge").classList.add("d-none");
           loadAdminData();
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menyimpan',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
         }
       }).simpanTransaksiMasuk(formObj);
     }
@@ -945,7 +968,15 @@
     function submitFormSetor(e) {
       e.preventDefault();
       var idAnggota = document.getElementById("setorAnggota").value;
-      if (!idAnggota) return alert("Silakan pilih anggota dari hasil pencarian!");
+      if (!idAnggota) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Anggota Belum Dipilih',
+          text: 'Silakan ketik dan pilih nama anggota dari hasil pencarian terlebih dahulu!',
+          confirmButtonColor: '#1F4E79'
+        });
+        return;
+      }
 
       var btn = document.getElementById("btnSimpanSetor");
       btn.disabled = true;
@@ -966,12 +997,25 @@
       google.script.run.withSuccessHandler(function(res) {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Catat Setoran Kas';
-        alert(res.message);
+        
         if (res.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Setoran Kas Berhasil',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
           document.getElementById("formSetor").reset();
           document.getElementById("setorAnggota").value = "";
           document.getElementById("setorAnggotaSelectedBadge").classList.add("d-none");
           loadAdminData();
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Mencatat Setoran',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
         }
       }).simpanTransaksiSetor(formObj);
     }
@@ -1057,7 +1101,14 @@
     function doSearch() {
       hideSuggestions();
       var kw = document.getElementById("searchKeyword").value.trim();
-      if (!kw) return alert("Masukkan Nama atau NIP terlebih dahulu!");
+      if (!kw) {
+        return Swal.fire({
+          icon: 'warning',
+          title: 'Perhatian',
+          text: 'Masukkan Nama atau NIP terlebih dahulu!',
+          confirmButtonColor: '#1F4E79'
+        });
+      }
 
       isMultipleSearchResult = false;
       document.getElementById("btnBackToMultiple").classList.add("d-none");
@@ -1076,7 +1127,12 @@
             renderMultipleMatches(res);
           }
         } else {
-          alert(res.message);
+          Swal.fire({
+            icon: 'error',
+            title: 'Pencarian Gagal',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
         }
       }).checkStatusAnggota(kw);
     }
@@ -1130,7 +1186,12 @@
           renderDetailResult(res.data);
         } else {
           document.getElementById("multipleResults").classList.remove("d-none");
-          alert(res.message);
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Memuat Detail',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
         }
       }).getDetailAnggotaById(idAnggota);
     }
@@ -1344,7 +1405,14 @@
 
     function doAdminSearch() {
       var kw = document.getElementById("adminSearchKeyword").value.trim();
-      if (!kw) return alert("Ketik nama atau NIP anggota!");
+      if (!kw) {
+        return Swal.fire({
+          icon: 'warning',
+          title: 'Perhatian',
+          text: 'Ketik nama atau NIP anggota!',
+          confirmButtonColor: '#1F4E79'
+        });
+      }
       document.getElementById("adminSearchSuggestions").classList.remove("show");
       document.getElementById("adminSearchSuggestions").classList.add("loader");
 
@@ -1369,7 +1437,12 @@
             document.getElementById("adminSearchResult").classList.remove("d-none");
           }
         } else {
-          alert(res.message);
+          Swal.fire({
+            icon: 'error',
+            title: 'Pencarian Gagal',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
         }
       }).checkStatusAnggota(kw);
     }
@@ -1383,7 +1456,12 @@
         if (res.success) {
           renderAdminSearchResult(res.data);
         } else {
-          alert(res.message);
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Memuat Detail',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
         }
       }).getDetailAnggotaById(idAnggota);
     }
@@ -1514,11 +1592,23 @@
       google.script.run.withSuccessHandler(function(res) {
         btn.disabled = false;
         btn.innerHTML = 'Simpan Anggota';
-        alert(res.message);
         if (res.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Berhasil',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
           bootstrap.Modal.getInstance(document.getElementById('tambahAnggotaModal')).hide();
           loadAdminData();
           loadTableAdminAnggota();
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menambah Anggota',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
         }
       }).simpanAnggotaBaru(formObj);
     }
@@ -1591,7 +1681,12 @@
             });
           }
         } else {
-          alert(res.message);
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Memuat Laporan',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
         }
       }).getAdminRekapLaporan(currentAdminPin, thn);
     }
