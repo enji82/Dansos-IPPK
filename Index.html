@@ -903,6 +903,14 @@
 
     /* CSS ATURAN CETAK (PRINT MEDIA) */
     @media print {
+      html, body {
+        height: 100mm !important;
+        max-height: 100mm !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+      }
       body * {
         visibility: hidden !important;
       }
@@ -925,12 +933,16 @@
         top: 0 !important;
         width: 190mm !important;
         height: 100mm !important;
+        max-height: 100mm !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
         z-index: 999999 !important;
         box-shadow: none !important;
         border-radius: 0 !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+        break-after: avoid !important;
       }
       .kwitansi-box.print-mode-kwitansi {
         border: none !important;
