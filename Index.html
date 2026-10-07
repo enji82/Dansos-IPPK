@@ -117,17 +117,37 @@
       padding: 0.75rem 1.15rem !important;
     }
 
-    /* Sticky Header & Column for Data Pembayaran Table */
-    #tableDataPembayaran th.sticky-col,
-    #tableDataPembayaran td.sticky-col {
+    /* Sticky Header & Columns for Data Pembayaran Table */
+    #tableDataPembayaran .sticky-col-1 {
       position: sticky;
       left: 0;
       z-index: 2;
       background-color: #ffffff;
+      width: 45px;
+      min-width: 45px;
     }
-    #tableDataPembayaran th.sticky-col {
+    #tableDataPembayaran th.sticky-col-1 {
       background-color: #f8fafc;
+      z-index: 4;
+    }
+    #tableDataPembayaran .sticky-col-2 {
+      position: sticky;
+      left: 45px;
+      z-index: 2;
+      background-color: #ffffff;
+      border-right: 2px solid #cbd5e1 !important;
+      box-shadow: 3px 0 6px -2px rgba(0, 0, 0, 0.1);
+    }
+    #tableDataPembayaran th.sticky-col-2 {
+      background-color: #f8fafc;
+      z-index: 4;
+    }
+    #tableDataPembayaran tfoot td.sticky-col-footer {
+      position: sticky;
+      left: 0;
       z-index: 3;
+      background-color: #e2e8f0;
+      border-right: 2px solid #94a3b8 !important;
     }
   </style>
 </head>
@@ -628,8 +648,8 @@
                 <table class="table table-bordered table-hover align-middle mb-0 text-nowrap" id="tableDataPembayaran" style="font-size: 0.9rem;">
                   <thead class="table-light text-center align-middle">
                     <tr>
-                      <th style="width: 45px;">No.</th>
-                      <th>Nama</th>
+                      <th class="sticky-col-1" style="width: 45px;">No.</th>
+                      <th class="sticky-col-2">Nama</th>
                       <th>NIP</th>
                       <th>TMT</th>
                       <th id="thPembayaranTerakhir">Pembayaran Terakhir</th>
@@ -2154,8 +2174,8 @@
       filteredList.forEach(function(row, idx) {
         colTotals.jumlah += row.jumlah;
         var htmlRow = '<tr class="align-middle">' +
-          '<td class="text-center">' + (idx + 1) + '</td>' +
-          '<td><strong class="text-navy">' + row.nama + '</strong></td>' +
+          '<td class="text-center sticky-col-1">' + (idx + 1) + '</td>' +
+          '<td class="sticky-col-2"><strong class="text-navy">' + row.nama + '</strong></td>' +
           '<td class="text-secondary small">' + row.nip + '</td>' +
           '<td class="text-secondary small text-center">' + row.tmt + '</td>' +
           '<td class="text-center"><span class="badge bg-light text-dark border">' + row.pembayaranTerakhir + '</span></td>';
@@ -2176,7 +2196,8 @@
 
       // Render Baris Jumlah di Paling Bawah (tfoot)
       var tfootHtml = '<tr>' +
-        '<td colspan="5" class="text-end fw-bold fs-6">JUMLAH TOTAL:</td>';
+        '<td colspan="2" class="text-center fw-bold fs-6 sticky-col-footer">JUMLAH TOTAL</td>' +
+        '<td colspan="3" class="text-end fw-bold text-muted"></td>';
       monthKeys.forEach(function(mKey) {
         var totM = colTotals[mKey];
         tfootHtml += '<td class="text-end fw-bold ' + (totM > 0 ? 'text-success' : 'text-muted') + '">' + (totM > 0 ? totM.toLocaleString('id-ID') : '0') + '</td>';

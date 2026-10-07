@@ -722,7 +722,7 @@ function getDataPembayaranMatrix(pin, targetTahun) {
         id: id,
         nama: row[1] || "-",
         nip: row[2] ? String(row[2]) : "-",
-        tmt: row[4] ? (row[4] instanceof Date ? Utilities.formatDate(row[4], ss.getSpreadsheetTimeZone(), "yyyy-MM-dd") : String(row[4])) : "-",
+        tmt: row[5] ? (row[5] instanceof Date ? Utilities.formatDate(row[5], ss.getSpreadsheetTimeZone(), "yyyy-MM-dd") : String(row[5])) : "-",
         cutoffBln: cutoffBln,
         cutoffThn: cutoffThn,
         bulanMap: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0 }
@@ -738,17 +738,40 @@ function getDataPembayaranMatrix(pin, targetTahun) {
         if (!m[0]) continue;
         var idAng = String(m[2]);
         var nominalTrx = Number(m[4]) || 0;
-        var thnTrx = Number(m[5]);
+        var thnSampai = Number(m[5]);
         var bDari = Number(m[6]);
         var bSampai = Number(m[7]);
 
-        if (thnTrx === selTahun && memberMap[idAng]) {
-          var jmlBulan = (bSampai - bDari) + 1;
-          var nominalPerBulan = jmlBulan > 0 ? (nominalTrx / jmlBulan) : 0;
-          for (var b = bDari; b <= bSampai; b++) {
-            if (b >= 1 && b <= 12) {
-              memberMap[idAng].bulanMap[b] = (memberMap[idAng].bulanMap[b] || 0) + nominalPerBulan;
-            }
+        if (!memberMap[idAng] || nominalTrx <= 0) continue;
+
+        // Hitung total rentang bulan transaksi
+        // Jika bDari > bSampai, transaksi melintasi pergantian tahun (misal thnSampai 2026, bDari 9 (Sep 2025), bSampai 1 (Jan 2026))
+        var startYear = thnSampai;
+        var startMonth = bDari;
+        var totalMonths = 0;
+
+        if (bDari <= bSampai) {
+          totalMonths = (bSampai - bDari) + 1;
+          startYear = thnSampai;
+        } else {
+          // Cross-year: misal Sep (9) s.d. Jan (1) di thnSampai (2026) -> Sep, Okt, Nov, Des 2025 (4 bln) + Jan 2026 (1 bln) = 5 bln
+          startYear = thnSampai - 1;
+          totalMonths = (12 - bDari + 1) + bSampai;
+        }
+
+        var nominalPerBulan = totalMonths > 0 ? (nominalTrx / totalMonths) : 0;
+
+        // Map setiap bulan ke tahun yang sesuai
+        var curY = startYear;
+        var curM = startMonth;
+        for (var step = 0; step < totalMonths; step++) {
+          if (curY === selTahun && curM >= 1 && curM <= 12) {
+            memberMap[idAng].bulanMap[curM] = (memberMap[idAng].bulanMap[curM] || 0) + nominalPerBulan;
+          }
+          curM++;
+          if (curM > 12) {
+            curM = 1;
+            curY++;
           }
         }
       }
