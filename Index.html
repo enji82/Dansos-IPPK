@@ -757,46 +757,24 @@
           <!-- CONTAINER PRATINJAU KUITANSI (19cm x 10cm) -->
           <div class="kwitansi-preview-wrapper d-flex justify-content-center overflow-auto pb-2">
             <div id="kwitansiContainer" class="kwitansi-box print-mode-hvs">
-              <!-- No Kuitansi -->
-              <div class="kw-row kw-no">
-                <span class="kw-label kw-only-hvs">No.</span>
-                <span id="kwValNo" class="kw-val kw-val-indent fw-bold">TRX-20261007-001</span>
-              </div>
+              <!-- Label HVS Teks Depan -->
+              <span class="kw-label kw-only-hvs kw-lbl-no">No.</span>
+              <span class="kw-label kw-only-hvs kw-lbl-diterima">Telah diterima dari :</span>
+              <span class="kw-label kw-only-hvs kw-lbl-uang">Uang sebanyak :</span>
+              <span class="kw-label kw-only-hvs kw-lbl-guna">Guna membayar :</span>
+              <span class="kw-label kw-only-hvs kw-lbl-terbilang">Terbilang</span>
 
-              <!-- Telah Diterima Dari -->
-              <div class="kw-row kw-diterima">
-                <span class="kw-label kw-only-hvs">Telah diterima dari :</span>
-                <span id="kwValNamaNip" class="kw-val kw-val-indent fw-bold fs-6">Ibu Ning Minarni - NIP: 19850112</span>
+              <!-- Field Isian (Posisi Absolut) -->
+              <div id="kwValNo" class="kw-val kw-pos-no fw-bold">TRX-20261007-001</div>
+              <div id="kwValNamaNip" class="kw-val kw-pos-diterima fw-bold fs-6">Ibu Ning Minarni - NIP: 19850112</div>
+              <div id="kwValTerbilangTeks" class="kw-val kw-pos-uang fst-italic">Sembilan puluh ribu rupiah</div>
+              <div id="kwValRincian" class="kw-val kw-pos-guna">iuran dansos pensiun bulan Januari s/d Maret 2026.</div>
+              <div class="kw-val kw-pos-tanggal">Secang, <span id="kwValTgl">1 April 2026</span></div>
+              <div id="kwValNominalRpContainer" class="kw-val kw-pos-nominal fw-bold fs-5">
+                <span class="kw-only-hvs me-1">Rp.</span><span id="kwValNominalRp">90.000,-</span>
               </div>
-
-              <!-- Uang Sebanyak -->
-              <div class="kw-row kw-uang">
-                <span class="kw-label kw-only-hvs">Uang sebanyak :</span>
-                <span id="kwValTerbilangTeks" class="kw-val kw-val-indent fst-italic">Sembilan puluh ribu rupiah</span>
-              </div>
-
-              <!-- Guna Membayar -->
-              <div class="kw-row kw-guna">
-                <span class="kw-label kw-only-hvs">Guna membayar :</span>
-                <span id="kwValRincian" class="kw-val kw-val-indent">iuran dansos pensiun bulan Januari s/d Maret 2026.</span>
-              </div>
-
-              <!-- Tanggal & Lokasi -->
-              <div class="kw-row kw-tanggal text-end">
-                <span class="kw-val">Secang, <span id="kwValTgl">1 April 2026</span></span>
-              </div>
-
-              <!-- Footer Terbilang Rp & Tanda Tangan -->
-              <div class="kw-row kw-footer d-flex justify-content-between align-items-end">
-                <div class="kw-terbilang-rp">
-                  <span class="kw-label kw-only-hvs">Terbilang</span>
-                  <span class="kw-rp-label">Rp.</span>
-                  <span id="kwValNominalRp" class="kw-val fw-bold fs-5">90.000,-</span>
-                </div>
-                <div class="kw-ttd text-center">
-                  <div class="kw-ttd-line mb-1"></div>
-                  <span id="kwValTtdNama" class="kw-val fw-bold d-block">( Puji Purnomo )</span>
-                </div>
+              <div class="kw-val kw-pos-ttd">
+                <span id="kwValTtdNama" class="fw-bold d-block">( Puji Purnomo )</span>
               </div>
             </div>
           </div>
@@ -812,12 +790,11 @@
     /* CSS PRATINJAU & MEDIA PRINT KUITANSI (19cm x 10cm) */
     .bg-navy { background-color: #1F4E79 !important; }
 
-    /* Box Kuitansi Fisik Layout (190mm x 100mm) */
+    /* Box Kuitansi Fisik Layout (190mm x 100mm) - ABSOLUTE CONTAINER */
     .kwitansi-box {
       width: 190mm;
       height: 100mm;
       box-sizing: border-box;
-      padding: 11mm 12mm 5mm 24mm;
       position: relative;
       background-color: #ffffff;
       font-family: 'Plus Jakarta Sans', Arial, sans-serif;
@@ -842,72 +819,78 @@
     .kwitansi-box.print-mode-kwitansi .kw-only-hvs {
       display: none !important;
     }
-    .kwitansi-box.print-mode-kwitansi .kw-val-indent {
-      display: inline-block !important;
-      margin-left: 36mm !important;
-    }
-    .kwitansi-box.print-mode-kwitansi .kw-terbilang-rp .kw-val {
-      margin-left: 0 !important;
-    }
 
-    /* Position Layout Rows */
-    .kw-row {
-      margin-bottom: 0mm;
+    /* Static Labels for HVS Mode */
+    .kw-label {
+      position: absolute;
+      color: #1F4E79;
+      font-weight: 600;
+      font-size: 11pt;
+    }
+    .kw-lbl-no       { top: 10mm; left: 45mm; }
+    .kw-lbl-diterima { top: 20mm; left: 45mm; }
+    .kw-lbl-uang     { top: 29mm; left: 45mm; }
+    .kw-lbl-guna     { top: 38mm; left: 45mm; }
+    .kw-lbl-terbilang { top: 78mm; left: 45mm; }
+
+    /* Field Values Absolute Positioning (Posisi Presisi X, Y dalam mm) */
+    .kw-pos-no {
+      position: absolute;
+      top: 10mm;
+      left: 65mm;
+      font-size: 11pt;
+    }
+    .kw-pos-diterima {
+      position: absolute;
+      top: 20mm;
+      left: 65mm;
+      width: 115mm;
+      font-size: 11pt;
+    }
+    .kw-pos-uang {
+      position: absolute;
+      top: 29mm;
+      left: 65mm;
+      width: 115mm;
+      font-size: 10.5pt;
+    }
+    .kw-pos-guna {
+      position: absolute;
+      top: 38mm;
+      left: 65mm;
+      width: 115mm;
+      font-size: 10.5pt;
       line-height: 1.3;
     }
-    .kw-no {
+    .kw-pos-tanggal {
+      position: absolute;
+      top: 61mm;
+      left: 115mm;
+      width: 65mm;
       font-size: 11pt;
-      margin-top: 0mm;
-      margin-bottom: 6mm;
+      text-align: center;
     }
-    .kw-diterima {
-      font-size: 11pt;
-      margin-bottom: 5.5mm;
+    .kw-pos-nominal {
+      position: absolute;
+      top: 76mm;
+      left: 65mm;
+      font-size: 13pt;
     }
-    .kw-uang {
-      font-size: 11pt;
-      margin-bottom: 5.5mm;
-    }
-    .kw-guna {
-      font-size: 10.5pt;
-      min-height: 12mm;
-      margin-bottom: 4mm;
-    }
-    .kw-label {
-      display: inline-block;
-      width: 36mm;
-      color: #334155;
-      font-weight: 600;
-    }
-    .kw-val {
-      color: #000000;
-    }
-    .kw-tanggal {
-      font-size: 11pt;
-      margin-top: 0mm;
-      margin-bottom: 3.5mm;
-      padding-right: 15mm;
-    }
-    .kw-footer {
-      margin-top: 0mm;
-    }
-    .kw-terbilang-rp {
+    .kwitansi-box.print-mode-hvs .kw-pos-nominal {
       border-top: 2px solid #000;
       border-bottom: 2px solid #000;
-      padding: 3px 12px;
-      font-size: 13pt;
-      display: inline-block;
-      margin-top: 2mm;
+      padding: 2px 10px;
     }
-    .kw-rp-label {
-      font-weight: bold;
-      margin-left: 6px;
-      margin-right: 4px;
+    .kwitansi-box.print-mode-kwitansi .kw-pos-nominal {
+      left: 25mm !important;
     }
-    .kw-ttd {
-      width: 55mm;
-      padding-right: 5mm;
-      padding-top: 0mm;
+    .kw-pos-ttd {
+      position: absolute;
+      top: 77mm;
+      left: 115mm;
+      width: 65mm;
+      font-size: 11pt;
+      text-align: center;
     }
 
     /* CSS ATURAN CETAK (PRINT MEDIA) */

@@ -755,110 +755,103 @@ function generateAndSaveKuitansiPDF(data) {
           body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 11mm 12mm 5mm 24mm;
+            padding: 0;
             width: 190mm;
             height: 100mm;
+            position: relative;
             box-sizing: border-box;
             color: #0f172a;
             ${isKwitansiMode ? 'border: none;' : 'border: 2px solid #1F4E79;'}
           }
-          .kw-row {
-            margin-bottom: 0mm;
+          /* Label HVS Static */
+          .kw-label {
+            display: ${isKwitansiMode ? 'none' : 'block'};
+            position: absolute;
+            color: #1F4E79;
+            font-weight: bold;
+            font-size: 11pt;
+          }
+          .kw-lbl-no       { top: 10mm; left: 45mm; }
+          .kw-lbl-diterima { top: 20mm; left: 45mm; }
+          .kw-lbl-uang     { top: 29mm; left: 45mm; }
+          .kw-lbl-guna     { top: 38mm; left: 45mm; }
+          .kw-lbl-terbilang { top: 78mm; left: 45mm; }
+
+          /* Field Values (Koordinat Presisi Absolut X, Y dalam mm) */
+          .kw-pos-no {
+            position: absolute;
+            top: 10mm;
+            left: 65mm;
+            font-size: 11pt;
+            font-weight: bold;
+          }
+          .kw-pos-diterima {
+            position: absolute;
+            top: 20mm;
+            left: 65mm;
+            width: 115mm;
+            font-size: 11pt;
+            font-weight: bold;
+          }
+          .kw-pos-uang {
+            position: absolute;
+            top: 29mm;
+            left: 65mm;
+            width: 115mm;
+            font-size: 10.5pt;
+            font-style: italic;
+          }
+          .kw-pos-guna {
+            position: absolute;
+            top: 38mm;
+            left: 65mm;
+            width: 115mm;
+            font-size: 10.5pt;
             line-height: 1.3;
           }
-          .kw-no {
+          .kw-pos-tanggal {
+            position: absolute;
+            top: 61mm;
+            left: 115mm;
+            width: 65mm;
             font-size: 11pt;
-            margin-top: 0mm;
-            margin-bottom: 6mm;
+            text-align: center;
           }
-          .kw-diterima {
-            font-size: 11pt;
-            margin-bottom: 5.5mm;
-          }
-          .kw-uang {
-            font-size: 11pt;
-            margin-bottom: 5.5mm;
-          }
-          .kw-guna {
-            font-size: 10.5pt;
-            min-height: 12mm;
-            margin-bottom: 4mm;
-          }
-          .kw-label {
-            display: ${isKwitansiMode ? 'none' : 'inline-block'};
-            width: 36mm;
-            color: #334155;
-            font-weight: bold;
-          }
-          .kw-val {
-            color: #000000;
-            ${isKwitansiMode ? 'margin-left: 36mm; display: inline-block;' : ''}
-          }
-          .kw-tanggal {
-            font-size: 11pt;
-            margin-top: 0mm;
-            margin-bottom: 3.5mm;
-            text-align: right;
-            padding-right: 15mm;
-          }
-          .kw-footer {
-            margin-top: 0mm;
-            display: table;
-            width: 100%;
-          }
-          .kw-terbilang-rp {
-            display: table-cell;
-            vertical-align: bottom;
-            ${isKwitansiMode ? 'border: none;' : 'border-top: 2px solid #000; border-bottom: 2px solid #000;'}
-            padding: 4px 12px;
+          .kw-pos-nominal {
+            position: absolute;
+            top: 76mm;
+            left: ${isKwitansiMode ? '25mm' : '65mm'};
             font-size: 13pt;
             font-weight: bold;
-            width: 55%;
-            margin-top: 2mm;
+            ${isKwitansiMode ? '' : 'border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 2px 10px;'}
           }
-          .kw-ttd {
-            display: table-cell;
-            vertical-align: bottom;
+          .kw-pos-ttd {
+            position: absolute;
+            top: 77mm;
+            left: 115mm;
+            width: 65mm;
+            font-size: 11pt;
+            font-weight: bold;
             text-align: center;
-            width: 45%;
-            padding-right: 5mm;
-            padding-top: 0mm;
           }
         </style>
       </head>
       <body>
-        <div class="kw-row kw-no">
-          <span class="kw-label">No.</span>
-          <span class="kw-val" style="font-weight: bold;">${idTrx}</span>
-        </div>
+        <!-- Static Labels for HVS Mode -->
+        <span class="kw-label kw-lbl-no">No.</span>
+        <span class="kw-label kw-lbl-diterima">Telah diterima dari :</span>
+        <span class="kw-label kw-lbl-uang">Uang sebanyak :</span>
+        <span class="kw-label kw-lbl-guna">Guna membayar :</span>
+        ${isKwitansiMode ? '' : '<span class="kw-label kw-lbl-terbilang">Terbilang</span>'}
 
-        <div class="kw-row kw-diterima">
-          <span class="kw-label">Telah diterima dari :</span>
-          <span class="kw-val" style="font-weight: bold;">${nama} ${nip && nip !== '-' ? (' - NIP: ' + nip) : ''}</span>
-        </div>
-
-        <div class="kw-row kw-uang">
-          <span class="kw-label">Uang sebanyak :</span>
-          <span class="kw-val" style="font-style: italic;">${terbilangTeks}</span>
-        </div>
-
-        <div class="kw-row kw-guna">
-          <span class="kw-label">Guna membayar :</span>
-          <span class="kw-val">${rincianTeks}</span>
-        </div>
-
-        <div class="kw-row kw-tanggal">
-          <span class="kw-val" style="${isKwitansiMode ? 'margin-left: 0;' : ''}">Secang, ${tglFormatted}</span>
-        </div>
-
-        <div class="kw-footer">
-          <div class="kw-terbilang-rp">
-            ${isKwitansiMode ? '' : 'Terbilang '}Rp. ${Number(nominal).toLocaleString('id-ID')},-
-          </div>
-          <div class="kw-ttd">
-            <span class="kw-val" style="font-weight: bold; display: block; ${isKwitansiMode ? 'margin-left: 0;' : ''}">( ${penandatangan} )</span>
-          </div>
-        </div>
+        <!-- Values positioned absolutely -->
+        <div class="kw-pos-no">${idTrx}</div>
+        <div class="kw-pos-diterima">${nama} ${nip && nip !== '-' ? (' - NIP: ' + nip) : ''}</div>
+        <div class="kw-pos-uang">${terbilangTeks}</div>
+        <div class="kw-pos-guna">${rincianTeks}</div>
+        <div class="kw-pos-tanggal">Secang, ${tglFormatted}</div>
+        <div class="kw-pos-nominal">Rp. ${Number(nominal).toLocaleString('id-ID')},-</div>
+        <div class="kw-pos-ttd">( ${penandatangan} )</div>
       </body>
       </html>
     `;
