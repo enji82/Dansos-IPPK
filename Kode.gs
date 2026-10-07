@@ -626,11 +626,12 @@ function getRiwayatPembayaranAdmin(pin, filterTahun) {
         var files = folder.getFiles();
         while (files.hasNext()) {
           var f = files.next();
-          var fn = f.getName(); // Format: Kuitansi_TRX-XXXX_Nama.pdf atau nama ber-underscore
-          // Ekstrak ID TRX seperti TRX-20261007-245 dari nama file
-          var match = fn.match(/TRX-[A-Za-z0-9-]+/i);
-          if (match && match[0]) {
-            pdfMap[match[0].toUpperCase()] = f.getUrl();
+          var fn = f.getName(); // Format: Kuitansi_TRX-20261007-245_COBA_DANSOS.pdf
+          var parts = fn.split("_");
+          if (parts.length >= 2) {
+            // parts[1] adalah ID TRX (misal TRX-20261007-245)
+            var cleanTrxId = parts[1].trim().toUpperCase();
+            pdfMap[cleanTrxId] = f.getUrl();
           }
         }
       }
