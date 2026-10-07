@@ -686,6 +686,131 @@ function getRiwayatPembayaranAdmin(pin, filterTahun) {
 }
 
 /**
+ * 9C. AMBIL MATRIX DATA PEMBAYARAN IURAN PER ANGGOTA PER BULAN
+ */
+function getDataPembayaranMatrix(pin, targetTahun) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
+    var sheetMasuk = ss.getSheetByName(SHEET_MASUK);
+
+    if (!sheetAnggota) return { success: false, message: "Sheet Master_Anggota tidak ditemukan!" };
+
+    var now = new Date();
+    var currentYear = now.getFullYear();
+    var selTahun = Number(targetTahun) || currentYear;
+
+    var paguMap = getMatrixPaguMap();
+
+    // 1. Ambil data seluruh anggota
+    var dataA = sheetAnggota.getDataRange().getValues();
+    var memberMap = {};
+    var memberOrder = [];
+
+    for (var i = 1; i < dataA.length; i++) {
+      var row = dataA[i];
+      var id = String(row[0]);
+      if (!id) continue;
+
+      var cutoffBln = Number(row[8]) || 0;
+      var cutoffThn = Number(row[9]) || 0;
+
+      memberMap[id] = {
+        id: id,
+        nama: row[1] || "-",
+        nip: row[2] ? String(row[2]) : "-",
+        tmt: row[4] ? (row[4] instanceof Date ? Utilities.formatDate(row[4], ss.getSpreadsheetTimeZone(), "yyyy-MM-dd") : String(row[4])) : "-",
+        cutoffBln: cutoffBln,
+        cutoffThn: cutoffThn,
+        bulanMap: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0 }
+      };
+      memberOrder.push(id);
+    }
+
+    // 2. Hitung nominal terbayar per bulan per anggota dari Transaksi_Masuk
+    if (sheetMasuk) {
+      var dataM = sheetMasuk.getDataRange().getValues();
+      for (var j = 1; j < dataM.length; j++) {
+        var m = dataM[j];
+        if (!m[0]) continue;
+        var idAng = String(m[2]);
+        var nominalTrx = Number(m[4]) || 0;
+        var thnTrx = Number(m[5]);
+        var bDari = Number(m[6]);
+        var bSampai = Number(m[7]);
+
+        if (thnTrx === selTahun && memberMap[idAng]) {
+          var jmlBulan = (bSampai - bDari) + 1;
+          var nominalPerBulan = jmlBulan > 0 ? (nominalTrx / jmlBulan) : 0;
+          for (var b = bDari; b <= bSampai; b++) {
+            if (b >= 1 && b <= 12) {
+              memberMap[idAng].bulanMap[b] = (memberMap[idAng].bulanMap[b] || 0) + nominalPerBulan;
+            }
+          }
+        }
+      }
+    }
+
+    // 3. Susun data baris dan hitung total per bulan
+    var rows = [];
+    var totalPerBulan = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0 };
+    var grandTotal = 0;
+
+    for (var k = 0; k < memberOrder.length; k++) {
+      var id = memberOrder[k];
+      var m = memberMap[id];
+      var lastPaidStr = (m.cutoffBln > 0 && m.cutoffThn > 0) ? (getNamaBulan(m.cutoffBln) + " " + m.cutoffThn) : "Belum Ada";
+
+      var rowTotal = 0;
+      var bulanVal = {};
+      for (var b = 1; b <= 12; b++) {
+        var val = m.bulanMap[b] || 0;
+        bulanVal[b] = val;
+        rowTotal += val;
+        totalPerBulan[b] += val;
+      }
+      grandTotal += rowTotal;
+
+      rows.push({
+        no: k + 1,
+        id: m.id,
+        nama: m.nama,
+        nip: m.nip,
+        tmt: m.tmt,
+        pembayaranTerakhir: lastPaidStr,
+        jan: bulanVal[1],
+        feb: bulanVal[2],
+        mar: bulanVal[3],
+        apr: bulanVal[4],
+        mei: bulanVal[5],
+        jun: bulanVal[6],
+        jul: bulanVal[7],
+        agt: bulanVal[8],
+        sep: bulanVal[9],
+        okt: bulanVal[10],
+        nov: bulanVal[11],
+        des: bulanVal[12],
+        jumlah: rowTotal
+      });
+    }
+
+    return {
+      success: true,
+      tahun: selTahun,
+      currentYear: currentYear,
+      data: rows,
+      totalPerBulan: totalPerBulan,
+      grandTotal: grandTotal
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal mengambil data pembayaran: " + err.message };
+  }
+}
+
+/**
  * 10. TAMBAH ANGGOTA BARU (KHUSUS ADMIN)
  */
 function simpanAnggotaBaru(form) {

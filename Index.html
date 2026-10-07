@@ -227,6 +227,11 @@
           </button>
         </li>
         <li class="nav-item me-1 mb-1 mb-md-0">
+          <button class="nav-link fw-bold py-2 px-2" id="tab-pembayaran" data-bs-toggle="tab" data-bs-target="#panelPembayaran" onclick="onSwitchAdminTab('pembayaran')">
+            <i class="fa-solid fa-table-list me-1 text-teal" style="color: #0d6efd;"></i>Data Pembayaran
+          </button>
+        </li>
+        <li class="nav-item me-1 mb-1 mb-md-0">
           <button class="nav-link fw-bold py-2 px-2" id="tab-riwayat" data-bs-toggle="tab" data-bs-target="#panelRiwayat" onclick="onSwitchAdminTab('riwayat')">
             <i class="fa-solid fa-clock-rotate-left me-1 text-purple" style="color: #6f42c1;"></i>Riwayat Pembayaran
           </button>
@@ -565,6 +570,70 @@
                   <tbody id="tbodyLaporanSetor">
                     <!-- Populated dynamically -->
                   </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- MENU BARU: DATA PEMBAYARAN IURAN MATRIKS (2012 - SEKARANG) -->
+          <div class="tab-pane fade" id="panelPembayaran">
+            <div class="card card-custom p-3 p-md-4">
+              <div class="alert alert-primary border-0 rounded-3 mb-4 shadow-sm" style="background-color: #e7f1ff; color: #0c4128;">
+                <h5 class="fw-bold mb-1"><i class="fa-solid fa-table-list me-2 text-primary"></i> Data Pembayaran Iuran Anggota</h5>
+                <p class="small mb-0 text-secondary">Tabel rekapitulasi nominal pembayaran iuran per bulan untuk seluruh anggota per tahun.</p>
+              </div>
+
+              <!-- Filter Tahun & Info Summary -->
+              <div class="row g-3 align-items-center mb-3">
+                <div class="col-md-4">
+                  <label class="form-label fw-bold small text-navy mb-1"><i class="fa-solid fa-calendar-days me-1"></i> Pilih Tahun Pembayaran:</label>
+                  <select id="filterTahunMatrix" class="form-select fw-bold" onchange="loadDataPembayaranMatrixAdmin()">
+                    <!-- Populated dynamically 2012 - current year -->
+                  </select>
+                </div>
+                <div class="col-md-5">
+                  <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                    <input type="text" id="filterPembayaranSearch" class="form-control border-start-0" placeholder="Cari nama, NIP, atau ID..." oninput="filterTableDataPembayaran()">
+                  </div>
+                </div>
+                <div class="col-md-3 text-md-end">
+                  <label class="d-none d-md-block mb-1">&nbsp;</label>
+                  <span class="badge bg-navy px-3 py-2 fs-6 shadow-sm" id="matrixTotalInfo" style="background-color: #1F4E79; color: white;">Total: Rp 0</span>
+                </div>
+              </div>
+
+              <!-- Tabel Data Pembayaran Per Bulan -->
+              <div class="table-responsive rounded-3 border shadow-sm">
+                <table class="table table-bordered table-hover align-middle mb-0 text-nowrap" id="tableDataPembayaran" style="font-size: 0.9rem;">
+                  <thead class="table-light text-center align-middle">
+                    <tr>
+                      <th style="width: 45px;">No.</th>
+                      <th>Nama</th>
+                      <th>NIP</th>
+                      <th>TMT</th>
+                      <th id="thPembayaranTerakhir">Pembayaran Terakhir</th>
+                      <th style="width: 65px;">Jan</th>
+                      <th style="width: 65px;">Feb</th>
+                      <th style="width: 65px;">Mar</th>
+                      <th style="width: 65px;">Apr</th>
+                      <th style="width: 65px;">Mei</th>
+                      <th style="width: 65px;">Jun</th>
+                      <th style="width: 65px;">Jul</th>
+                      <th style="width: 65px;">Agt</th>
+                      <th style="width: 65px;">Sep</th>
+                      <th style="width: 65px;">Okt</th>
+                      <th style="width: 65px;">Nov</th>
+                      <th style="width: 65px;">Des</th>
+                      <th style="width: 95px;" class="table-primary text-navy">Jumlah</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyDataPembayaran">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                  <tfoot id="tfootDataPembayaran" class="table-secondary fw-bold text-end align-middle">
+                    <!-- Populated dynamically -->
+                  </tfoot>
                 </table>
               </div>
             </div>
@@ -1727,6 +1796,9 @@
     function onSwitchAdminTab(tabName) {
       if (tabName === 'anggota') {
         loadTableAdminAnggota();
+      } else if (tabName === 'pembayaran') {
+        initFilterTahunMatrix();
+        loadDataPembayaranMatrixAdmin();
       } else if (tabName === 'laporan') {
         initFilterTahunLaporan();
         loadRekapLaporanAdmin();
@@ -1986,6 +2058,118 @@
           });
         }
       }).simpanAnggotaBaru(formObj);
+    }
+
+    // MENU BARU: DATA PEMBAYARAN IURAN MATRIKS (2012 - SEKARANG)
+    function initFilterTahunMatrix() {
+      var sel = document.getElementById("filterTahunMatrix");
+      if (sel.options.length > 0) return; // Sudah terisi
+      var curY = new Date().getFullYear();
+      for (var y = 2012; y <= curY; y++) {
+        var opt = document.createElement("option");
+        opt.value = y;
+        opt.textContent = "Tahun " + y;
+        if (y === curY) opt.selected = true;
+        sel.appendChild(opt);
+      }
+    }
+
+    var globalMatrixDataCache = null;
+
+    function loadDataPembayaranMatrixAdmin() {
+      var selTahun = document.getElementById("filterTahunMatrix").value || new Date().getFullYear();
+      var tbody = document.getElementById("tbodyDataPembayaran");
+      var tfoot = document.getElementById("tfootDataPembayaran");
+      var totalInfo = document.getElementById("matrixTotalInfo");
+
+      tbody.innerHTML = '<tr><td colspan="18" class="text-center py-4 text-primary"><div class="spinner-border spinner-border-sm me-2"></div>Memuat data pembayaran iuran tahun ' + selTahun + '...</td></tr>';
+      tfoot.innerHTML = '';
+      totalInfo.textContent = "Total: Rp 0";
+
+      google.script.run.withSuccessHandler(function(res) {
+        if (res.success) {
+          globalMatrixDataCache = res;
+          renderDataPembayaranMatrixTable(res);
+        } else {
+          tbody.innerHTML = '<tr><td colspan="18" class="text-center text-danger py-3">Gagal memuat data: ' + escapeQuotes(res.message) + '</td></tr>';
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Memuat Data',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
+        }
+      }).getDataPembayaranMatrix(currentAdminPin, selTahun);
+    }
+
+    function renderDataPembayaranMatrixTable(res) {
+      var tbody = document.getElementById("tbodyDataPembayaran");
+      var tfoot = document.getElementById("tfootDataPembayaran");
+      var totalInfo = document.getElementById("matrixTotalInfo");
+
+      document.getElementById("thPembayaranTerakhir").textContent = "Pembayaran Terakhir (" + res.tahun + ")";
+      totalInfo.textContent = "Total " + res.tahun + ": Rp " + res.grandTotal.toLocaleString('id-ID');
+
+      var searchKw = (document.getElementById("filterPembayaranSearch").value || "").trim().toLowerCase();
+      var filteredList = res.data;
+
+      if (searchKw) {
+        filteredList = res.data.filter(function(row) {
+          return String(row.nama||'').toLowerCase().includes(searchKw) || 
+                 String(row.nip||'').toLowerCase().includes(searchKw) || 
+                 String(row.id||'').toLowerCase().includes(searchKw);
+        });
+      }
+
+      tbody.innerHTML = "";
+      if (filteredList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="18" class="text-center text-muted py-3">Tidak ada data anggota / pembayaran cocok.</td></tr>';
+        tfoot.innerHTML = "";
+        return;
+      }
+
+      var monthKeys = ['jan','feb','mar','apr','mei','jun','jul','agt','sep','okt','nov','des'];
+      var colTotals = { jan:0, feb:0, mar:0, apr:0, mei:0, jun:0, jul:0, agt:0, sep:0, okt:0, nov:0, des:0, jumlah:0 };
+
+      filteredList.forEach(function(row, idx) {
+        colTotals.jumlah += row.jumlah;
+        var htmlRow = '<tr class="align-middle">' +
+          '<td class="text-center">' + (idx + 1) + '</td>' +
+          '<td><strong class="text-navy">' + row.nama + '</strong></td>' +
+          '<td class="text-secondary small">' + row.nip + '</td>' +
+          '<td class="text-secondary small text-center">' + row.tmt + '</td>' +
+          '<td class="text-center"><span class="badge bg-light text-dark border">' + row.pembayaranTerakhir + '</span></td>';
+
+        monthKeys.forEach(function(mKey, mIdx) {
+          var val = row[mKey] || 0;
+          colTotals[mKey] += val;
+          if (val > 0) {
+            htmlRow += '<td class="text-end fw-bold text-success" style="background-color: #f0fdf4;">' + val.toLocaleString('id-ID') + '</td>';
+          } else {
+            htmlRow += '<td class="text-center text-muted small">-</td>';
+          }
+        });
+
+        htmlRow += '<td class="text-end fw-bold table-primary text-navy">' + row.jumlah.toLocaleString('id-ID') + '</td></tr>';
+        tbody.innerHTML += htmlRow;
+      });
+
+      // Render Baris Jumlah di Paling Bawah (tfoot)
+      var tfootHtml = '<tr>' +
+        '<td colspan="5" class="text-end fw-bold fs-6">JUMLAH TOTAL:</td>';
+      monthKeys.forEach(function(mKey) {
+        var totM = colTotals[mKey];
+        tfootHtml += '<td class="text-end fw-bold ' + (totM > 0 ? 'text-success' : 'text-muted') + '">' + (totM > 0 ? totM.toLocaleString('id-ID') : '0') + '</td>';
+      });
+      tfootHtml += '<td class="text-end fw-bold fs-6 text-navy table-primary">Rp ' + colTotals.jumlah.toLocaleString('id-ID') + '</td></tr>';
+
+      tfoot.innerHTML = tfootHtml;
+    }
+
+    function filterTableDataPembayaran() {
+      if (globalMatrixDataCache) {
+        renderDataPembayaranMatrixTable(globalMatrixDataCache);
+      }
     }
 
     // MENU 5: REKAP CETAK LAPORAN ADMIN
