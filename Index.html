@@ -1981,7 +1981,8 @@
             tbM.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-2">Belum ada transaksi iuran masuk.</td></tr>';
           } else {
             res.transaksiMasuk.forEach(function(m) {
-              var itemJson = escapeQuotes(JSON.stringify(m));
+              kuitansiRowCache[m.idTrx] = m;
+              var itemJson = "'" + escapeQuotes(String(m.idTrx)) + "'";
               tbM.innerHTML += '<tr>' +
                 '<td><span class="badge bg-secondary">' + m.idTrx + '</span></td>' +
                 '<td>' + m.tanggal + '</td>' +
@@ -2028,8 +2029,11 @@
     }
 
     var currentKuitansiData = null;
+    var kuitansiRowCache = {};
 
-    function printKuitansiFromRow(item) {
+    function printKuitansiFromRow(key) {
+      var item = (typeof key === 'object') ? key : kuitansiRowCache[key];
+      if (!item) return;
       showKuitansiModal({
         idTrx: item.idTrx,
         tgl: item.tanggal,
@@ -2195,7 +2199,8 @@
       }
 
       list.forEach(function(item) {
-        var itemJson = escapeQuotes(JSON.stringify(item));
+        kuitansiRowCache[item.idTrx] = item;
+        var itemJson = "'" + escapeQuotes(String(item.idTrx)) + "'";
         var tr = document.createElement("tr");
         tr.innerHTML = 
           '<td><span class="badge bg-secondary font-monospace">' + item.idTrx + '</span></td>' +
