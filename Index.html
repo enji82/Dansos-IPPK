@@ -117,7 +117,28 @@
       padding: 0.75rem 1.15rem !important;
     }
 
+    /* Global touchpad swipe back/next prevention */
+    html, body {
+      overscroll-behavior-x: contain;
+    }
+
     /* Sticky Header & Columns for Data Pembayaran Table */
+    .table-responsive-matrix {
+      max-height: 70vh;
+      overflow-y: auto;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      overscroll-behavior-y: auto;
+      touch-action: pan-x pan-y;
+      position: relative;
+    }
+    #tableDataPembayaran thead th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      background-color: #f8fafc;
+      box-shadow: 0 2px 3px -1px rgba(0, 0, 0, 0.1);
+    }
     #tableDataPembayaran .sticky-col-1 {
       position: sticky;
       left: 0;
@@ -127,8 +148,11 @@
       min-width: 45px;
     }
     #tableDataPembayaran th.sticky-col-1 {
+      position: sticky;
+      top: 0;
+      left: 0;
+      z-index: 6;
       background-color: #f8fafc;
-      z-index: 4;
     }
     #tableDataPembayaran .sticky-col-2 {
       position: sticky;
@@ -139,13 +163,26 @@
       box-shadow: 3px 0 6px -2px rgba(0, 0, 0, 0.1);
     }
     #tableDataPembayaran th.sticky-col-2 {
+      position: sticky;
+      top: 0;
+      left: 45px;
+      z-index: 6;
       background-color: #f8fafc;
-      z-index: 4;
+      border-right: 2px solid #cbd5e1 !important;
+      box-shadow: 3px 2px 6px -2px rgba(0, 0, 0, 0.15);
+    }
+    #tableDataPembayaran tfoot td {
+      position: sticky;
+      bottom: 0;
+      z-index: 3;
+      background-color: #e2e8f0;
+      border-top: 2px solid #cbd5e1 !important;
     }
     #tableDataPembayaran tfoot td.sticky-col-footer {
       position: sticky;
+      bottom: 0;
       left: 0;
-      z-index: 3;
+      z-index: 5;
       background-color: #e2e8f0;
       border-right: 2px solid #94a3b8 !important;
     }
@@ -644,7 +681,7 @@
               </div>
 
               <!-- Tabel Data Pembayaran Per Bulan -->
-              <div class="table-responsive rounded-3 border shadow-sm">
+              <div class="table-responsive table-responsive-matrix rounded-3 border shadow-sm">
                 <table class="table table-bordered table-hover align-middle mb-0 text-nowrap" id="tableDataPembayaran" style="font-size: 0.9rem;">
                   <thead class="table-light text-center align-middle">
                     <tr>
@@ -1092,6 +1129,18 @@
           hideSuggestions();
         }
       });
+
+      // Mencegah touchpad swipe horizontal memicu browser back/next navigation
+      document.addEventListener("wheel", function(e) {
+        var matrixContainer = e.target.closest('.table-responsive-matrix, .table-responsive');
+        if (matrixContainer && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+          var scrollLeft = matrixContainer.scrollLeft;
+          var maxScrollLeft = matrixContainer.scrollWidth - matrixContainer.clientWidth;
+          if ((scrollLeft <= 0 && e.deltaX < 0) || (scrollLeft >= maxScrollLeft - 1 && e.deltaX > 0)) {
+            e.preventDefault();
+          }
+        }
+      }, { passive: false });
     });
 
     function initDropdownOptions() {

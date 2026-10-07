@@ -778,14 +778,14 @@ function getDataPembayaranMatrix(pin, targetTahun) {
           totalMonths = (12 - bDari + 1) + bSampai;
         }
 
-        var nominalPerBulan = totalMonths > 0 ? (nominalTrx / totalMonths) : 0;
-
         var curY = startYear;
         var curM = startMonth;
         for (var step = 0; step < totalMonths; step++) {
           if (curY === selTahun && curM >= 1 && curM <= 12) {
-            // Gunakan nilai transaksi riil jika ada
-            memberMap[idAng].bulanMap[curM] = nominalPerBulan;
+            // Nilai isian bulan disesuaikan dengan pagu tarif di Master_Pagu untuk bulan/tahun tersebut
+            var pKey = selTahun + "_" + curM;
+            var monthPagu = Number(paguMap[pKey]) || 30000;
+            memberMap[idAng].bulanMap[curM] = monthPagu;
           }
           curM++;
           if (curM > 12) {
