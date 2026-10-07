@@ -755,7 +755,7 @@ function generateAndSaveKuitansiPDF(data) {
           body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 10mm 12mm 5mm 24mm;
+            padding: 11mm 12mm 5mm 24mm;
             width: 190mm;
             height: 100mm;
             box-sizing: border-box;
@@ -763,26 +763,26 @@ function generateAndSaveKuitansiPDF(data) {
             ${isKwitansiMode ? 'border: none;' : 'border: 2px solid #1F4E79;'}
           }
           .kw-row {
-            margin-bottom: 2mm;
+            margin-bottom: 0mm;
             line-height: 1.3;
           }
           .kw-no {
             font-size: 11pt;
-            margin-top: 1mm;
-            margin-bottom: 3.5mm;
+            margin-top: 0mm;
+            margin-bottom: 6mm;
           }
           .kw-diterima {
             font-size: 11pt;
-            margin-bottom: 3mm;
+            margin-bottom: 5.5mm;
           }
           .kw-uang {
             font-size: 11pt;
-            margin-bottom: 3.5mm;
+            margin-bottom: 5.5mm;
           }
           .kw-guna {
             font-size: 10.5pt;
-            min-height: 14mm;
-            margin-bottom: 1mm;
+            min-height: 12mm;
+            margin-bottom: 4mm;
           }
           .kw-label {
             display: ${isKwitansiMode ? 'none' : 'inline-block'};
@@ -796,8 +796,8 @@ function generateAndSaveKuitansiPDF(data) {
           }
           .kw-tanggal {
             font-size: 11pt;
-            margin-top: 0.5mm;
-            margin-bottom: 4mm;
+            margin-top: 0mm;
+            margin-bottom: 3.5mm;
             text-align: right;
             padding-right: 15mm;
           }
@@ -814,6 +814,7 @@ function generateAndSaveKuitansiPDF(data) {
             font-size: 13pt;
             font-weight: bold;
             width: 55%;
+            margin-top: 2mm;
           }
           .kw-ttd {
             display: table-cell;
@@ -821,7 +822,7 @@ function generateAndSaveKuitansiPDF(data) {
             text-align: center;
             width: 45%;
             padding-right: 5mm;
-            padding-top: 2mm;
+            padding-top: 0mm;
           }
         </style>
       </head>
