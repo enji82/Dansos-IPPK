@@ -760,25 +760,25 @@
               <!-- No Kuitansi -->
               <div class="kw-row kw-no">
                 <span class="kw-label kw-only-hvs">No.</span>
-                <span id="kwValNo" class="kw-val fw-bold">TRX-20261007-001</span>
+                <span id="kwValNo" class="kw-val kw-val-indent fw-bold">TRX-20261007-001</span>
               </div>
 
               <!-- Telah Diterima Dari -->
               <div class="kw-row kw-diterima">
                 <span class="kw-label kw-only-hvs">Telah diterima dari :</span>
-                <span id="kwValNamaNip" class="kw-val fw-bold fs-6">Ibu Ning Minarni - NIP: 19850112</span>
+                <span id="kwValNamaNip" class="kw-val kw-val-indent fw-bold fs-6">Ibu Ning Minarni - NIP: 19850112</span>
               </div>
 
               <!-- Uang Sebanyak -->
               <div class="kw-row kw-uang">
                 <span class="kw-label kw-only-hvs">Uang sebanyak :</span>
-                <span id="kwValTerbilangTeks" class="kw-val fst-italic">Sembilan puluh ribu rupiah</span>
+                <span id="kwValTerbilangTeks" class="kw-val kw-val-indent fst-italic">Sembilan puluh ribu rupiah</span>
               </div>
 
               <!-- Guna Membayar -->
               <div class="kw-row kw-guna">
                 <span class="kw-label kw-only-hvs">Guna membayar :</span>
-                <span id="kwValRincian" class="kw-val">iuran dansos pensiun bulan Januari s/d Maret 2026.</span>
+                <span id="kwValRincian" class="kw-val kw-val-indent">iuran dansos pensiun bulan Januari s/d Maret 2026.</span>
               </div>
 
               <!-- Tanggal & Lokasi -->
@@ -841,6 +841,10 @@
     }
     .kwitansi-box.print-mode-kwitansi .kw-only-hvs {
       display: none !important;
+    }
+    .kwitansi-box.print-mode-kwitansi .kw-val-indent {
+      display: inline-block !important;
+      margin-left: 42mm !important;
     }
 
     /* Position Layout Rows */
