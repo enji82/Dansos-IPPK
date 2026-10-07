@@ -16,6 +16,16 @@ const SHEET_SETOR = "Transaksi_Setor";
 const SHEET_PENGATURAN = "Pengaturan";
 
 /**
+ * FUNGSI OTORISASI PERIZINAN GOOGLE DRIVE & SPREADSHEET
+ * Jalankan fungsi ini sekali di Editor Apps Script jika memerlukan dialog izin.
+ */
+function dummyAuthorizeDriveScope() {
+  var folder = DriveApp.getFolderById("1fHDGNAMQFtmcOCl3oId-R7rF2seo25_g");
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  Logger.log("Drive & Spreadsheet Access Authorized: " + folder.getName() + " - " + ss.getName());
+}
+
+/**
  * FUNGSI PEMBANTU: Membuka Spreadsheet Secara Pasti & Aman
  */
 function getSS() {
