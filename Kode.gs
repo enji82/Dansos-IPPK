@@ -22,7 +22,10 @@ const SHEET_PENGATURAN = "Pengaturan";
 function dummyAuthorizeDriveScope() {
   var folder = DriveApp.getFolderById("1fHDGNAMQFtmcOCl3oId-R7rF2seo25_g");
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  Logger.log("Drive & Spreadsheet Access Authorized: " + folder.getName() + " - " + ss.getName());
+  var testBlob = Utilities.newBlob("test", "text/plain", "auth_test.txt");
+  var tempFile = folder.createFile(testBlob);
+  tempFile.setTrashed(true);
+  Logger.log("Drive Access Authorized Successfully: " + folder.getName() + " - " + ss.getName());
 }
 
 /**
