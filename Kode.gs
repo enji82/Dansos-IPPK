@@ -743,6 +743,20 @@ function generateAndSaveKuitansiPDF(data) {
 
     var filename = "Kuitansi_" + idTrx + "_" + nama.replace(/[^a-zA-Z0-9]/g, "_") + ".pdf";
 
+    // Helper memecah rincian teks ke 3 baris
+    var words = String(rincianTeks).split(" ");
+    var gunaLine1 = "", gunaLine2 = "", gunaLine3 = "";
+    for (var i = 0; i < words.length; i++) {
+      var word = words[i];
+      if ((gunaLine1 + " " + word).trim().length <= 48) {
+        gunaLine1 = (gunaLine1 + " " + word).trim();
+      } else if ((gunaLine2 + " " + word).trim().length <= 68) {
+        gunaLine2 = (gunaLine2 + " " + word).trim();
+      } else {
+        gunaLine3 = (gunaLine3 + " " + word).trim();
+      }
+    }
+
     var htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -772,11 +786,11 @@ function generateAndSaveKuitansiPDF(data) {
             font-weight: bold;
             font-size: 11pt;
           }
-          .kw-lbl-no       { top: 10mm; left: 45mm; }
+          .kw-lbl-no       { top: 11mm; left: 45mm; }
           .kw-lbl-diterima { top: 20mm; left: 45mm; }
-          .kw-lbl-uang     { top: 29mm; left: 45mm; }
-          .kw-lbl-guna     { top: 38mm; left: 45mm; }
-          .kw-lbl-terbilang { top: 78mm; left: 45mm; }
+          .kw-lbl-uang     { top: 28mm; left: 45mm; }
+          .kw-lbl-guna     { top: 36mm; left: 45mm; }
+          .kw-lbl-terbilang { top: 77mm; left: 45mm; }
 
           /* Field Values (Koordinat Presisi Absolut X, Y dalam mm) */
           .kw-pos-no {
@@ -802,13 +816,29 @@ function generateAndSaveKuitansiPDF(data) {
             font-size: 10.5pt;
             font-style: italic;
           }
-          .kw-pos-guna {
+          .kw-pos-guna1 {
             position: absolute;
             top: 36mm;
             left: 85mm;
             width: 97mm;
             font-size: 10.5pt;
-            line-height: 1.3;
+            white-space: nowrap;
+          }
+          .kw-pos-guna2 {
+            position: absolute;
+            top: 44mm;
+            left: 45mm;
+            width: 137mm;
+            font-size: 10.5pt;
+            white-space: nowrap;
+          }
+          .kw-pos-guna3 {
+            position: absolute;
+            top: 51mm;
+            left: 45mm;
+            width: 137mm;
+            font-size: 10.5pt;
+            white-space: nowrap;
           }
           .kw-pos-tanggal {
             position: absolute;
@@ -820,8 +850,8 @@ function generateAndSaveKuitansiPDF(data) {
           }
           .kw-pos-nominal {
             position: absolute;
-            top: 76mm;
-            left: ${isKwitansiMode ? '83mm' : '83mm'};
+            top: 77mm;
+            left: 83mm;
             font-size: 13pt;
             font-weight: bold;
             ${isKwitansiMode ? '' : 'border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 2px 10px;'}
@@ -849,7 +879,9 @@ function generateAndSaveKuitansiPDF(data) {
         <div class="kw-pos-no">${idTrx}</div>
         <div class="kw-pos-diterima">${nama} ${nip && nip !== '-' ? (' - NIP: ' + nip) : ''}</div>
         <div class="kw-pos-uang">${terbilangTeks}</div>
-        <div class="kw-pos-guna">${rincianTeks}</div>
+        <div class="kw-pos-guna1">${gunaLine1}</div>
+        <div class="kw-pos-guna2">${gunaLine2}</div>
+        <div class="kw-pos-guna3">${gunaLine3}</div>
         <div class="kw-pos-tanggal">Secang, ${tglFormatted}</div>
         <div class="kw-pos-nominal">Rp. ${Number(nominal).toLocaleString('id-ID')},-</div>
         <div class="kw-pos-ttd">( ${penandatangan} )</div>
