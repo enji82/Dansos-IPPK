@@ -614,24 +614,29 @@
         <div class="modal-body p-4 bg-light">
           <!-- Opsi Mode Cetak -->
           <div class="card p-3 mb-4 border-0 shadow-sm rounded-3 bg-white no-print">
-            <div class="row align-items-center">
-              <div class="col-md-6 mb-2 mb-md-0">
-                <label class="fw-bold text-navy mb-1"><i class="fa-solid fa-sliders me-1"></i> Pilih Mode Cetak Kertas:</label>
+            <div class="row align-items-center g-3">
+              <div class="col-md-5">
+                <label class="fw-bold text-navy mb-1"><i class="fa-solid fa-sliders me-1"></i> Mode Cetak Kertas Printer:</label>
                 <div class="btn-group w-100" role="group">
                   <input type="radio" class="btn-check" name="printMode" id="modeHVS" value="hvs" checked onclick="switchPrintMode('hvs')">
-                  <label class="btn btn-outline-primary fw-bold" for="modeHVS"><i class="fa-solid fa-file-lines me-1"></i> Mode HVS / PDF (Lengkap)</label>
+                  <label class="btn btn-outline-primary fw-bold" for="modeHVS"><i class="fa-solid fa-file-lines me-1"></i> Mode HVS</label>
 
                   <input type="radio" class="btn-check" name="printMode" id="modeKwitansi" value="kwitansi" onclick="switchPrintMode('kwitansi')">
-                  <label class="btn btn-outline-success fw-bold" for="modeKwitansi"><i class="fa-solid fa-stamp me-1"></i> Mode Kertas Kwitansi (Isian Saja)</label>
+                  <label class="btn btn-outline-success fw-bold" for="modeKwitansi"><i class="fa-solid fa-stamp me-1"></i> Mode Kertas Kwitansi</label>
                 </div>
               </div>
-              <div class="col-md-6 text-md-end">
-                <span class="badge bg-info text-dark p-2 mb-2 d-inline-block">
-                  <i class="fa-solid fa-ruler-combined me-1"></i> Ukuran Kertas: <strong>19 cm x 10 cm</strong>
-                </span>
-                <div>
-                  <button type="button" class="btn btn-navy px-4 fw-bold shadow-sm" onclick="triggerPrintKuitansi()">
-                    <i class="fa-solid fa-print me-1"></i> Cetak Kuitansi Now
+              <div class="col-md-4">
+                <label class="fw-bold text-navy mb-1"><i class="fa-solid fa-signature me-1"></i> Nama Penandatangan:</label>
+                <input type="text" id="kwInputPenandatangan" class="form-control fw-bold" value="Puji Purnomo" oninput="updatePenandatanganName(this.value)">
+              </div>
+              <div class="col-md-3 text-md-end">
+                <label class="d-none d-md-block mb-1">&nbsp;</label>
+                <div class="d-grid gap-2">
+                  <button type="button" class="btn btn-navy fw-bold shadow-sm" onclick="triggerPrintKuitansi()">
+                    <i class="fa-solid fa-print me-1"></i> Cetak Printer
+                  </button>
+                  <button type="button" id="btnSimpanPDF" class="btn btn-danger fw-bold shadow-sm" onclick="triggerSavePDF()">
+                    <i class="fa-solid fa-file-pdf me-1"></i> Cetak / Simpan PDF
                   </button>
                 </div>
               </div>
@@ -1936,6 +1941,8 @@
       }).getAdminRekapLaporan(currentAdminPin, thn);
     }
 
+    var currentKuitansiData = null;
+
     function printKuitansiFromRow(item) {
       showKuitansiModal({
         idTrx: item.idTrx,
@@ -1948,6 +1955,7 @@
     }
 
     function showKuitansiModal(data) {
+      currentKuitansiData = data;
       document.getElementById("kwValNo").textContent = data.idTrx;
       document.getElementById("kwValNamaNip").textContent = data.nama + (data.nip && data.nip !== "-" ? (" - NIP: " + data.nip) : "");
       document.getElementById("kwValTerbilangTeks").textContent = terbilang(data.nominal) + " rupiah";
@@ -1960,11 +1968,19 @@
       var tglFormatted = tglObj.getDate() + " " + namaBulanList[tglObj.getMonth() + 1] + " " + tglObj.getFullYear();
       document.getElementById("kwValTgl").textContent = tglFormatted;
 
+      var currentTtd = document.getElementById("kwInputPenandatangan").value.trim() || "Puji Purnomo";
+      document.getElementById("kwValTtdNama").textContent = "( " + currentTtd + " )";
+
       switchPrintMode('hvs');
       document.getElementById("modeHVS").checked = true;
 
       var modal = new bootstrap.Modal(document.getElementById('modalCetakKuitansi'));
       modal.show();
+    }
+
+    function updatePenandatanganName(val) {
+      var name = val.trim() || ".................................";
+      document.getElementById("kwValTtdNama").textContent = "( " + name + " )";
     }
 
     function switchPrintMode(mode) {
@@ -1978,6 +1994,58 @@
 
     function triggerPrintKuitansi() {
       window.print();
+    }
+
+    function triggerSavePDF() {
+      if (!currentKuitansiData) return;
+
+      var btn = document.getElementById("btnSimpanPDF");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Membuat PDF...';
+
+      var tglObj = currentKuitansiData.tgl ? new Date(currentKuitansiData.tgl) : new Date();
+      if (isNaN(tglObj.getTime())) tglObj = new Date();
+      var tglFormatted = tglObj.getDate() + " " + namaBulanList[tglObj.getMonth() + 1] + " " + tglObj.getFullYear();
+
+      var payload = {
+        idTrx: currentKuitansiData.idTrx,
+        nama: currentKuitansiData.nama,
+        nip: currentKuitansiData.nip,
+        nominal: currentKuitansiData.nominal,
+        terbilangTeks: terbilang(currentKuitansiData.nominal) + " rupiah",
+        rincianTeks: "iuran dansos pensiun " + currentKuitansiData.rincianBulan + ".",
+        tglFormatted: tglFormatted,
+        penandatangan: document.getElementById("kwInputPenandatangan").value.trim() || "Puji Purnomo"
+      };
+
+      google.script.run.withSuccessHandler(function(res) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-file-pdf me-1"></i> Cetak / Simpan PDF';
+
+        if (res.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'File PDF Berhasil Dibuat',
+            html: '<p class="mb-2">' + res.message + '</p><p class="small text-muted mb-0">Tersimpan di Google Drive Folder ID: <strong>1fHDGNAMQFtmcOCl3oId-R7rF2seo25_g</strong></p>',
+            showCancelButton: true,
+            confirmButtonColor: '#1F4E79',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fa-solid fa-download me-1"></i> Download PDF',
+            cancelButtonText: 'Tutup'
+          }).then(function(result) {
+            if (result.isConfirmed && res.downloadUrl) {
+              window.open(res.downloadUrl, '_blank');
+            }
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Membuat PDF',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
+        }
+      }).generateAndSaveKuitansiPDF(payload);
     }
 
     function terbilang(angka) {

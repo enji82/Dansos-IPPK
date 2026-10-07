@@ -615,3 +615,153 @@ function getNamaBulan(index) {
   var bulanMap = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
   return bulanMap[index] || "";
 }
+
+/**
+ * 11. GENERATE PDF KUITANSI (19cm x 10cm) & SIMPAN KE GOOGLE DRIVE FOLDER
+ */
+const KUITANSI_FOLDER_ID = "1fHDGNAMQFtmcOCl3oId-R7rF2seo25_g";
+
+function generateAndSaveKuitansiPDF(data) {
+  try {
+    var folder = DriveApp.getFolderById(KUITANSI_FOLDER_ID);
+    if (!folder) {
+      return { success: false, message: "Folder Google Drive penyimpan PDF tidak ditemukan!" };
+    }
+
+    var penandatangan = data.penandatangan || "Puji Purnomo";
+    var filename = "Kuitansi_" + data.idTrx + "_" + data.nama.replace(/[^a-zA-Z0-9]/g, "_") + ".pdf";
+
+    var htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          @page {
+            size: 190mm 100mm;
+            margin: 0;
+          }
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 8mm 12mm 6mm 18mm;
+            width: 190mm;
+            height: 100mm;
+            box-sizing: border-box;
+            color: #0f172a;
+            border: 2px solid #1F4E79;
+          }
+          .kw-row {
+            margin-bottom: 4mm;
+            line-height: 1.4;
+          }
+          .kw-no {
+            font-size: 12pt;
+            margin-bottom: 5mm;
+          }
+          .kw-diterima, .kw-uang, .kw-guna {
+            font-size: 11pt;
+            min-height: 8mm;
+          }
+          .kw-label {
+            display: inline-block;
+            width: 42mm;
+            color: #334155;
+            font-weight: bold;
+          }
+          .kw-val {
+            color: #000000;
+          }
+          .kw-tanggal {
+            font-size: 11pt;
+            margin-top: 3mm;
+            text-align: right;
+            padding-right: 15mm;
+          }
+          .kw-footer {
+            margin-top: 4mm;
+            display: table;
+            width: 100%;
+          }
+          .kw-terbilang-rp {
+            display: table-cell;
+            vertical-align: bottom;
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+            padding: 4px 12px;
+            font-size: 13pt;
+            font-weight: bold;
+            width: 55%;
+          }
+          .kw-ttd {
+            display: table-cell;
+            vertical-align: bottom;
+            text-align: center;
+            width: 45%;
+            padding-right: 5mm;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="kw-row kw-no">
+          <span class="kw-label">No.</span>
+          <span class="kw-val" style="font-weight: bold;">${data.idTrx}</span>
+        </div>
+
+        <div class="kw-row kw-diterima">
+          <span class="kw-label">Telah diterima dari :</span>
+          <span class="kw-val" style="font-weight: bold;">${data.nama} ${data.nip && data.nip !== '-' ? (' - NIP: ' + data.nip) : ''}</span>
+        </div>
+
+        <div class="kw-row kw-uang">
+          <span class="kw-label">Uang sebanyak :</span>
+          <span class="kw-val" style="font-style: italic;">${data.terbilangTeks}</span>
+        </div>
+
+        <div class="kw-row kw-guna">
+          <span class="kw-label">Guna membayar :</span>
+          <span class="kw-val">${data.rincianTeks}</span>
+        </div>
+
+        <div class="kw-row kw-tanggal">
+          <span class="kw-val">Secang, ${data.tglFormatted}</span>
+        </div>
+
+        <div class="kw-footer">
+          <div class="kw-terbilang-rp">
+            Terbilang Rp. ${Number(data.nominal).toLocaleString('id-ID')},-
+          </div>
+          <div class="kw-ttd">
+            <span class="kw-val" style="font-weight: bold; display: block;">( ${penandatangan} )</span>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    var htmlOutput = HtmlService.createHtmlOutput(htmlContent);
+    var pdfBlob = htmlOutput.getAs('application/pdf').setName(filename);
+    
+    // Cek apakah file sudah ada sebelumnya di folder
+    var existingFiles = folder.getFilesByName(filename);
+    while (existingFiles.hasNext()) {
+      existingFiles.next().setTrashed(true);
+    }
+
+    var file = folder.createFile(pdfBlob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    var downloadUrl = file.getDownloadUrl();
+    var viewUrl = file.getUrl();
+
+    return {
+      success: true,
+      message: "File PDF Kuitansi berhasil dibuat & disimpan!",
+      fileId: file.getId(),
+      fileName: filename,
+      downloadUrl: downloadUrl,
+      viewUrl: viewUrl
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal membuat PDF: " + err.message };
+  }
+}
