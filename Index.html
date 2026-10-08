@@ -292,7 +292,7 @@
                     </div>
                   </div>
 
-                  <div class="row text-center mb-3 g-3">
+                  <div class="row text-center mb-3 g-3" id="resStatusPembayaranRow">
                     <div class="col-md-6 border-end mb-3 mb-md-0">
                       <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.02em;">Status Pembayaran Terakhir</span>
                       <h5 class="text-success mt-2 mb-0 fw-bold" style="font-size: 1.25rem;" id="resLunas">Lunas s.d -</h5>
@@ -1959,11 +1959,13 @@
       if (document.getElementById("resNoHpVal")) document.getElementById("resNoHpVal").textContent = data.noHp || "-";
       if (document.getElementById("resAlamatVal")) document.getElementById("resAlamatVal").textContent = data.alamat || "-";
 
+      var statusText = data.statusStr || "Aktif";
+      var isWafat = (statusText === "Wafat");
+
       var badgeEl = document.getElementById("resStatusBadge");
       if (badgeEl) {
-        var statusText = data.statusStr || "Aktif";
         badgeEl.textContent = statusText;
-        if (statusText === "Wafat") {
+        if (isWafat) {
           badgeEl.className = "badge bg-dark text-white fw-semibold";
         } else if (statusText === "Mengundurkan Diri" || statusText === "Keluar") {
           badgeEl.className = "badge bg-danger text-white fw-semibold";
@@ -1972,6 +1974,17 @@
         } else {
           badgeEl.className = "badge bg-secondary text-white fw-semibold";
         }
+      }
+
+      var rowStatusEl = document.getElementById("resStatusPembayaranRow");
+      var rincianContainerEl = document.getElementById("resRincianContainer");
+
+      if (isWafat) {
+        if (rowStatusEl) rowStatusEl.classList.add("d-none");
+        if (rincianContainerEl) rincianContainerEl.classList.add("d-none");
+      } else {
+        if (rowStatusEl) rowStatusEl.classList.remove("d-none");
+        if (rincianContainerEl) rincianContainerEl.classList.remove("d-none");
       }
 
       document.getElementById("resLunas").textContent = "Lunas s.d " + data.lunasSampai;
