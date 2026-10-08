@@ -1172,3 +1172,251 @@ function getDataBelumSetor(pin) {
     return { success: false, message: "Error: " + err.toString() };
   }
 }
+
+/**
+ * REKAP DATA ANGGOTA UNTUK INPUT SETORAN KAS
+ * Menampilkan seluruh anggota beserta detail iuran terbayar yang belum disetor dan status setor terakhir.
+ */
+function getDataInputSetor(pin) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
+    if (!sheetAnggota) return { success: false, message: "Sheet Master_Anggota tidak ditemukan!" };
+
+    var paguMap = getMatrixPaguMap();
+    var dataA = sheetAnggota.getDataRange().getValues();
+    var resultList = [];
+    var totalSeluruhBelumSetor = 0;
+    var totalAnggotaBelumSetor = 0;
+
+    for (var i = 1; i < dataA.length; i++) {
+      var row = dataA[i];
+      var id = String(row[0]);
+      if (!id) continue;
+
+      var nama = row[1] || "-";
+      var nip = row[2] ? String(row[2]) : "-";
+
+      var bayarBln = Number(row[8]) || 0;
+      var bayarThn = Number(row[9]) || 0;
+      var setorBln = Number(row[10]) || 0;
+      var setorThn = Number(row[11]) || 0;
+
+      var bayarVal = bayarThn * 12 + bayarBln;
+      var setorVal = (setorThn > 0 && setorBln > 0) ? (setorThn * 12 + setorBln) : 0;
+
+      var lastPaidStr = (bayarThn > 0 && bayarBln > 0) ? (getNamaBulan(bayarBln) + " " + bayarThn) : "Belum Ada";
+      var lastSetorStr = (setorThn > 0 && setorBln > 0) ? (getNamaBulan(setorBln) + " " + setorThn) : "Belum Ada";
+
+      var totalIuran = 0;
+      var jumlahBulan = 0;
+      var bulanAwalStr = "-";
+      var bulanAkhirStr = "-";
+      var detailBulanBelumSetor = [];
+
+      if (bayarVal > 0 && setorVal < bayarVal) {
+        // Tentukan bulan awal (setor_terakhir + 1 bulan)
+        var startBln = 1;
+        var startThn = bayarThn;
+
+        if (setorVal > 0) {
+          startBln = setorBln + 1;
+          startThn = setorThn;
+          if (startBln > 12) {
+            startBln = 1;
+            startThn = setorThn + 1;
+          }
+        } else {
+          var paguYears = Object.keys(paguMap).map(function(k) { return parseInt(k.split("_")[0]); }).filter(Boolean);
+          startThn = paguYears.length > 0 ? Math.min.apply(null, paguYears) : bayarThn;
+          startBln = 1;
+        }
+
+        var endThn = bayarThn;
+        var endBln = bayarBln;
+
+        var currY = startThn;
+        var currM = startBln;
+
+        while (currY < endThn || (currY === endThn && currM <= endBln)) {
+          var key = currY + "_" + currM;
+          var paguNominal = Number(paguMap[key]) || 30000;
+
+          totalIuran += paguNominal;
+          jumlahBulan++;
+
+          if (jumlahBulan === 1) {
+            bulanAwalStr = getNamaBulan(currM) + " " + currY;
+          }
+          bulanAkhirStr = getNamaBulan(currM) + " " + currY;
+
+          detailBulanBelumSetor.push({
+            bulan: currM,
+            tahun: currY,
+            namaBulan: getNamaBulan(currM),
+            label: getNamaBulan(currM) + " " + currY,
+            jumlahBulanKe: jumlahBulan,
+            subtotal: totalIuran,
+            nominal: paguNominal
+          });
+
+          currM++;
+          if (currM > 12) {
+            currM = 1;
+            currY++;
+          }
+        }
+      }
+
+      if (jumlahBulan > 0) {
+        totalSeluruhBelumSetor += totalIuran;
+        totalAnggotaBelumSetor++;
+      }
+
+      resultList.push({
+        id: id,
+        nama: nama,
+        nip: nip,
+        bayarBln: bayarBln,
+        bayarThn: bayarThn,
+        setorBln: setorBln,
+        setorThn: setorThn,
+        lastPaidStr: lastPaidStr,
+        lastSetorStr: lastSetorStr,
+        bulanAwal: bulanAwalStr,
+        bulanAkhir: bulanAkhirStr,
+        jumlahBulan: jumlahBulan,
+        jumlahIuran: totalIuran,
+        isLunasSetor: (setorVal >= bayarVal && bayarVal > 0),
+        detailBulanBelumSetor: detailBulanBelumSetor
+      });
+    }
+
+    return {
+      success: true,
+      data: resultList,
+      totalAnggota: resultList.length,
+      totalAnggotaBelumSetor: totalAnggotaBelumSetor,
+      totalSeluruhBelumSetor: totalSeluruhBelumSetor
+    };
+  } catch (err) {
+    return { success: false, message: "Error: " + err.toString() };
+  }
+}
+
+/**
+ * PROSES SETOR KAS ANGGOTA (Setor Seluruhnya / Setor Bulanan)
+ */
+function processSetorKasAnggota(pin, payload) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
+    var sheetSetor = ss.getSheetByName(SHEET_SETOR);
+    if (!sheetAnggota || !sheetSetor) {
+      return { success: false, message: "Sheet Master_Anggota atau Transaksi_Setor tidak ditemukan!" };
+    }
+
+    var idAnggota = payload.idAnggota;
+    var targetBln = Number(payload.targetBln);
+    var targetThn = Number(payload.targetThn);
+    var nominalDisetor = Number(payload.nominal) || 0;
+    var bDari = Number(payload.bDari) || targetBln;
+    var bSampai = Number(payload.bSampai) || targetBln;
+    var thnDari = Number(payload.thnDari) || targetThn;
+    var thnSampai = Number(payload.thnSampai) || targetThn;
+    var penerima = payload.penerima || "Bendahara";
+    var catatan = payload.catatan || "Setoran Kas Anggota";
+
+    var dataAnggota = sheetAnggota.getDataRange().getValues();
+    var namaAnggota = "";
+    var targetRowIdx = -1;
+
+    for (var i = 1; i < dataAnggota.length; i++) {
+      if (String(dataAnggota[i][0]) === String(idAnggota)) {
+        namaAnggota = dataAnggota[i][1];
+        targetRowIdx = i + 1;
+        break;
+      }
+    }
+
+    if (targetRowIdx === -1) {
+      return { success: false, message: "Data Anggota tidak ditemukan!" };
+    }
+
+    // Catat ke Transaksi_Setor
+    var tgl = new Date();
+    var tglStr = Utilities.formatDate(tgl, ss.getSpreadsheetTimeZone(), "yyyy-MM-dd");
+    var idSetor = "STR-" + Utilities.formatDate(tgl, ss.getSpreadsheetTimeZone(), "yyyyMMdd") + "-" + Math.floor(100 + Math.random() * 900);
+
+    var periodeStr = (thnDari === thnSampai && bDari === bSampai)
+      ? (getNamaBulan(bDari) + " " + thnDari)
+      : (getNamaBulan(bDari) + " " + thnDari + " s.d. " + getNamaBulan(bSampai) + " " + thnSampai);
+
+    sheetSetor.appendRow([
+      idSetor, tglStr, idAnggota, namaAnggota, nominalDisetor,
+      thnSampai, bDari, bSampai, penerima, catatan + " [" + periodeStr + "]"
+    ]);
+
+    // Update Master_Anggota: Setor Terakhir Bulan (kolom 11), Setor Terakhir Tahun (kolom 12)
+    sheetAnggota.getRange(targetRowIdx, 11, 1, 2).setValues([[targetBln, targetThn]]);
+
+    return {
+      success: true,
+      message: "Setoran kas berhasil disimpan untuk " + namaAnggota + " (" + periodeStr + ")!"
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal memproses setoran: " + err.toString() };
+  }
+}
+
+/**
+ * PROSES BATAL SETOR KAS ANGGOTA (MENGEMBALIKAN POSISI SETOR TERAKHIR)
+ */
+function batalSetorKasAnggota(pin, payload) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
+    if (!sheetAnggota) return { success: false, message: "Sheet Master_Anggota tidak ditemukan!" };
+
+    var idAnggota = payload.idAnggota;
+    var targetBln = Number(payload.targetBln) || 0;
+    var targetThn = Number(payload.targetThn) || 0;
+
+    var dataAnggota = sheetAnggota.getDataRange().getValues();
+    var namaAnggota = "";
+    var targetRowIdx = -1;
+
+    for (var i = 1; i < dataAnggota.length; i++) {
+      if (String(dataAnggota[i][0]) === String(idAnggota)) {
+        namaAnggota = dataAnggota[i][1];
+        targetRowIdx = i + 1;
+        break;
+      }
+    }
+
+    if (targetRowIdx === -1) {
+      return { success: false, message: "Data Anggota tidak ditemukan!" };
+    }
+
+    // Update Master_Anggota: Setor Terakhir Bulan (kolom 11), Setor Terakhir Tahun (kolom 12)
+    sheetAnggota.getRange(targetRowIdx, 11, 1, 2).setValues([[targetBln, targetThn]]);
+
+    var statusStr = (targetThn > 0 && targetBln > 0) ? (getNamaBulan(targetBln) + " " + targetThn) : "Belum Ada Setoran";
+
+    return {
+      success: true,
+      message: "Setoran kas anggota " + namaAnggota + " berhasil dikembalikan ke posisi: " + statusStr
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal membatalkan setoran: " + err.toString() };
+  }
+}
