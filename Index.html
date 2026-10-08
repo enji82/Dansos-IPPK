@@ -173,7 +173,7 @@
       border-right: 2px solid #cbd5e1 !important;
       box-shadow: 3px 2px 6px -2px rgba(0, 0, 0, 0.15);
     }
-    /* Sticky Header & Columns for Data Anggota Table (Sama Seperti Data Pembayaran) */
+    /* Sticky Header & Columns for Data Anggota Table */
     .table-responsive-anggota {
       max-height: 70vh;
       overflow-y: auto;
@@ -191,29 +191,9 @@
       color: #334155 !important;
       box-shadow: 0 2px 3px -1px rgba(0, 0, 0, 0.1);
     }
-    .table-responsive-anggota .sticky-anggota-id {
-      position: sticky;
-      left: 0;
-      z-index: 2;
-      background-color: #ffffff !important;
-      width: 55px !important;
-      min-width: 55px !important;
-      max-width: 55px !important;
-    }
-    .table-responsive-anggota th.sticky-anggota-id {
-      position: sticky;
-      top: 0;
-      left: 0;
-      z-index: 6;
-      background-color: #f8fafc !important;
-      color: #334155 !important;
-      width: 55px !important;
-      min-width: 55px !important;
-      max-width: 55px !important;
-    }
     .table-responsive-anggota .sticky-anggota-nama {
       position: sticky;
-      left: 55px;
+      left: 0;
       z-index: 2;
       background-color: #ffffff !important;
       border-right: 2px solid #cbd5e1 !important;
@@ -223,7 +203,7 @@
     .table-responsive-anggota th.sticky-anggota-nama {
       position: sticky;
       top: 0;
-      left: 55px;
+      left: 0;
       z-index: 6;
       background-color: #f8fafc !important;
       color: #334155 !important;
@@ -602,7 +582,6 @@
                 <table class="table table-bordered table-hover align-middle mb-0 text-nowrap" id="tableDataAnggota" style="font-size: 0.88rem;">
                   <thead class="table-light align-middle">
                     <tr>
-                      <th class="sticky-anggota-id text-center" style="width: 55px;">ID</th>
                       <th class="sticky-anggota-nama">NAMA ANGGOTA</th>
                       <th>NIP</th>
                       <th>TANGGAL LAHIR</th>
@@ -2579,14 +2558,14 @@
 
     function loadTableAdminAnggota() {
       var tbody = document.getElementById("tbodyAnggota");
-      tbody.innerHTML = '<tr><td colspan="12" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm me-2"></div>Memuat data anggota...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="11" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm me-2"></div>Memuat data anggota...</td></tr>';
 
       google.script.run.withSuccessHandler(function(res) {
         if (res.success) {
           globalAnggotaList = res.data;
           filterTableAnggota();
         } else {
-          tbody.innerHTML = '<tr><td colspan="12" class="text-center text-danger py-3">' + res.message + '</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="11" class="text-center text-danger py-3">' + res.message + '</td></tr>';
         }
       }).getAdminDataAnggota(currentAdminPin);
     }
@@ -2596,7 +2575,7 @@
       tbody.innerHTML = "";
 
       if (!list || list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="12" class="text-center text-muted py-3">Tidak ada data anggota yang sesuai filter.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="text-center text-muted py-3">Tidak ada data anggota yang sesuai filter.</td></tr>';
         return;
       }
 
@@ -2606,7 +2585,6 @@
         var statusInfo = computeAnggotaStatusInfo(a);
         
         tr.innerHTML = 
-          '<td class="sticky-anggota-id"><span class="badge bg-secondary">' + a.id + '</span></td>' +
           '<td class="sticky-anggota-nama"><strong class="text-navy">' + escapeQuotes(a.nama) + '</strong></td>' +
           '<td>' + (a.nip || '-') + '</td>' +
           '<td>' + (a.tglLahir || '-') + '</td>' +
