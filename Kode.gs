@@ -330,19 +330,166 @@ function getAllAnggota() {
   
   for (var i = 1; i < data.length; i++) {
     if (data[i][0]) {
+      var tglLahirVal = "";
+      if (data[i][3]) {
+        if (data[i][3] instanceof Date) {
+          tglLahirVal = Utilities.formatDate(data[i][3], ss.getSpreadsheetTimeZone(), "yyyy-MM-dd");
+        } else {
+          tglLahirVal = String(data[i][3]);
+        }
+      }
+
+      var tmtVal = "";
+      if (data[i][5]) {
+        if (data[i][5] instanceof Date) {
+          tmtVal = Utilities.formatDate(data[i][5], ss.getSpreadsheetTimeZone(), "yyyy-MM-dd");
+        } else {
+          tmtVal = String(data[i][5]);
+        }
+      }
+
       result.push({
         id: data[i][0],
         nama: data[i][1],
-        nip: data[i][2],
+        nip: data[i][2] ? String(data[i][2]) : "",
+        tglLahir: tglLahirVal,
+        alamat: data[i][4] ? String(data[i][4]) : "",
+        tmt: tmtVal,
+        noHp: data[i][6] ? String(data[i][6]) : "",
         saldoDeposit: Number(data[i][7]) || 0,
         bayarBln: Number(data[i][8]) || 0,
         bayarThn: Number(data[i][9]) || 0,
         setorBln: Number(data[i][10]) || 0,
-        setorThn: Number(data[i][11]) || 0
+        setorThn: Number(data[i][11]) || 0,
+        statusOverride: data[i][12] ? String(data[i][12]).trim() : "",
+        noKode: data[i][13] ? String(data[i][13]) : ""
       });
     }
   }
   return result;
+}
+
+/**
+  * FUNGSI SIMPAN ANGGOTA BARU (CREATE)
+  */
+function simpanAnggotaBaru(form) {
+  try {
+    var authCheck = verifyAdminPin(form ? form.adminPin : "");
+    if (!authCheck.success) {
+      return { success: false, message: "Akses Ditolak: PIN Admin tidak valid!" };
+    }
+
+    var ss = getSS();
+    var sheet = ss.getSheetByName(SHEET_ANGGOTA);
+    if (!sheet) return { success: false, message: "Sheet Master_Anggota tidak ditemukan!" };
+
+    var data = sheet.getDataRange().getValues();
+    var maxId = 0;
+    for (var i = 1; i < data.length; i++) {
+      var valId = parseInt(data[i][0], 10);
+      if (!isNaN(valId) && valId > maxId) maxId = valId;
+    }
+    var newId = maxId + 1;
+
+    // Col A (0): ID, B (1): Nama, C (2): NIP, D (3): Tgl Lahir, E (4): Alamat, F (5): TMT, G (6): No HP,
+    // H (7): Saldo (0), I (8): BayarBln (0), J (9): BayarThn (0), K (10): SetorBln (0), L (11): SetorThn (0),
+    // M (12): Status Override, N (13): No Kode
+    sheet.appendRow([
+      newId,
+      form.nama || "",
+      form.nip || "",
+      form.tglLahir || "",
+      form.alamat || "",
+      form.tmt || "",
+      form.noHp || "",
+      0, 0, 0, 0, 0,
+      form.statusOverride || "",
+      form.noKode || ""
+    ]);
+
+    return { success: true, message: "Anggota baru berhasil ditambahkan! (ID: " + newId + ")" };
+  } catch (err) {
+    return { success: false, message: "Gagal menyimpan anggota: " + err.message };
+  }
+}
+
+/**
+  * FUNGSI UPDATE ANGGOTA (UPDATE)
+  */
+function updateAnggota(form) {
+  try {
+    var authCheck = verifyAdminPin(form ? form.adminPin : "");
+    if (!authCheck.success) {
+      return { success: false, message: "Akses Ditolak: PIN Admin tidak valid!" };
+    }
+
+    var ss = getSS();
+    var sheet = ss.getSheetByName(SHEET_ANGGOTA);
+    if (!sheet) return { success: false, message: "Sheet Master_Anggota tidak ditemukan!" };
+
+    var data = sheet.getDataRange().getValues();
+    var targetRow = -1;
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(form.id)) {
+        targetRow = i + 1;
+        break;
+      }
+    }
+
+    if (targetRow === -1) {
+      return { success: false, message: "Data Anggota tidak ditemukan!" };
+    }
+
+    // Update Kolom B..G (Index 2..7 di spreadsheet)
+    sheet.getRange(targetRow, 2).setValue(form.nama || "");
+    sheet.getRange(targetRow, 3).setValue(form.nip || "");
+    sheet.getRange(targetRow, 4).setValue(form.tglLahir || "");
+    sheet.getRange(targetRow, 5).setValue(form.alamat || "");
+    sheet.getRange(targetRow, 6).setValue(form.tmt || "");
+    sheet.getRange(targetRow, 7).setValue(form.noHp || "");
+
+    // Update Kolom M (13): Status Override, Kolom N (14): No Kode
+    sheet.getRange(targetRow, 13).setValue(form.statusOverride || "");
+    sheet.getRange(targetRow, 14).setValue(form.noKode || "");
+
+    return { success: true, message: "Data Anggota berhasil diperbarui!" };
+  } catch (err) {
+    return { success: false, message: "Gagal memperbarui data: " + err.message };
+  }
+}
+
+/**
+  * FUNGSI HAPUS ANGGOTA (DELETE)
+  */
+function hapusAnggota(pin, idAnggota) {
+  try {
+    var authCheck = verifyAdminPin(pin);
+    if (!authCheck.success) {
+      return { success: false, message: "Akses Ditolak: PIN Admin tidak valid!" };
+    }
+
+    var ss = getSS();
+    var sheet = ss.getSheetByName(SHEET_ANGGOTA);
+    if (!sheet) return { success: false, message: "Sheet Master_Anggota tidak ditemukan!" };
+
+    var data = sheet.getDataRange().getValues();
+    var targetRow = -1;
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(idAnggota)) {
+        targetRow = i + 1;
+        break;
+      }
+    }
+
+    if (targetRow === -1) {
+      return { success: false, message: "Data Anggota tidak ditemukan!" };
+    }
+
+    sheet.deleteRow(targetRow);
+    return { success: true, message: "Anggota ID " + idAnggota + " berhasil dihapus!" };
+  } catch (err) {
+    return { success: false, message: "Gagal menghapus anggota: " + err.message };
+  }
 }
 
 /**

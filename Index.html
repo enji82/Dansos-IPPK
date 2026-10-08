@@ -533,23 +533,45 @@
                 </button>
               </div>
 
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <input type="text" id="filterAnggotaInput" class="form-control" placeholder="Cari Anggota dalam tabel..." oninput="filterTableAnggota()">
+              <div class="row g-2 mb-3 align-items-center">
+                <div class="col-md-5">
+                  <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                    <input type="text" id="filterAnggotaInput" class="form-control border-start-0 ps-0" placeholder="Cari Nama, NIP, Kode, Alamat..." oninput="filterTableAnggota()">
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <select id="filterAnggotaStatus" class="form-select fw-semibold" onchange="handleFilterStatusChange()">
+                    <option value="semua">Semua Status (Aktif & Tidak Aktif)</option>
+                    <option value="aktif" selected>Status: Aktif (2025 & 2026)</option>
+                    <option value="tidak_aktif">Status: Tidak Aktif</option>
+                  </select>
+                </div>
+                <div class="col-md-4 d-none" id="wrapFilterKategori">
+                  <select id="filterAnggotaKategori" class="form-select fw-semibold border-warning bg-warning bg-opacity-10 text-dark" onchange="filterTableAnggota()">
+                    <option value="semua">Semua Kategori Tidak Aktif</option>
+                    <option value="Wafat">Wafat</option>
+                    <option value="Mengundurkan Diri">Mengundurkan Diri / Keluar</option>
+                  </select>
                 </div>
               </div>
 
               <div class="table-responsive rounded-3 border shadow-sm">
-                <table class="table table-hover align-middle mb-0" id="tableDataAnggota">
-                  <thead class="table-dark bg-navy">
+                <table class="table table-hover align-middle mb-0" id="tableDataAnggota" style="font-size: 0.88rem;">
+                  <thead class="table-dark bg-navy text-nowrap">
                     <tr>
                       <th>ID</th>
-                      <th>Nama Anggota</th>
+                      <th>NAMA ANGGOTA</th>
                       <th>NIP</th>
-                      <th>Bayar Iuran s.d</th>
-                      <th>Disetor s.d</th>
-                      <th>Saldo Deposit</th>
-                      <th class="text-center">Aksi</th>
+                      <th>TANGGAL LAHIR</th>
+                      <th>NO. KODE</th>
+                      <th>TMT PENSIUN</th>
+                      <th>NO. HP</th>
+                      <th>ALAMAT</th>
+                      <th>IURAN TERAKHIR</th>
+                      <th>SALDO DEPOSIT</th>
+                      <th>STATUS</th>
+                      <th class="text-center">AKSI</th>
                     </tr>
                   </thead>
                   <tbody id="tbodyAnggota">
@@ -865,39 +887,119 @@
 
   <!-- MODAL TAMBAH ANGGOTA BARU -->
   <div class="modal fade" id="tambahAnggotaModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-navy text-white" style="background-color: #1F4E79;">
-          <h5 class="modal-title"><i class="fa-solid fa-user-plus me-2"></i> Tambah Anggota Baru</h5>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-navy text-white">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-plus me-2"></i> Tambah Anggota Baru</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <form id="formTambahAnggota" onsubmit="submitFormTambahAnggota(event)">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label fw-bold">Nama Lengkap</label>
-              <input type="text" id="newNama" class="form-control" placeholder="Contoh: Drs. H. Ahmad Sudrajat" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">NIP / ID Pensiun</label>
-              <input type="text" id="newNip" class="form-control" placeholder="Contoh: 19650412..." required>
-            </div>
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label fw-bold">Jenis Kelamin</label>
-                <select id="newGender" class="form-select">
-                  <option value="L">Laki-laki (L)</option>
-                  <option value="P">Perempuan (P)</option>
+          <div class="modal-body p-4">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-navy">Nama Lengkap <span class="text-danger">*</span></label>
+                <input type="text" id="newNama" class="form-control" placeholder="Contoh: Drs. H. Ahmad Sudrajat" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-navy">NIP / ID Pensiun</label>
+                <input type="text" id="newNip" class="form-control" placeholder="Contoh: 19650412...">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-navy">No. Kode (No. Kartu)</label>
+                <input type="text" id="newNoKode" class="form-control" placeholder="Contoh: 01.002">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-navy">Tanggal Lahir</label>
+                <input type="date" id="newTglLahir" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-navy">TMT Pensiun</label>
+                <input type="date" id="newTmt" class="form-control">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-navy">No. HP / WA</label>
+                <input type="text" id="newNoHp" class="form-control" placeholder="Contoh: 08123456789">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-navy">Status Anggota</label>
+                <select id="newStatusOverride" class="form-select">
+                  <option value="">Otomatis (Berdasarkan Pembayaran Iuran)</option>
+                  <option value="Wafat">Wafat</option>
+                  <option value="Mengundurkan Diri">Mengundurkan Diri / Keluar</option>
                 </select>
               </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label fw-bold">No. Telepon / WA</label>
-                <input type="text" id="newNoHp" class="form-control" placeholder="0812...">
+              <div class="col-12">
+                <label class="form-label fw-bold small text-navy">Alamat Lengkap</label>
+                <textarea id="newAlamat" class="form-control" rows="2" placeholder="Contoh: Jl. Ahmad Yani No. 45, Bandung"></textarea>
               </div>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-            <button type="submit" class="btn btn-navy" id="btnSimpanAnggotaNew">Simpan Anggota</button>
+          <div class="modal-footer bg-light px-4 py-3">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-navy rounded-pill px-4 fw-bold shadow-sm" id="btnSimpanAnggotaNew">
+              <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Anggota
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT ANGGOTA -->
+  <div class="modal fade" id="editAnggotaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-navy text-white">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-pen me-2"></i> Edit Data Anggota</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="formEditAnggota" onsubmit="submitFormEditAnggota(event)">
+          <input type="hidden" id="editId">
+          <div class="modal-body p-4">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-navy">Nama Lengkap <span class="text-danger">*</span></label>
+                <input type="text" id="editNama" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-navy">NIP / ID Pensiun</label>
+                <input type="text" id="editNip" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-navy">No. Kode (No. Kartu)</label>
+                <input type="text" id="editNoKode" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-navy">Tanggal Lahir</label>
+                <input type="date" id="editTglLahir" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-navy">TMT Pensiun</label>
+                <input type="date" id="editTmt" class="form-control">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-navy">No. HP / WA</label>
+                <input type="text" id="editNoHp" class="form-control">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-navy">Status Khusus / Override</label>
+                <select id="editStatusOverride" class="form-select border-primary">
+                  <option value="">Otomatis (Berdasarkan Pembayaran Iuran)</option>
+                  <option value="Wafat">Wafat</option>
+                  <option value="Mengundurkan Diri">Mengundurkan Diri / Keluar</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-bold small text-navy">Alamat Lengkap</label>
+                <textarea id="editAlamat" class="form-control" rows="2"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer bg-light px-4 py-3">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-navy rounded-pill px-4 fw-bold shadow-sm" id="btnSimpanAnggotaEdit">
+              <i class="fa-solid fa-floppy-disk me-1"></i> Update Data
+            </button>
           </div>
         </form>
       </div>
@@ -2356,16 +2458,101 @@
     }
 
     // MENU 4: DATA ANGGOTA ADMIN
+    function computeAnggotaStatusInfo(a) {
+      // Priority 1: Manual Override
+      if (a.statusOverride === "Wafat") {
+        return {
+          label: "Wafat",
+          badgeClass: "bg-dark text-white",
+          category: "Wafat",
+          isAktif: false
+        };
+      }
+      if (a.statusOverride === "Mengundurkan Diri" || a.statusOverride === "Keluar") {
+        return {
+          label: "Mengundurkan Diri",
+          badgeClass: "bg-danger text-white",
+          category: "Mengundurkan Diri",
+          isAktif: false
+        };
+      }
+
+      // Priority 2: Automatic by Last Payment Year
+      var curYear = 2026;
+      var lastYear = 2025;
+      var bayarThn = Number(a.bayarThn) || 0;
+
+      if (bayarThn >= curYear) {
+        return {
+          label: "Aktif",
+          badgeClass: "bg-success text-white",
+          category: "Aktif",
+          isAktif: true
+        };
+      } else if (bayarThn === lastYear) {
+        return {
+          label: "Aktif 2025",
+          badgeClass: "bg-success text-white opacity-75",
+          category: "Aktif 2025",
+          isAktif: true
+        };
+      } else if (bayarThn > 0) {
+        return {
+          label: "Aktif " + bayarThn,
+          badgeClass: "bg-warning text-dark",
+          category: "Aktif " + bayarThn,
+          isAktif: false
+        };
+      } else {
+        return {
+          label: "Belum Bayar",
+          badgeClass: "bg-secondary text-white",
+          category: "Belum Bayar",
+          isAktif: false
+        };
+      }
+    }
+
+    function handleFilterStatusChange() {
+      var statusVal = document.getElementById("filterAnggotaStatus").value;
+      var wrapKat = document.getElementById("wrapFilterKategori");
+      var selKat = document.getElementById("filterAnggotaKategori");
+
+      if (statusVal === "tidak_aktif") {
+        wrapKat.classList.remove("d-none");
+        
+        // Dynamically build Kategori options based on loaded dataset
+        var setKategori = new Set(["Wafat", "Mengundurkan Diri"]);
+        (globalAnggotaList || []).forEach(function(a) {
+          var info = computeAnggotaStatusInfo(a);
+          if (!info.isAktif) {
+            setKategori.add(info.category);
+          }
+        });
+
+        var htmlKat = '<option value="semua">Semua Kategori Tidak Aktif</option>';
+        setKategori.forEach(function(kat) {
+          if (kat) {
+            htmlKat += '<option value="' + kat + '">' + kat + '</option>';
+          }
+        });
+        selKat.innerHTML = htmlKat;
+      } else {
+        wrapKat.classList.add("d-none");
+      }
+      filterTableAnggota();
+    }
+
     function loadTableAdminAnggota() {
       var tbody = document.getElementById("tbodyAnggota");
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm me-2"></div>Memuat data anggota...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="12" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm me-2"></div>Memuat data anggota...</td></tr>';
 
       google.script.run.withSuccessHandler(function(res) {
         if (res.success) {
           globalAnggotaList = res.data;
-          renderTableAnggota(res.data);
+          filterTableAnggota();
         } else {
-          tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-3">' + res.message + '</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="12" class="text-center text-danger py-3">' + res.message + '</td></tr>';
         }
       }).getAdminDataAnggota(currentAdminPin);
     }
@@ -2375,35 +2562,66 @@
       tbody.innerHTML = "";
 
       if (!list || list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">Belum ada data anggota.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12" class="text-center text-muted py-3">Tidak ada data anggota yang sesuai filter.</td></tr>';
         return;
       }
 
       list.forEach(function(a) {
         var tr = document.createElement("tr");
         var bayarStr = (a.bayarBln > 0 && a.bayarThn > 0) ? (namaBulanList[a.bayarBln] + " " + a.bayarThn) : "Belum Ada";
-        var setorStr = (a.setorBln > 0 && a.setorThn > 0) ? (namaBulanList[a.setorBln] + " " + a.setorThn) : "Belum Ada";
+        var statusInfo = computeAnggotaStatusInfo(a);
         
         tr.innerHTML = 
           '<td><span class="badge bg-secondary">' + a.id + '</span></td>' +
-          '<td><strong class="text-dark">' + a.nama + '</strong></td>' +
+          '<td><strong class="text-navy">' + escapeQuotes(a.nama) + '</strong></td>' +
           '<td>' + (a.nip || '-') + '</td>' +
+          '<td>' + (a.tglLahir || '-') + '</td>' +
+          '<td><span class="badge bg-light text-dark border">' + (a.noKode || '-') + '</span></td>' +
+          '<td>' + (a.tmt || '-') + '</td>' +
+          '<td>' + (a.noHp || '-') + '</td>' +
+          '<td><span class="small text-muted">' + (a.alamat || '-') + '</span></td>' +
           '<td><span class="badge bg-success bg-opacity-10 text-success border border-success fw-bold px-2 py-1">' + bayarStr + '</span></td>' +
-          '<td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary fw-bold px-2 py-1">' + setorStr + '</span></td>' +
           '<td><strong class="text-info">Rp ' + (a.saldoDeposit || 0).toLocaleString('id-ID') + '</strong></td>' +
-          '<td class="text-center">' +
-            '<button class="btn btn-outline-primary btn-sm me-1" onclick="quickFillPembayaran(\'' + a.id + '\')" title="Input Pembayaran"><i class="fa-solid fa-hand-holding-dollar"></i></button>' +
-            '<button class="btn btn-outline-warning btn-sm" onclick="quickFillSetoran(\'' + a.id + '\')" title="Input Setoran Kas"><i class="fa-solid fa-building-columns"></i></button>' +
+          '<td><span class="badge ' + statusInfo.badgeClass + ' px-2 py-1 fw-semibold">' + statusInfo.label + '</span></td>' +
+          '<td class="text-center text-nowrap">' +
+            '<button class="btn btn-outline-primary btn-sm me-1" onclick="openEditAnggotaModal(' + a.id + ')" title="Edit Anggota"><i class="fa-solid fa-pen-to-square"></i> Edit</button>' +
+            '<button class="btn btn-outline-danger btn-sm" onclick="confirmHapusAnggota(' + a.id + ', \'' + escapeQuotes(a.nama) + '\')" title="Hapus Anggota"><i class="fa-solid fa-trash"></i> Hapus</button>' +
           '</td>';
         tbody.appendChild(tr);
       });
     }
 
     function filterTableAnggota() {
-      var kw = document.getElementById("filterAnggotaInput").value.toLowerCase();
-      var filtered = globalAnggotaList.filter(function(a) {
-        return String(a.id||'').toLowerCase().includes(kw) || String(a.nama||'').toLowerCase().includes(kw) || String(a.nip||'').toLowerCase().includes(kw);
+      var kw = (document.getElementById("filterAnggotaInput").value || "").toLowerCase();
+      var filterStatus = document.getElementById("filterAnggotaStatus").value;
+      var filterKategori = document.getElementById("filterAnggotaKategori") ? document.getElementById("filterAnggotaKategori").value : "semua";
+
+      var filtered = (globalAnggotaList || []).filter(function(a) {
+        // Keyword match across Nama, NIP, Kode, Alamat, HP
+        var textMatch = String(a.id||'').toLowerCase().includes(kw) || 
+                          String(a.nama||'').toLowerCase().includes(kw) || 
+                          String(a.nip||'').toLowerCase().includes(kw) ||
+                          String(a.noKode||'').toLowerCase().includes(kw) ||
+                          String(a.alamat||'').toLowerCase().includes(kw) ||
+                          String(a.noHp||'').toLowerCase().includes(kw);
+
+        if (!textMatch) return false;
+
+        var info = computeAnggotaStatusInfo(a);
+
+        // Filter Status
+        if (filterStatus === "aktif") {
+          return info.isAktif;
+        } else if (filterStatus === "tidak_aktif") {
+          if (info.isAktif) return false;
+          if (filterKategori !== "semua") {
+            return info.category === filterKategori;
+          }
+          return true;
+        }
+        return true;
       });
+
       renderTableAnggota(filtered);
     }
 
@@ -2423,13 +2641,17 @@
         adminPin: currentAdminPin,
         nama: document.getElementById("newNama").value,
         nip: document.getElementById("newNip").value,
-        gender: document.getElementById("newGender").value,
-        noHp: document.getElementById("newNoHp").value
+        noKode: document.getElementById("newNoKode").value,
+        tglLahir: document.getElementById("newTglLahir").value,
+        tmt: document.getElementById("newTmt").value,
+        noHp: document.getElementById("newNoHp").value,
+        statusOverride: document.getElementById("newStatusOverride").value,
+        alamat: document.getElementById("newAlamat").value
       };
 
       google.script.run.withSuccessHandler(function(res) {
         btn.disabled = false;
-        btn.innerHTML = 'Simpan Anggota';
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Simpan Anggota';
         if (res.success) {
           Swal.fire({
             icon: 'success',
@@ -2437,7 +2659,9 @@
             text: res.message,
             confirmButtonColor: '#1F4E79'
           });
-          bootstrap.Modal.getInstance(document.getElementById('tambahAnggotaModal')).hide();
+          var modalEl = document.getElementById('tambahAnggotaModal');
+          var modal = bootstrap.Modal.getInstance(modalEl);
+          if (modal) modal.hide();
           loadAdminData();
           loadTableAdminAnggota();
         } else {
@@ -2449,6 +2673,104 @@
           });
         }
       }).simpanAnggotaBaru(formObj);
+    }
+
+    function openEditAnggotaModal(idAnggota) {
+      var a = (globalAnggotaList || []).find(function(x) { return String(x.id) === String(idAnggota); });
+      if (!a) return;
+
+      document.getElementById("editId").value = a.id;
+      document.getElementById("editNama").value = a.nama || "";
+      document.getElementById("editNip").value = a.nip || "";
+      document.getElementById("editNoKode").value = a.noKode || "";
+      document.getElementById("editTglLahir").value = a.tglLahir || "";
+      document.getElementById("editTmt").value = a.tmt || "";
+      document.getElementById("editNoHp").value = a.noHp || "";
+      document.getElementById("editStatusOverride").value = a.statusOverride || "";
+      document.getElementById("editAlamat").value = a.alamat || "";
+
+      var modal = new bootstrap.Modal(document.getElementById('editAnggotaModal'));
+      modal.show();
+    }
+
+    function submitFormEditAnggota(e) {
+      e.preventDefault();
+      var btn = document.getElementById("btnSimpanAnggotaEdit");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Updating...';
+
+      var formObj = {
+        adminPin: currentAdminPin,
+        id: document.getElementById("editId").value,
+        nama: document.getElementById("editNama").value,
+        nip: document.getElementById("editNip").value,
+        noKode: document.getElementById("editNoKode").value,
+        tglLahir: document.getElementById("editTglLahir").value,
+        tmt: document.getElementById("editTmt").value,
+        noHp: document.getElementById("editNoHp").value,
+        statusOverride: document.getElementById("editStatusOverride").value,
+        alamat: document.getElementById("editAlamat").value
+      };
+
+      google.script.run.withSuccessHandler(function(res) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Update Data';
+        if (res.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Berhasil Update',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
+          var modalEl = document.getElementById('editAnggotaModal');
+          var modal = bootstrap.Modal.getInstance(modalEl);
+          if (modal) modal.hide();
+          loadAdminData();
+          loadTableAdminAnggota();
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Update Data',
+            text: res.message,
+            confirmButtonColor: '#1F4E79'
+          });
+        }
+      }).updateAnggota(formObj);
+    }
+
+    function confirmHapusAnggota(idAnggota, namaAnggota) {
+      Swal.fire({
+        title: 'Hapus Anggota?',
+        html: 'Apakah Anda yakin ingin menghapus anggota <strong>' + namaAnggota + '</strong> (ID: ' + idAnggota + ')?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fa-solid fa-trash me-1"></i> Ya, Hapus!',
+        cancelButtonText: 'Batal'
+      }).then(function(result) {
+        if (result.isConfirmed) {
+          google.script.run.withSuccessHandler(function(res) {
+            if (res.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Berhasil Dihapus',
+                text: res.message,
+                confirmButtonColor: '#1F4E79'
+              });
+              loadAdminData();
+              loadTableAdminAnggota();
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Gagal Menghapus',
+                text: res.message,
+                confirmButtonColor: '#1F4E79'
+              });
+            }
+          }).hapusAnggota(currentAdminPin, idAnggota);
+        }
+      });
     }
 
     // MENU BARU: DATA PEMBAYARAN IURAN MATRIKS (2012 - SEKARANG)
