@@ -1666,3 +1666,88 @@ function batalSetorKasAnggota(pin, payload) {
     return { success: false, message: "Gagal membatalkan setoran: " + err.toString() };
   }
 }
+
+/**
+ * 12. GET DASHBOARD REKAP & STATISTIK (KHUSUS ADMIN)
+ */
+function getDashboardStats(pin) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
+    var sheetMasuk = ss.getSheetByName(SHEET_MASUK);
+    var sheetSetor = ss.getSheetByName(SHEET_SETOR);
+
+    if (!sheetAnggota) return { success: false, message: "Sheet Master_Anggota tidak ditemukan!" };
+
+    var now = new Date();
+    var curYear = now.getFullYear();
+
+    // 1. Data Anggota
+    var dataA = sheetAnggota.getDataRange().getValues();
+    var totalAnggota = 0;
+    var totalAktif = 0;
+    var totalWafat = 0;
+    var totalKeluar = 0;
+
+    for (var i = 1; i < dataA.length; i++) {
+      var rA = dataA[i];
+      if (!rA[0]) continue;
+      totalAnggota++;
+      var stOverride = rA[12] ? String(rA[12]).trim() : "";
+      if (stOverride === "Wafat") {
+        totalWafat++;
+      } else if (stOverride === "Mengundurkan Diri" || stOverride === "Keluar") {
+        totalKeluar++;
+      } else {
+        totalAktif++;
+      }
+    }
+
+    // 2. Data Kas Masuk
+    var totalKasMasuk = 0;
+    var countTrxMasuk = 0;
+    if (sheetMasuk) {
+      var dataM = sheetMasuk.getDataRange().getValues();
+      for (var j = 1; j < dataM.length; j++) {
+        if (dataM[j][0]) {
+          totalKasMasuk += Number(dataM[j][4]) || 0;
+          countTrxMasuk++;
+        }
+      }
+    }
+
+    // 3. Data Kas Setor (ke Bendahara DISDIKBUD)
+    var totalKasSetor = 0;
+    var countTrxSetor = 0;
+    if (sheetSetor) {
+      var dataS = sheetSetor.getDataRange().getValues();
+      for (var k = 1; k < dataS.length; k++) {
+        if (dataS[k][0]) {
+          totalKasSetor += Number(dataS[k][4]) || 0;
+          countTrxSetor++;
+        }
+      }
+    }
+
+    var saldoKasTersedia = totalKasMasuk - totalKasSetor;
+
+    return {
+      success: true,
+      tahun: curYear,
+      totalAnggota: totalAnggota,
+      totalAktif: totalAktif,
+      totalWafat: totalWafat,
+      totalKeluar: totalKeluar,
+      totalKasMasuk: totalKasMasuk,
+      countTrxMasuk: countTrxMasuk,
+      totalKasSetor: totalKasSetor,
+      countTrxSetor: countTrxSetor,
+      saldoKasTersedia: saldoKasTersedia
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal mengambil data dashboard: " + err.message };
+  }
+}
