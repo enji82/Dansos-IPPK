@@ -2113,9 +2113,16 @@
     function renderAdminSearchResult(data) {
       window.globalCurrentDetailData = data;
       var isTunggakan = data.totalTunggakan > 0;
-      var statusBadge = isTunggakan
-        ? '<span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1.5 fw-bold" style="font-size: 0.82rem;"><i class="fa-solid fa-triangle-exclamation me-1.5"></i>Tunggakan: Rp ' + data.totalTunggakan.toLocaleString('id-ID') + '</span>'
-        : '<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-bold" style="font-size: 0.82rem;"><i class="fa-solid fa-circle-check me-1.5"></i>Lunas Seluruhnya</span>';
+
+      var statusCardHtml = isTunggakan
+        ? '<div class="p-3 rounded-3 bg-danger-subtle bg-opacity-30 border border-danger-subtle h-100 text-end">' +
+            '<span class="text-danger text-uppercase fw-bold d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.04em;"><i class="fa-solid fa-triangle-exclamation me-1"></i>Tunggakan</span>' +
+            '<span class="fw-bold text-danger fs-5">Rp ' + data.totalTunggakan.toLocaleString('id-ID') + '</span>' +
+          '</div>'
+        : '<div class="p-3 rounded-3 bg-success-subtle bg-opacity-30 border border-success-subtle h-100 text-end">' +
+            '<span class="text-success text-uppercase fw-bold d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.04em;"><i class="fa-solid fa-circle-check me-1"></i>Status</span>' +
+            '<span class="fw-bold text-success fs-6">Lunas Seluruhnya</span>' +
+          '</div>';
 
       var html = 
         '<div class="card border-0 shadow rounded-4 overflow-hidden mt-3" style="background: #ffffff;">' +
@@ -2127,39 +2134,39 @@
               '</div>' +
               '<div>' +
                 '<h6 class="mb-0 fw-bold text-navy fs-6">' + data.nama + '</h6>' +
-                '<span class="text-muted small">ID Anggota: ' + data.id + '</span>' +
+                '<span class="text-muted small">NIP: ' + (data.nip || '-') + '</span>' +
               '</div>' +
             '</div>' +
-            statusBadge +
           '</div>' +
 
           '<!-- Card Body -->' +
           '<div class="card-body p-4">' +
-            '<!-- Metric Grid 4 Stat Cards -->' +
-            '<div class="row g-3 mb-4">' +
-              '<div class="col-6 col-md-3">' +
-                '<div class="p-3 rounded-3 bg-body-tertiary border border-light-subtle h-100">' +
-                  '<span class="text-muted text-uppercase fw-semibold d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.04em;">NIP</span>' +
-                  '<span class="fw-bold text-dark fs-6">' + (data.nip || '-') + '</span>' +
+            '<!-- Stat Cards Grid -->' +
+            '<div class="row g-3 mb-4 align-items-center">' +
+              '<div class="col-12 col-md-8">' +
+                '<div class="row g-2">' +
+                  '<div class="col-12 col-sm-4">' +
+                    '<div class="p-3 rounded-3 bg-body-tertiary border border-light-subtle h-100">' +
+                      '<span class="text-muted text-uppercase fw-semibold d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.04em;">TMT</span>' +
+                      '<span class="fw-bold text-dark style="font-size: 0.95rem;">' + (data.tmt || '-') + '</span>' +
+                    '</div>' +
+                  '</div>' +
+                  '<div class="col-12 col-sm-4">' +
+                    '<div class="p-3 rounded-3 bg-success-subtle bg-opacity-25 border border-success-subtle h-100">' +
+                      '<span class="text-success text-uppercase fw-semibold d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.04em;">Posisi Lunas s.d</span>' +
+                      '<span class="fw-bold text-success style="font-size: 0.95rem;">' + data.lunasSampai + '</span>' +
+                    '</div>' +
+                  '</div>' +
+                  '<div class="col-12 col-sm-4">' +
+                    '<div class="p-3 rounded-3 bg-info-subtle bg-opacity-25 border border-info-subtle h-100">' +
+                      '<span class="text-info-emphasis text-uppercase fw-semibold d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.04em;">Posisi Bulan Ini</span>' +
+                      '<span class="fw-bold text-dark style="font-size: 0.95rem;">' + data.bulanIniStr + '</span>' +
+                    '</div>' +
+                  '</div>' +
                 '</div>' +
               '</div>' +
-              '<div class="col-6 col-md-3">' +
-                '<div class="p-3 rounded-3 bg-body-tertiary border border-light-subtle h-100">' +
-                  '<span class="text-muted text-uppercase fw-semibold d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.04em;">TMT</span>' +
-                  '<span class="fw-bold text-dark fs-6">' + (data.tmt || '-') + '</span>' +
-                '</div>' +
-              '</div>' +
-              '<div class="col-6 col-md-3">' +
-                '<div class="p-3 rounded-3 bg-success-subtle bg-opacity-25 border border-success-subtle h-100">' +
-                  '<span class="text-success text-uppercase fw-semibold d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.04em;">Posisi Lunas s.d</span>' +
-                  '<span class="fw-bold text-success fs-6">' + data.lunasSampai + '</span>' +
-                '</div>' +
-              '</div>' +
-              '<div class="col-6 col-md-3">' +
-                '<div class="p-3 rounded-3 bg-info-subtle bg-opacity-25 border border-info-subtle h-100">' +
-                  '<span class="text-info-emphasis text-uppercase fw-semibold d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.04em;">Posisi Bulan Ini</span>' +
-                  '<span class="fw-bold text-dark fs-6">' + data.bulanIniStr + '</span>' +
-                '</div>' +
+              '<div class="col-12 col-md-4">' +
+                statusCardHtml +
               '</div>' +
             '</div>';
 

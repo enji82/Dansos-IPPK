@@ -193,7 +193,19 @@ function buildDetailStatusAnggota(foundRow, paguMap) {
     };
   });
 
-  var tmtVal = foundRow[5] ? (foundRow[5] instanceof Date ? Utilities.formatDate(foundRow[5], ss.getSpreadsheetTimeZone(), "yyyy-MM-dd") : String(foundRow[5])) : "-";
+  var tmtVal = "-";
+  if (foundRow[5]) {
+    try {
+      var dTmt = (foundRow[5] instanceof Date) ? foundRow[5] : new Date(foundRow[5]);
+      if (!isNaN(dTmt.getTime())) {
+        tmtVal = dTmt.getDate() + " " + getNamaBulan(dTmt.getMonth() + 1) + " " + dTmt.getFullYear();
+      } else {
+        tmtVal = String(foundRow[5]);
+      }
+    } catch(eTmt) {
+      tmtVal = String(foundRow[5]);
+    }
+  }
 
   return {
     id: idAnggota,
