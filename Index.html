@@ -1432,18 +1432,29 @@
     }
 
     function selectMasukAnggota(id) {
-      document.getElementById("masukAnggotaSuggestions").classList.remove("show");
-      document.getElementById("masukAnggotaSuggestions").classList.add("loader");
+      var sugEl = document.getElementById("masukAnggotaSuggestions");
+      if (sugEl) {
+        sugEl.classList.remove("show");
+        sugEl.classList.add("loader");
+      }
       
       var a = globalAnggotaList.find(x => String(x.id) === String(id));
       if (a) {
-        document.getElementById("masukAnggotaSearch").value = a.nama;
-        document.getElementById("masukAnggota").value = a.id;
+        var inputSearch = document.getElementById("masukAnggotaSearch");
+        if (inputSearch) inputSearch.value = a.nama;
+
+        var inputId = document.getElementById("masukAnggota");
+        if (inputId) inputId.value = a.id;
         
-        document.getElementById("masukAnggotaSelectedNama").textContent = a.nama;
+        var selectedNama = document.getElementById("masukAnggotaSelectedNama");
+        if (selectedNama) selectedNama.textContent = a.nama;
+
         var bayarStr = (a.bayarBln > 0 && a.bayarThn > 0) ? (namaBulanList[a.bayarBln] + " " + a.bayarThn) : "Belum Ada Catatan";
-        document.getElementById("masukAnggotaSelectedInfo").textContent = "ID: " + a.id + " | NIP: " + (a.nip || '-') + " | Lunas s.d: " + bayarStr;
-        document.getElementById("masukAnggotaSelectedBadge").classList.remove("d-none");
+        var selectedInfo = document.getElementById("masukAnggotaSelectedInfo");
+        if (selectedInfo) selectedInfo.textContent = "ID: " + a.id + " | NIP: " + (a.nip || '-') + " | Lunas s.d: " + bayarStr;
+
+        var selectedBadge = document.getElementById("masukAnggotaSelectedBadge");
+        if (selectedBadge) selectedBadge.classList.remove("d-none");
 
         // Set otomatis periode BERIKUTNYA (Bulan pertama yang BELUM LUNAS)
         var nextBln = (a.bayarBln >= 12) ? 1 : (a.bayarBln + 1);
@@ -1451,28 +1462,35 @@
         
         // Simpan posisi lunas anggota di atribut dataset untuk validasi
         var selThnDari = document.getElementById("masukTahunDari");
-        selThnDari.dataset.lunasThn = a.bayarThn || 0;
-        selThnDari.dataset.lunasBln = a.bayarBln || 0;
+        if (selThnDari) {
+          selThnDari.dataset.lunasThn = a.bayarThn || 0;
+          selThnDari.dataset.lunasBln = a.bayarBln || 0;
 
-        // Populate pilihan Tahun Dari yang valid (hanya tahun >= tahun lunas)
-        selThnDari.innerHTML = "";
-        var minThn = a.bayarThn || 2021;
-        for (var y = minThn; y <= 2030; y++) {
-          var opt = document.createElement("option");
-          opt.value = y;
-          opt.textContent = y;
-          if (y === nextThn) opt.selected = true;
-          selThnDari.appendChild(opt);
+          // Populate pilihan Tahun Dari yang valid (hanya tahun >= tahun lunas)
+          selThnDari.innerHTML = "";
+          var minThn = a.bayarThn || 2021;
+          for (var y = minThn; y <= 2030; y++) {
+            var opt = document.createElement("option");
+            opt.value = y;
+            opt.textContent = y;
+            if (y === nextThn) opt.selected = true;
+            selThnDari.appendChild(opt);
+          }
         }
 
-        document.getElementById("masukTahunSampai").value = nextThn;
+        var selThnSampai = document.getElementById("masukTahunSampai");
+        if (selThnSampai) selThnSampai.value = nextThn;
 
         // Update pilihan bulan yang belum lunas (disable bulan yang sudah lunas)
         updatePeriodeMasukOptions(a.bayarThn || 0, a.bayarBln || 0, nextThn, nextBln);
 
         // Reset nominal
-        document.getElementById("masukNominal").value = "";
-        hitungKalkulasiBayar();
+        var inputNominal = document.getElementById("masukNominal");
+        if (inputNominal) inputNominal.value = "";
+
+        if (typeof hitungKalkulasiBayar === "function") {
+          hitungKalkulasiBayar();
+        }
       }
     }
 
@@ -1560,26 +1578,44 @@
     }
 
     function selectSetorAnggota(id) {
-      document.getElementById("setorAnggotaSuggestions").classList.remove("show");
-      document.getElementById("setorAnggotaSuggestions").classList.add("loader");
+      var sugEl = document.getElementById("setorAnggotaSuggestions");
+      if (sugEl) {
+        sugEl.classList.remove("show");
+        sugEl.classList.add("loader");
+      }
 
       var a = globalAnggotaList.find(x => String(x.id) === String(id));
       if (a) {
-        document.getElementById("setorAnggotaSearch").value = a.nama;
-        document.getElementById("setorAnggota").value = a.id;
+        var inputSearch = document.getElementById("setorAnggotaSearch");
+        if (inputSearch) inputSearch.value = a.nama;
 
-        document.getElementById("setorAnggotaSelectedNama").textContent = a.nama;
+        var inputId = document.getElementById("setorAnggota");
+        if (inputId) inputId.value = a.id;
+
+        var selectedNama = document.getElementById("setorAnggotaSelectedNama");
+        if (selectedNama) selectedNama.textContent = a.nama;
+
         var setorStr = (a.setorBln > 0 && a.setorThn > 0) ? (namaBulanList[a.setorBln] + " " + a.setorThn) : "Belum Ada Catatan";
-        document.getElementById("setorAnggotaSelectedInfo").textContent = "ID: " + a.id + " | NIP: " + (a.nip || '-') + " | Disetor s.d: " + setorStr;
-        document.getElementById("setorAnggotaSelectedBadge").classList.remove("d-none");
+        var selectedInfo = document.getElementById("setorAnggotaSelectedInfo");
+        if (selectedInfo) selectedInfo.textContent = "ID: " + a.id + " | NIP: " + (a.nip || '-') + " | Disetor s.d: " + setorStr;
+
+        var selectedBadge = document.getElementById("setorAnggotaSelectedBadge");
+        if (selectedBadge) selectedBadge.classList.remove("d-none");
 
         var nextBln = (a.setorBln >= 12) ? 1 : (a.setorBln + 1);
         var nextThn = (a.setorBln >= 12) ? (a.setorThn + 1) : (a.setorThn || new Date().getFullYear());
 
-        document.getElementById("setorTahunDari").value = nextThn;
-        document.getElementById("setorBulanDari").value = nextBln;
-        document.getElementById("setorTahunSampai").value = nextThn;
-        document.getElementById("setorBulanSampai").value = nextBln;
+        var selThnDari = document.getElementById("setorTahunDari");
+        if (selThnDari) selThnDari.value = nextThn;
+
+        var selBlnDari = document.getElementById("setorBulanDari");
+        if (selBlnDari) selBlnDari.value = nextBln;
+
+        var selThnSampai = document.getElementById("setorTahunSampai");
+        if (selThnSampai) selThnSampai.value = nextThn;
+
+        var selBlnSampai = document.getElementById("setorBulanSampai");
+        if (selBlnSampai) selBlnSampai.value = nextBln;
       }
     }
 
