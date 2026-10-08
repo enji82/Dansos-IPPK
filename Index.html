@@ -972,13 +972,11 @@
                 <span id="kwValTtdNama" class="fw-bold d-block">( Puji Purnomo )</span>
               </div>
             </div>
-          </div>
-        </div>
-        <div class="modal-footer no-print">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
         </div>
       </div>
     </div>
+  </div>
+
   <!-- HIDDEN PRINT AREA UNTUK NOTA RINCIAN KEKURANGAN PEMBAYARAN IURAN -->
   <div id="printAreaRincian" class="d-none"></div>
 
@@ -1096,25 +1094,28 @@
 
     /* CSS ATURAN CETAK (PRINT MEDIA) */
     @media print {
-      body.printing-rincian-mode * {
+      body.printing-rincian-mode > *:not(#printAreaRincian) {
+        display: none !important;
         visibility: hidden !important;
       }
       body.printing-rincian-mode #printAreaRincian,
       body.printing-rincian-mode #printAreaRincian * {
+        display: block !important;
         visibility: visible !important;
       }
       body.printing-rincian-mode #printAreaRincian {
-        display: block !important;
-        position: fixed !important;
+        position: absolute !important;
         left: 0 !important;
         top: 0 !important;
         width: 100% !important;
-        height: auto !important;
         margin: 0 !important;
-        padding: 20px !important;
+        padding: 10mm !important;
         background: #ffffff !important;
-        z-index: 9999999 !important;
+        color: #000000 !important;
         box-shadow: none !important;
+      }
+      body.printing-rincian-mode #printAreaRincian div {
+        display: block !important;
       }
       @page {
         size: auto;
