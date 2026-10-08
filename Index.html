@@ -449,74 +449,74 @@
                     </div>
                   </div>
 
-                  <div class="col-md-3">
-                    <label class="form-label fw-bold">Tahun Dari</label>
-                    <select id="masukTahunDari" class="form-select" required onchange="onMasukPeriodeChange()">
+                  <div class="col-6 col-md-3">
+                    <label class="form-label fw-bold small">Tahun Dari</label>
+                    <select id="masukTahunDari" class="form-select form-select-sm" required onchange="onMasukPeriodeChange()">
                       <!-- Populated by JS -->
                     </select>
                   </div>
 
-                  <div class="col-md-3">
-                    <label class="form-label fw-bold">Bulan Dari</label>
-                    <select id="masukBulanDari" class="form-select" required onchange="hitungKalkulasiBayar()">
+                  <div class="col-6 col-md-3">
+                    <label class="form-label fw-bold small">Bulan Dari</label>
+                    <select id="masukBulanDari" class="form-select form-select-sm" required onchange="hitungKalkulasiBayar()">
                       <!-- Populated by JS -->
                     </select>
                   </div>
 
-                  <div class="col-md-3">
-                    <label class="form-label fw-bold">Tahun Sampai</label>
-                    <select id="masukTahunSampai" class="form-select" required onchange="hitungKalkulasiBayar()">
+                  <div class="col-6 col-md-3">
+                    <label class="form-label fw-bold small">Tahun Sampai</label>
+                    <select id="masukTahunSampai" class="form-select form-select-sm" required onchange="hitungKalkulasiBayar()">
                       <!-- Populated by JS -->
                     </select>
                   </div>
 
-                  <div class="col-md-3">
-                    <label class="form-label fw-bold">Bulan Sampai</label>
-                    <select id="masukBulanSampai" class="form-select" required onchange="hitungKalkulasiBayar()">
+                  <div class="col-6 col-md-3">
+                    <label class="form-label fw-bold small">Bulan Sampai</label>
+                    <select id="masukBulanSampai" class="form-select form-select-sm" required onchange="hitungKalkulasiBayar()">
                       <!-- Populated by JS -->
                     </select>
                   </div>
 
                   <div class="col-md-6">
-                    <label class="form-label fw-bold">Total Pagu Seharusnya (Rp)</label>
+                    <label class="form-label fw-bold small">Total Pagu Seharusnya (Rp)</label>
                     <input type="text" id="masukPaguTotal" class="form-control bg-light fs-5 fw-bold text-primary" readonly value="Rp 0">
                     <div class="form-text text-muted" id="masukJumlahBulanInfo">Total: 0 Bulan</div>
                   </div>
 
                   <div class="col-md-6">
-                    <label class="form-label fw-bold">Nominal Uang Diterima (Rp)</label>
+                    <label class="form-label fw-bold small">Nominal Uang Diterima (Rp)</label>
                     <input type="number" id="masukNominal" class="form-control fs-5 fw-bold" placeholder="Contoh: 180000" required oninput="hitungKalkulasiBayar()">
                   </div>
 
                   <div class="col-md-6">
-                    <label class="form-label fw-bold">Pengalokasian Sisa / Kelebihan Uang</label>
+                    <label class="form-label fw-bold small">Pengalokasian Sisa / Kelebihan Uang</label>
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="alokasiSisa" id="radioKembalian" value="cash" checked onchange="hitungKalkulasiBayar()">
-                      <label class="form-check-label" for="radioKembalian">Dikembalikan Tunai (Cash)</label>
+                      <label class="form-check-label small" for="radioKembalian">Dikembalikan Tunai (Cash)</label>
                     </div>
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="alokasiSisa" id="radioDeposit" value="deposit" onchange="hitungKalkulasiBayar()">
-                      <label class="form-check-label" for="radioDeposit">Disimpan ke Saldo Deposit</label>
+                      <label class="form-check-label small" for="radioDeposit">Disimpan ke Saldo Deposit</label>
                     </div>
                   </div>
 
-                  <div class="col-md-3">
-                    <label class="form-label fw-bold">Kembalian Cash (Rp)</label>
-                    <input type="text" id="masukKembalian" class="form-control bg-light" readonly value="0">
+                  <div class="col-6 col-md-3">
+                    <label class="form-label fw-bold small">Kembalian Cash (Rp)</label>
+                    <input type="text" id="masukKembalian" class="form-control bg-light form-select-sm" readonly value="0">
                   </div>
 
-                  <div class="col-md-3">
-                    <label class="form-label fw-bold">Masuk Deposit (Rp)</label>
-                    <input type="text" id="masukDepositVal" class="form-control bg-light" readonly value="0">
+                  <div class="col-6 col-md-3">
+                    <label class="form-label fw-bold small">Masuk Deposit (Rp)</label>
+                    <input type="text" id="masukDepositVal" class="form-control bg-light form-select-sm" readonly value="0">
                   </div>
 
                   <div class="col-12">
-                    <label class="form-label fw-bold">Catatan (Opsional)</label>
+                    <label class="form-label fw-bold small">Catatan (Opsional)</label>
                     <input type="text" id="masukCatatan" class="form-control" placeholder="Misal: Pembayaran Tunai Lintas Tahun">
                   </div>
 
-                  <div class="col-12 text-end mt-4">
-                    <button type="submit" class="btn btn-navy px-4" id="btnSimpanMasuk">
+                  <div class="col-12 text-md-end mt-4">
+                    <button type="submit" class="btn btn-navy w-100 w-md-auto px-4 py-2 fw-semibold" id="btnSimpanMasuk">
                       <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Transaksi Masuk
                     </button>
                   </div>
