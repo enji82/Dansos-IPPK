@@ -1104,16 +1104,19 @@
         visibility: visible !important;
       }
       body.printing-rincian-mode #printAreaRincian {
-        position: absolute !important;
+        display: block !important;
+        position: fixed !important;
         left: 0 !important;
         top: 0 !important;
         width: 100% !important;
+        height: auto !important;
         margin: 0 !important;
-        padding: 15px !important;
+        padding: 20px !important;
         background: #ffffff !important;
+        z-index: 9999999 !important;
         box-shadow: none !important;
       }
-      body.printing-rincian-mode @page {
+      @page {
         size: auto;
         margin: 10mm;
       }
@@ -2255,12 +2258,13 @@
       area.classList.remove("d-none");
       document.body.classList.add("printing-rincian-mode");
 
-      window.print();
-
       setTimeout(function() {
-        document.body.classList.remove("printing-rincian-mode");
-        area.classList.add("d-none");
-      }, 1000);
+        window.print();
+        setTimeout(function() {
+          document.body.classList.remove("printing-rincian-mode");
+          area.classList.add("d-none");
+        }, 800);
+      }, 100);
     }
 
     function toggleYearAccordionAdmin(tahun) {
