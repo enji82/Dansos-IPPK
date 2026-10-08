@@ -566,7 +566,7 @@
                     <tr>
                       <th class="sticky-col-1" style="width: 45px;">No.</th>
                       <th class="sticky-col-2">Nama</th>
-                      <th>NIP</th>
+                      <th>NO. KODE</th>
                       <th>Bulan Awal</th>
                       <th>Bulan Akhir</th>
                       <th style="width: 120px;">Jumlah Bulan</th>
@@ -3333,7 +3333,7 @@
         var htmlRow = '<tr class="align-middle">' +
           '<td class="text-center sticky-col-1">' + (idx + 1) + '</td>' +
           '<td class="sticky-col-2"><strong class="text-navy">' + row.nama + '</strong></td>' +
-          '<td class="text-secondary small">' + row.nip + '</td>' +
+          '<td class="text-secondary small">' + (row.noKode || row.nip || '-') + '</td>' +
           '<td class="text-center"><span class="badge bg-light text-dark border">' + row.bulanAwal + '</span></td>' +
           '<td class="text-center"><span class="badge bg-light text-dark border">' + row.bulanAkhir + '</span></td>' +
           '<td class="text-center fw-bold text-dark">' + (row.jumlahBulan > 0 ? (row.jumlahBulan + ' Bulan') : '-') + '</td>' +

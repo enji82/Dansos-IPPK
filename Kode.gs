@@ -1395,6 +1395,7 @@ function getDataInputSetor(pin) {
 
       var nama = row[1] || "-";
       var nip = row[2] ? String(row[2]) : "-";
+      var noKode = row[4] ? String(row[4]) : "-";
 
       var bayarBln = Number(row[8]) || 0;
       var bayarThn = Number(row[9]) || 0;
@@ -1475,6 +1476,7 @@ function getDataInputSetor(pin) {
         id: id,
         nama: nama,
         nip: nip,
+        noKode: noKode,
         bayarBln: bayarBln,
         bayarThn: bayarThn,
         setorBln: setorBln,
