@@ -14,6 +14,8 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <!-- SweetAlert2 CSS & JS -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- SheetJS / XLSX Export Library -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     html, body {
       overscroll-behavior-x: contain;
@@ -738,14 +740,17 @@
 
               <!-- Search & Summary Badges -->
               <div class="row g-3 align-items-center mb-3">
-                <div class="col-md-6">
+                <div class="col-md-5">
                   <div class="input-group">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
                     <input type="text" id="filterBelumSetorSearch" class="form-control border-start-0" placeholder="Cari nama, NIP, atau ID..." oninput="filterTableDataBelumSetor()">
                   </div>
                 </div>
-                <div class="col-md-6 text-md-end">
-                  <span class="badge bg-secondary px-3 py-2 fs-6 shadow-sm me-2" id="belumSetorCountInfo">0 Anggota</span>
+                <div class="col-md-7 text-md-end d-flex align-items-center justify-content-md-end flex-wrap gap-2">
+                  <button class="btn btn-success fw-bold px-3 shadow-sm" onclick="exportExcelDataBelumSetor()">
+                    <i class="fa-solid fa-file-excel me-2"></i>Ekspor Excel (.xlsx)
+                  </button>
+                  <span class="badge bg-secondary px-3 py-2 fs-6 shadow-sm" id="belumSetorCountInfo">0 Anggota</span>
                   <span class="badge bg-danger px-3 py-2 fs-6 shadow-sm" id="belumSetorTotalInfo">Total: Rp 0</span>
                 </div>
               </div>
@@ -2415,6 +2420,135 @@
       if (globalBelumSetorDataCache) {
         renderDataBelumSetorTable(globalBelumSetorDataCache);
       }
+    }
+
+    function exportExcelDataBelumSetor() {
+      if (!globalBelumSetorDataCache || !globalBelumSetorDataCache.data || globalBelumSetorDataCache.data.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Data Kosong',
+          text: 'Tidak ada data anggota belum setor untuk diekspor.',
+          confirmButtonColor: '#1F4E79'
+        });
+        return;
+      }
+
+      var searchKw = (document.getElementById("filterBelumSetorSearch").value || "").trim().toLowerCase();
+      var dataList = globalBelumSetorDataCache.data;
+      if (searchKw) {
+        dataList = dataList.filter(function(row) {
+          return String(row.nama||'').toLowerCase().includes(searchKw) || 
+                 String(row.nip||'').toLowerCase().includes(searchKw) || 
+                 String(row.id||'').toLowerCase().includes(searchKw);
+        });
+      }
+
+      if (dataList.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Data Tidak Ditemukan',
+          text: 'Hasil pencarian tidak memiliki data untuk diekspor.',
+          confirmButtonColor: '#1F4E79'
+        });
+        return;
+      }
+
+      // 1. Buat Array of Arrays (AoA) sesuai format gambar
+      var wsData = [];
+
+      // Baris 1 & 2: Judul Header
+      wsData.push(["DAFTAR PEMBAYARAN IURAN DANSOS SETIA KAWAN", "", "", "", "", "", "", ""]);
+      wsData.push(["KORWIL DISDIKBUD KECAMATAN SECANG", "", "", "", "", "", "", ""]);
+      wsData.push(["", "", "", "", "", "", "", ""]); // Baris 3: Kosong
+
+      // Baris 4: Header Tabel
+      wsData.push(["NO", "NAMA", "BULAN", "", "", "JUMLAH BULAN", "JUMLAH", "KETERANGAN"]);
+
+      // Baris 5 s.d. N: Data Anggota
+      var totBulan = 0;
+      var totIuran = 0;
+
+      dataList.forEach(function(item, idx) {
+        totBulan += item.jumlahBulan;
+        totIuran += item.jumlahIuran;
+        wsData.push([
+          idx + 1,
+          item.nama,
+          item.bulanAwal,
+          "s.d.",
+          item.bulanAkhir,
+          item.jumlahBulan,
+          item.jumlahIuran,
+          ""
+        ]);
+      });
+
+      // Baris N+1: Summary Baris Jumlah Total
+      wsData.push(["JUMLAH", "", "", "", "", totBulan, totIuran, ""]);
+
+      // Baris N+2 & N+3: Kosong
+      wsData.push(["", "", "", "", "", "", "", ""]);
+      wsData.push(["", "", "", "", "", "", "", ""]);
+
+      // Baris TTD
+      wsData.push(["", "", "", "", "", "Diterima tanggal, ................................", "", ""]);
+      wsData.push(["", "", "", "", "", "Yang menerima", "", ""]);
+      wsData.push(["", "", "", "", "", "", "", ""]);
+      wsData.push(["", "", "", "", "", "", "", ""]);
+      wsData.push(["", "", "", "", "", "", "", ""]);
+      wsData.push(["", "", "", "", "", ".................................................", "", ""]);
+
+      // 2. Inisialisasi Worksheet & Workbook
+      var ws = XLSX.utils.aoa_to_sheet(wsData);
+
+      // Merges
+      ws['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }, // Row 1: A1 - H1 (Judul 1)
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } }, // Row 2: A2 - H2 (Judul 2)
+        { s: { r: 3, c: 2 }, e: { r: 3, c: 4 } }  // Row 4: C4 - E4 (Header BULAN)
+      ];
+
+      // Merge JUMLAH row (Row 5 + dataList.length): A(N) - E(N)
+      var totalRowIdx = 4 + dataList.length;
+      ws['!merges'].push({ s: { r: totalRowIdx, c: 0 }, e: { r: totalRowIdx, c: 4 } });
+
+      // Column widths
+      ws['!cols'] = [
+        { wch: 6 },  // A: NO
+        { wch: 32 }, // B: NAMA
+        { wch: 20 }, // C: Bulan Awal
+        { wch: 6 },  // D: s.d.
+        { wch: 20 }, // E: Bulan Akhir
+        { wch: 15 }, // F: JUMLAH BULAN
+        { wch: 18 }, // G: JUMLAH
+        { wch: 25 }  // H: KETERANGAN
+      ];
+
+      // Format Angka Rupiah / Jumlah di Kolom G (Format: #,##0)
+      for (var r = 4; r <= totalRowIdx; r++) {
+        var cellRef = XLSX.utils.encode_cell({ r: r, c: 6 });
+        if (ws[cellRef] && typeof ws[cellRef].v === 'number') {
+          ws[cellRef].z = '#,##0';
+        }
+      }
+
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Belum Setor");
+
+      // Generate & Download File XLSX
+      var now = new Date();
+      var tglStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+      var filename = "Data_Anggota_Belum_Setor_" + tglStr + ".xlsx";
+
+      XLSX.writeFile(wb, filename);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Ekspor Berhasil',
+        text: 'File ' + filename + ' telah berhasil diunduh.',
+        timer: 2000,
+        showConfirmButton: false
+      });
     }
 
     // MENU 5: REKAP CETAK LAPORAN ADMIN
