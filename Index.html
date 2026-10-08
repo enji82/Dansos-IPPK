@@ -1460,7 +1460,7 @@
             '<div class="suggestion-item d-flex justify-content-between align-items-center" onclick="selectMasukAnggota(\'' + item.id + '\')">' +
               '<div>' +
                 '<div class="fw-bold text-dark"><i class="fa-solid fa-user me-2 text-primary"></i>' + item.nama + '</div>' +
-                '<div class="small text-muted">ID: ' + item.id + ' | NIP: ' + (item.nip || '-') + '</div>' +
+                '<div class="small text-muted">NO. KODE: ' + (item.noKode || item.nip || '-') + '</div>' +
               '</div>' +
               '<i class="fa-solid fa-chevron-right text-primary small"></i>' +
             '</div>';
@@ -1491,7 +1491,7 @@
 
         var bayarStr = (a.bayarBln > 0 && a.bayarThn > 0) ? (namaBulanList[a.bayarBln] + " " + a.bayarThn) : "Belum Ada Catatan";
         var selectedInfo = document.getElementById("masukAnggotaSelectedInfo");
-        if (selectedInfo) selectedInfo.textContent = "ID: " + a.id + " | NIP: " + (a.nip || '-') + " | Lunas s.d: " + bayarStr;
+        if (selectedInfo) selectedInfo.textContent = "NO. KODE: " + (a.noKode || a.nip || '-') + " | Lunas s.d: " + bayarStr;
 
         var selectedBadge = document.getElementById("masukAnggotaSelectedBadge");
         if (selectedBadge) selectedBadge.classList.remove("d-none");
@@ -1606,7 +1606,7 @@
             '<div class="suggestion-item d-flex justify-content-between align-items-center" onclick="selectSetorAnggota(\'' + item.id + '\')">' +
               '<div>' +
                 '<div class="fw-bold text-dark"><i class="fa-solid fa-user me-2 text-warning"></i>' + item.nama + '</div>' +
-                '<div class="small text-muted">ID: ' + item.id + ' | NIP: ' + (item.nip || '-') + '</div>' +
+                '<div class="small text-muted">NO. KODE: ' + (item.noKode || item.nip || '-') + '</div>' +
               '</div>' +
               '<i class="fa-solid fa-chevron-right text-warning small"></i>' +
             '</div>';
@@ -1637,7 +1637,7 @@
 
         var setorStr = (a.setorBln > 0 && a.setorThn > 0) ? (namaBulanList[a.setorBln] + " " + a.setorThn) : "Belum Ada Catatan";
         var selectedInfo = document.getElementById("setorAnggotaSelectedInfo");
-        if (selectedInfo) selectedInfo.textContent = "ID: " + a.id + " | NIP: " + (a.nip || '-') + " | Disetor s.d: " + setorStr;
+        if (selectedInfo) selectedInfo.textContent = "NO. KODE: " + (a.noKode || a.nip || '-') + " | Disetor s.d: " + setorStr;
 
         var selectedBadge = document.getElementById("setorAnggotaSelectedBadge");
         if (selectedBadge) selectedBadge.classList.remove("d-none");
