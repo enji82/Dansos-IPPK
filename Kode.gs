@@ -808,11 +808,14 @@ function getRiwayatPembayaranAdmin(pin, filterTahun) {
     var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
 
     var nipMap = {};
+    var noKodeMap = {};
     if (sheetAnggota) {
       var dataA = sheetAnggota.getDataRange().getValues();
       for (var k = 1; k < dataA.length; k++) {
         if (dataA[k][0]) {
-          nipMap[String(dataA[k][0])] = dataA[k][2] ? String(dataA[k][2]) : "-";
+          var idKey = String(dataA[k][0]);
+          nipMap[idKey] = dataA[k][2] ? String(dataA[k][2]) : "-";
+          noKodeMap[idKey] = dataA[k][13] ? String(dataA[k][13]) : "-";
         }
       }
     }
@@ -860,6 +863,7 @@ function getRiwayatPembayaranAdmin(pin, filterTahun) {
             idAnggota: r[2],
             nama: r[3],
             nip: nipMap[String(r[2])] || "-",
+            noKode: noKodeMap[String(r[2])] || "-",
             nominal: nom,
             tahun: thn,
             periode: getNamaBulan(bDari) + " - " + getNamaBulan(bSampai),
