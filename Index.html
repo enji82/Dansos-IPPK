@@ -2046,52 +2046,53 @@
 
     function renderAdminSearchResult(data) {
       var statusBadge = data.totalTunggakan > 0 
-        ? '<span class="badge bg-danger fs-6 px-3 py-2">Tunggakan: Rp ' + data.totalTunggakan.toLocaleString('id-ID') + '</span>'
-        : '<span class="badge bg-success fs-6 px-3 py-2"><i class="fa-solid fa-check me-1"></i> Lunas Seluruhnya</span>';
+        ? '<span class="badge bg-danger rounded-pill px-3 py-1.5 fw-semibold" style="font-size: 0.85rem;">Tunggakan: Rp ' + data.totalTunggakan.toLocaleString('id-ID') + '</span>'
+        : '<span class="badge bg-success rounded-pill px-3 py-1.5 fw-semibold" style="font-size: 0.85rem;"><i class="fa-solid fa-check me-1"></i> Lunas Seluruhnya</span>';
 
       var html = 
-        '<div class="card border-primary shadow-sm rounded-3 overflow-hidden mt-2">' +
-          '<div class="card-header bg-primary text-white p-3 d-flex justify-content-between align-items-center">' +
-            '<h5 class="mb-0 fw-bold"><i class="fa-solid fa-id-card me-2"></i>' + data.nama + '</h5>' +
+        '<div class="card border-0 shadow-sm rounded-3 overflow-hidden mt-3 border-start border-4 border-primary">' +
+          '<div class="card-header bg-white p-3 d-flex justify-content-between align-items-center border-bottom">' +
+            '<h6 class="mb-0 fw-bold text-navy" style="font-size: 1.05rem;"><i class="fa-solid fa-user text-primary me-2"></i>' + data.nama + '</h6>' +
             statusBadge +
           '</div>' +
-          '<div class="card-body p-4">' +
-            '<div class="row mb-3">' +
-              '<div class="col-md-4"><strong>NIP:</strong> ' + (data.nip || '-') + '</div>' +
-              '<div class="col-md-4"><strong>Posisi Lunas s.d:</strong> ' + data.lunasSampai + '</div>' +
-              '<div class="col-md-4"><strong>Posisi Bulan Ini:</strong> ' + data.bulanIniStr + '</div>' +
+          '<div class="card-body p-3 style="font-size: 0.875rem;">' +
+            '<div class="row g-2 mb-3 bg-light p-2.5 rounded-3 border" style="font-size: 0.85rem;">' +
+              '<div class="col-6 col-md-3"><strong>NIP:</strong> <span class="text-secondary">' + (data.nip || '-') + '</span></div>' +
+              '<div class="col-6 col-md-3"><strong>TMT:</strong> <span class="text-secondary">' + (data.tmt || '-') + '</span></div>' +
+              '<div class="col-6 col-md-3"><strong>Posisi Lunas s.d:</strong> <span class="text-success fw-bold">' + data.lunasSampai + '</span></div>' +
+              '<div class="col-6 col-md-3"><strong>Posisi Bulan Ini:</strong> <span class="text-dark fw-bold">' + data.bulanIniStr + '</span></div>' +
             '</div>';
 
       if (data.rincianTunggakan && data.rincianTunggakan.length > 0) {
-        html += '<h6 class="fw-bold text-navy border-top pt-3 mb-2"><i class="fa-solid fa-list-check me-2"></i>Rincian Belum Dibayar:</h6><div class="mb-3">';
+        html += '<h6 class="fw-bold text-navy pt-2 mb-2" style="font-size: 0.9rem;"><i class="fa-solid fa-list-check me-1.5 text-primary"></i>Rincian Belum Dibayar:</h6><div class="mb-2">';
         data.rincianTunggakan.forEach(function(r) {
           var monthlyHtml = "";
           if (r.detailBulan && r.detailBulan.length > 0) {
             r.detailBulan.forEach(function(bln) {
               monthlyHtml += 
-                '<div class="col-12 col-md-6">' +
-                  '<div class="p-2 px-3 bg-light rounded-3 d-flex justify-content-between align-items-center border-start border-3 border-danger shadow-sm mb-1">' +
-                    '<span class="fw-medium text-dark text-nowrap" style="font-size: 0.92rem;"><i class="fa-regular fa-calendar-check me-2 text-primary"></i>' + bln.namaBulan + '</span>' +
-                    '<span class="fw-bold text-danger text-nowrap ms-2" style="font-size: 0.92rem;">Rp ' + bln.nominal.toLocaleString('id-ID') + '</span>' +
+                '<div class="col-12 col-md-4 col-lg-3">' +
+                  '<div class="p-1.5 px-2 bg-light rounded-2 d-flex justify-content-between align-items-center border-start border-3 border-danger mb-1" style="font-size: 0.8rem;">' +
+                    '<span class="fw-medium text-dark text-nowrap"><i class="fa-regular fa-calendar-check me-1 text-primary"></i>' + bln.namaBulan + '</span>' +
+                    '<span class="fw-bold text-danger text-nowrap ms-1">Rp ' + bln.nominal.toLocaleString('id-ID') + '</span>' +
                   '</div>' +
                 '</div>';
             });
           }
 
-          html += '<div class="card border-0 mb-2 shadow-sm rounded-3 overflow-hidden">' +
-            '<div class="card-header bg-light p-3 d-flex justify-content-between align-items-center border-0" style="cursor: pointer;" onclick="toggleYearAccordionAdmin(' + r.tahun + ')">' +
-              '<div class="d-flex align-items-center">' +
-                '<i class="fa-solid fa-chevron-right text-primary me-2 transition-icon" id="iconYearAdmin-' + r.tahun + '"></i>' +
+          html += '<div class="card border mb-2 shadow-sm rounded-3 overflow-hidden">' +
+            '<div class="card-header bg-light p-2.5 d-flex justify-content-between align-items-center border-0" style="cursor: pointer;" onclick="toggleYearAccordionAdmin(' + r.tahun + ')">' +
+              '<div class="d-flex align-items-center" style="font-size: 0.88rem;">' +
+                '<i class="fa-solid fa-chevron-right text-primary me-2 transition-icon" id="iconYearAdmin-' + r.tahun + '" style="font-size: 0.75rem;"></i>' +
                 '<div>' +
-                  '<strong class="fs-5 text-dark">Tahun ' + r.tahun + '</strong>' +
-                  '<span class="text-dark fw-bold ms-2" style="font-size: 1.05rem;">(' + r.rentangBulan + ')</span>' +
+                  '<strong class="text-dark">Tahun ' + r.tahun + '</strong>' +
+                  '<span class="text-secondary fw-semibold ms-2" style="font-size: 0.82rem;">(' + r.rentangBulan + ')</span>' +
                 '</div>' +
               '</div>' +
-              '<span class="badge bg-danger rounded-pill px-3 py-2 fs-6 fw-bold">Rp ' + r.total.toLocaleString('id-ID') + '</span>' +
+              '<span class="badge bg-danger rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.8rem;">Rp ' + r.total.toLocaleString('id-ID') + '</span>' +
             '</div>' +
-            '<div class="card-body bg-white p-3 border-top d-none" id="bodyYearAdmin-' + r.tahun + '">' +
-              '<p class="small text-muted fw-bold mb-2"><i class="fa-solid fa-circle-info me-1"></i> Rincian Iuran per Bulan Tahun ' + r.tahun + ':</p>' +
-              '<div class="row g-2">' + monthlyHtml + '</div>' +
+            '<div class="card-body bg-white p-2.5 border-top d-none" id="bodyYearAdmin-' + r.tahun + '">' +
+              '<p class="text-muted fw-semibold mb-2" style="font-size: 0.78rem;"><i class="fa-solid fa-circle-info me-1"></i> Rincian Iuran per Bulan Tahun ' + r.tahun + ':</p>' +
+              '<div class="row g-1.5">' + monthlyHtml + '</div>' +
             '</div>' +
           '</div>';
         });
@@ -2099,9 +2100,9 @@
       }
 
       html += 
-            '<div class="text-end mt-3 border-top pt-3">' +
-              '<button class="btn btn-success me-2" onclick="quickFillPembayaran(\'' + data.id + '\')"><i class="fa-solid fa-hand-holding-dollar me-1"></i> Input Pembayaran Orang Ini</button>' +
-              '<button class="btn btn-warning" onclick="quickFillSetoran(\'' + data.id + '\')"><i class="fa-solid fa-building-columns me-1"></i> Input Setoran Kas Orang Ini</button>' +
+            '<div class="text-end mt-2 border-top pt-2">' +
+              '<button class="btn btn-success btn-sm me-2 fw-semibold px-3 shadow-sm" onclick="quickFillPembayaran(\'' + data.id + '\')"><i class="fa-solid fa-hand-holding-dollar me-1"></i> Input Pembayaran</button>' +
+              '<button class="btn btn-warning btn-sm fw-semibold px-3 shadow-sm" onclick="quickFillSetoran(\'' + data.id + '\')"><i class="fa-solid fa-building-columns me-1"></i> Input Setoran Kas</button>' +
             '</div>' +
           '</div>' +
         '</div>';

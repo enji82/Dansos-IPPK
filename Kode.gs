@@ -192,10 +192,13 @@ function buildDetailStatusAnggota(foundRow, paguMap) {
     };
   });
 
+  var tmtVal = foundRow[5] ? (foundRow[5] instanceof Date ? Utilities.formatDate(foundRow[5], ss.getSpreadsheetTimeZone(), "yyyy-MM-dd") : String(foundRow[5])) : "-";
+
   return {
     id: idAnggota,
     nama: namaAnggota,
     nip: nip,
+    tmt: tmtVal,
     lunasSampai: (cutoffBayarBln > 0 && cutoffBayarThn > 0) ? (getNamaBulan(cutoffBayarBln) + " " + cutoffBayarThn) : "Belum Ada Catatan",
     totalTunggakan: totalTunggakan,
     rincianTunggakan: rincianTunggakanList,
