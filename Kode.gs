@@ -1282,6 +1282,7 @@ function getDataBelumSetor(pin) {
 
       var nama = row[1] || "-";
       var nip = row[2] ? String(row[2]) : "-";
+      var noKode = row[13] ? String(row[13]) : "-";
 
       var bayarBln = Number(row[8]) || 0;
       var bayarThn = Number(row[9]) || 0;
@@ -1352,6 +1353,7 @@ function getDataBelumSetor(pin) {
           id: id,
           nama: nama,
           nip: nip,
+          noKode: noKode,
           bulanAwal: bulanAwalStr,
           bulanAkhir: bulanAkhirStr,
           jumlahBulan: jumlahBulan,
