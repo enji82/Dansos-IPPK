@@ -1111,8 +1111,7 @@ function getDataBelumSetor(pin) {
           startThn = setorThn + 1;
         }
       } else {
-        var paguYears = Object.keys(paguMap).map(function(k) { return parseInt(k.split("_")[0]); }).filter(Boolean);
-        startThn = paguYears.length > 0 ? Math.min.apply(null, paguYears) : bayarThn;
+        startThn = bayarThn;
         startBln = 1;
       }
 
@@ -1230,8 +1229,7 @@ function getDataInputSetor(pin) {
             startThn = setorThn + 1;
           }
         } else {
-          var paguYears = Object.keys(paguMap).map(function(k) { return parseInt(k.split("_")[0]); }).filter(Boolean);
-          startThn = paguYears.length > 0 ? Math.min.apply(null, paguYears) : bayarThn;
+          startThn = bayarThn;
           startBln = 1;
         }
 
