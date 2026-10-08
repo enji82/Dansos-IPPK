@@ -1706,7 +1706,65 @@ function getDashboardStats(pin) {
       }
     }
 
-    // 2. Data Kas Masuk
+    // 2. Data Belum Setor ke DISDIKBUD (Berdasarkan posisi cutoff bayar vs setor seluruh anggota)
+    var paguMap = getMatrixPaguMap();
+    var totalBelumSetorAkurat = 0;
+    var countAnggotaBelumSetor = 0;
+
+    for (var a = 1; a < dataA.length; a++) {
+      var rowA = dataA[a];
+      if (!rowA[0]) continue;
+
+      var bBln = Number(rowA[8]) || 0;
+      var bThn = Number(rowA[9]) || 0;
+      var sBln = Number(rowA[10]) || 0;
+      var sThn = Number(rowA[11]) || 0;
+
+      if (bThn === 0 || bBln === 0) continue;
+
+      var bVal = bThn * 12 + bBln;
+      var sVal = (sThn > 0 && sBln > 0) ? (sThn * 12 + sBln) : 0;
+
+      if (sVal >= bVal) continue;
+
+      var stBln = 1;
+      var stThn = bThn;
+      if (sVal > 0) {
+        stBln = sBln + 1;
+        stThn = sThn;
+        if (stBln > 12) {
+          stBln = 1;
+          stThn = sThn + 1;
+        }
+      } else {
+        stThn = bThn;
+        stBln = 1;
+      }
+
+      var edThn = bThn;
+      var edBln = bBln;
+
+      var cY = stThn;
+      var cM = stBln;
+      var totalNomAnggota = 0;
+
+      while (cY < edThn || (cY === edThn && cM <= edBln)) {
+        var keyNom = cY + "_" + cM;
+        totalNomAnggota += Number(paguMap[keyNom]) || 30000;
+        cM++;
+        if (cM > 12) {
+          cM = 1;
+          cY++;
+        }
+      }
+
+      if (totalNomAnggota > 0) {
+        totalBelumSetorAkurat += totalNomAnggota;
+        countAnggotaBelumSetor++;
+      }
+    }
+
+    // 3. Data Kas Masuk Ter-input (dari Riwayat Sistem)
     var totalKasMasuk = 0;
     var countTrxMasuk = 0;
     if (sheetMasuk) {
@@ -1719,7 +1777,7 @@ function getDashboardStats(pin) {
       }
     }
 
-    // 3. Data Kas Setor (ke Bendahara DISDIKBUD)
+    // 4. Data Kas Setor ke DISDIKBUD (dari Riwayat Sistem)
     var totalKasSetor = 0;
     var countTrxSetor = 0;
     if (sheetSetor) {
@@ -1745,7 +1803,9 @@ function getDashboardStats(pin) {
       countTrxMasuk: countTrxMasuk,
       totalKasSetor: totalKasSetor,
       countTrxSetor: countTrxSetor,
-      saldoKasTersedia: saldoKasTersedia
+      saldoKasTersedia: saldoKasTersedia,
+      totalBelumSetorAkurat: totalBelumSetorAkurat,
+      countAnggotaBelumSetor: countAnggotaBelumSetor
     };
   } catch (err) {
     return { success: false, message: "Gagal mengambil data dashboard: " + err.message };

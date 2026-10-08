@@ -435,27 +435,27 @@
             <!-- Dashboard Content Container -->
             <div id="dashContent" class="d-none">
               <!-- CARDS 1: REKAP KAS PENITIPAN -->
-              <h6 class="fw-bold text-navy mb-3"><i class="fa-solid fa-wallet me-2 text-success"></i> Status Arus Kas Penitipan (Rp)</h6>
+              <h6 class="fw-bold text-navy mb-3"><i class="fa-solid fa-wallet me-2 text-success"></i> Status Arus Kas & Dana Penitipan (Rp)</h6>
               <div class="row g-3 mb-4">
                 <div class="col-12 col-md-4">
+                  <div class="card border-0 bg-danger bg-opacity-10 p-3 rounded-4 border-start border-4 border-danger h-100 shadow-sm">
+                    <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 0.03em;">Total Belum Disetorkan ke DISDIKBUD</span>
+                    <h3 class="fw-bold text-danger mb-1 mt-2" id="dashTotalBelumSetor">Rp 0</h3>
+                    <span class="small text-secondary" id="dashCountBelumSetor"><i class="fa-solid fa-user-clock me-1"></i>0 Anggota Memiliki Tunggakan Setor</span>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
                   <div class="card border-0 bg-success bg-opacity-10 p-3 rounded-4 border-start border-4 border-success h-100 shadow-sm">
-                    <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 0.03em;">Total Iuran Dititipkan (Masuk)</span>
+                    <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 0.03em;">Iuran Masuk (Tercatat di Web)</span>
                     <h3 class="fw-bold text-success mb-1 mt-2" id="dashTotalMasuk">Rp 0</h3>
                     <span class="small text-secondary" id="dashCountMasuk"><i class="fa-solid fa-receipt me-1"></i>0 Transaksi Masuk</span>
                   </div>
                 </div>
                 <div class="col-12 col-md-4">
                   <div class="card border-0 bg-warning bg-opacity-10 p-3 rounded-4 border-start border-4 border-warning h-100 shadow-sm">
-                    <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 0.03em;">Total Disetorkan ke DISDIKBUD</span>
+                    <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 0.03em;">Total Disetorkan (Tercatat di Web)</span>
                     <h3 class="fw-bold text-warning mb-1 mt-2" id="dashTotalSetor">Rp 0</h3>
-                    <span class="small text-secondary" id="dashCountSetor"><i class="fa-solid fa-paper-plane me-1"></i>0 Posis Penyetoran</span>
-                  </div>
-                </div>
-                <div class="col-12 col-md-4">
-                  <div class="card border-0 bg-primary bg-opacity-10 p-3 rounded-4 border-start border-4 border-primary h-100 shadow-sm">
-                    <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 0.03em;">Saldo Kas di Pengurus (Tersedia)</span>
-                    <h3 class="fw-bold text-primary mb-1 mt-2" id="dashSaldoTersedia">Rp 0</h3>
-                    <span class="small text-secondary"><i class="fa-solid fa-building-columns me-1"></i>Belum Disetorkan ke Kas Besar</span>
+                    <span class="small text-secondary" id="dashCountSetor"><i class="fa-solid fa-paper-plane me-1"></i>0 Penyetoran Kas</span>
                   </div>
                 </div>
               </div>
@@ -2330,13 +2330,14 @@
         if (loader) loader.classList.add("d-none");
         if (res && res.success) {
           if (content) content.classList.remove("d-none");
+          document.getElementById("dashTotalBelumSetor").textContent = "Rp " + (res.totalBelumSetorAkurat || 0).toLocaleString('id-ID');
+          document.getElementById("dashCountBelumSetor").innerHTML = '<i class="fa-solid fa-user-clock me-1"></i>' + (res.countAnggotaBelumSetor || 0) + ' Anggota Belum Disetorkan';
+
           document.getElementById("dashTotalMasuk").textContent = "Rp " + res.totalKasMasuk.toLocaleString('id-ID');
-          document.getElementById("dashCountMasuk").innerHTML = '<i class="fa-solid fa-receipt me-1"></i>' + res.countTrxMasuk + ' Transaksi Masuk';
+          document.getElementById("dashCountMasuk").innerHTML = '<i class="fa-solid fa-receipt me-1"></i>' + res.countTrxMasuk + ' Transaksi Masuk Baru';
 
           document.getElementById("dashTotalSetor").textContent = "Rp " + res.totalKasSetor.toLocaleString('id-ID');
-          document.getElementById("dashCountSetor").innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i>' + res.countTrxSetor + ' Penyetoran Kas';
-
-          document.getElementById("dashSaldoTersedia").textContent = "Rp " + res.saldoKasTersedia.toLocaleString('id-ID');
+          document.getElementById("dashCountSetor").innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i>' + res.countTrxSetor + ' Penyetoran Baru';
 
           document.getElementById("dashTotalAnggota").textContent = res.totalAnggota;
           document.getElementById("dashTotalAktif").textContent = res.totalAktif;
