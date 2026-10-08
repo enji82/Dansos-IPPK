@@ -770,9 +770,8 @@
                     <tr>
                       <th class="sticky-col-1" style="width: 45px;">No.</th>
                       <th class="sticky-col-2">Nama</th>
-                      <th>NIP</th>
-                      <th>TMT</th>
-                      <th id="thPembayaranTerakhir">Pembayaran Terakhir</th>
+                      <th>NO. KODE</th>
+                      <th id="thPembayaranTerakhir">Bayar Terakhir</th>
                       <th style="width: 65px;">Jan</th>
                       <th style="width: 65px;">Feb</th>
                       <th style="width: 65px;">Mar</th>
@@ -2953,7 +2952,7 @@
       var tfoot = document.getElementById("tfootDataPembayaran");
       var totalInfo = document.getElementById("matrixTotalInfo");
 
-      document.getElementById("thPembayaranTerakhir").textContent = "Pembayaran Terakhir (" + res.tahun + ")";
+      document.getElementById("thPembayaranTerakhir").textContent = "Bayar Terakhir (" + res.tahun + ")";
       totalInfo.textContent = "Total " + res.tahun + ": Rp " + res.grandTotal.toLocaleString('id-ID');
 
       var searchKw = (document.getElementById("filterPembayaranSearch").value || "").trim().toLowerCase();
@@ -2962,14 +2961,14 @@
       if (searchKw) {
         filteredList = res.data.filter(function(row) {
           return String(row.nama||'').toLowerCase().includes(searchKw) || 
-                 String(row.nip||'').toLowerCase().includes(searchKw) || 
+                 String(row.noKode||row.nip||'').toLowerCase().includes(searchKw) || 
                  String(row.id||'').toLowerCase().includes(searchKw);
         });
       }
 
       tbody.innerHTML = "";
       if (filteredList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="18" class="text-center text-muted py-3">Tidak ada data anggota / pembayaran cocok.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="17" class="text-center text-muted py-3">Tidak ada data anggota / pembayaran cocok.</td></tr>';
         tfoot.innerHTML = "";
         return;
       }
@@ -2982,8 +2981,7 @@
         var htmlRow = '<tr class="align-middle">' +
           '<td class="text-center sticky-col-1">' + (idx + 1) + '</td>' +
           '<td class="sticky-col-2"><strong class="text-navy">' + row.nama + '</strong></td>' +
-          '<td class="text-secondary small">' + row.nip + '</td>' +
-          '<td class="text-secondary small text-center">' + row.tmt + '</td>' +
+          '<td class="text-secondary small">' + (row.noKode || row.nip || '-') + '</td>' +
           '<td class="text-center"><span class="badge bg-light text-dark border">' + row.pembayaranTerakhir + '</span></td>';
 
         monthKeys.forEach(function(mKey, mIdx) {
@@ -3003,7 +3001,7 @@
       // Render Baris Jumlah di Paling Bawah (tfoot)
       var tfootHtml = '<tr>' +
         '<td colspan="2" class="text-center fw-bold fs-6 sticky-col-footer">JUMLAH TOTAL</td>' +
-        '<td colspan="3" class="text-end fw-bold text-muted"></td>';
+        '<td colspan="2" class="text-end fw-bold text-muted"></td>';
       monthKeys.forEach(function(mKey) {
         var totM = colTotals[mKey];
         tfootHtml += '<td class="text-end fw-bold ' + (totM > 0 ? 'text-success' : 'text-muted') + '">' + (totM > 0 ? totM.toLocaleString('id-ID') : '0') + '</td>';
