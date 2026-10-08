@@ -117,6 +117,7 @@ function getMatrixPaguMap() {
  * HELPER: Menghitung Detail Status & Tunggakan Anggota
  */
 function buildDetailStatusAnggota(foundRow, paguMap) {
+  var ss = getSS();
   var idAnggota = foundRow[0];
   var namaAnggota = foundRow[1];
   var nip = foundRow[2];

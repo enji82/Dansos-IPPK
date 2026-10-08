@@ -1901,19 +1901,23 @@
       var selMasuk = document.getElementById("masukAnggota");
       var selSetor = document.getElementById("setorAnggota");
 
-      selMasuk.innerHTML = '<option value="">-- Pilih Anggota --</option>';
-      selSetor.innerHTML = '<option value="">-- Pilih Anggota --</option>';
+      if (selMasuk && selMasuk.tagName === 'SELECT') selMasuk.innerHTML = '<option value="">-- Pilih Anggota --</option>';
+      if (selSetor && selSetor.tagName === 'SELECT') selSetor.innerHTML = '<option value="">-- Pilih Anggota --</option>';
 
       globalAnggotaList.forEach(function(a) {
-        var opt1 = document.createElement("option");
-        opt1.value = a.id;
-        opt1.textContent = a.id + " - " + a.nama + " (" + a.nip + ")";
-        selMasuk.appendChild(opt1);
+        if (selMasuk && selMasuk.tagName === 'SELECT') {
+          var opt1 = document.createElement("option");
+          opt1.value = a.id;
+          opt1.textContent = a.id + " - " + a.nama + " (" + a.nip + ")";
+          selMasuk.appendChild(opt1);
+        }
 
-        var opt2 = document.createElement("option");
-        opt2.value = a.id;
-        opt2.textContent = a.id + " - " + a.nama + " (" + a.nip + ")";
-        selSetor.appendChild(opt2);
+        if (selSetor && selSetor.tagName === 'SELECT') {
+          var opt2 = document.createElement("option");
+          opt2.value = a.id;
+          opt2.textContent = a.id + " - " + a.nama + " (" + a.nip + ")";
+          selSetor.appendChild(opt2);
+        }
       });
     }
 
