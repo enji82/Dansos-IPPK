@@ -1388,11 +1388,9 @@ function batalSetorKasAnggota(pin, payload) {
     var idAnggota = payload.idAnggota;
     if (!idAnggota) return { success: false, message: "ID Anggota tidak valid!" };
 
-    var targetBln = Number(payload.targetBln) || 0;
-    var targetThn = Number(payload.targetThn) || 0;
-
     var ss = getSS();
     var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
+    var sheetSetor = ss.getSheetByName(SHEET_SETOR);
     if (!sheetAnggota) return { success: false, message: "Sheet Master_Anggota tidak ditemukan!" };
 
     var dataAnggota = sheetAnggota.getDataRange().getValues();
@@ -1411,14 +1409,51 @@ function batalSetorKasAnggota(pin, payload) {
       return { success: false, message: "Data Anggota tidak ditemukan!" };
     }
 
-    // Update Master_Anggota: Setor Terakhir Bulan (kolom 11), Setor Terakhir Tahun (kolom 12)
-    sheetAnggota.getRange(targetRowIdx, 11, 1, 2).setValues([[targetBln, targetThn]]);
+    var prevBln = 0;
+    var prevThn = 0;
 
-    var statusStr = (targetThn > 0 && targetBln > 0) ? (getNamaBulan(targetBln) + " " + targetThn) : "Belum Ada Setoran";
+    // Cari riwayat penyetoran anggota di Transaksi_Setor
+    if (sheetSetor) {
+      var dataSetor = sheetSetor.getDataRange().getValues();
+      var lastTrxRowIdx = -1;
+
+      // Cari baris transaksi setoran paling akhir untuk anggota ini
+      for (var r = dataSetor.length - 1; r >= 1; r--) {
+        if (String(dataSetor[r][2]) === String(idAnggota)) {
+          lastTrxRowIdx = r + 1;
+          break;
+        }
+      }
+
+      // Hapus transaksi penyetoran paling akhir tersebut (rollback transaksi)
+      if (lastTrxRowIdx > -1) {
+        sheetSetor.deleteRow(lastTrxRowIdx);
+      }
+
+      // Cari transaksi penyetoran SEBELUMNYA jika ada
+      dataSetor = sheetSetor.getDataRange().getValues(); // Refresh data setelah deleteRow
+      for (var r2 = dataSetor.length - 1; r2 >= 1; r2--) {
+        if (String(dataSetor[r2][2]) === String(idAnggota)) {
+          // Kolom 5 = Tahun Sampai (index 5), Kolom 7 = Bulan Sampai (index 7)
+          prevThn = Number(dataSetor[r2][5]) || 0;
+          prevBln = Number(dataSetor[r2][7]) || 0;
+          break;
+        }
+      }
+    }
+
+    // Jika payload menyediakan targetBln/targetThn yang spesifik > 0, gunakan nilai tersebut
+    var finalBln = (Number(payload.targetBln) > 0) ? Number(payload.targetBln) : prevBln;
+    var finalThn = (Number(payload.targetThn) > 0) ? Number(payload.targetThn) : prevThn;
+
+    // Update Master_Anggota: Setor Terakhir Bulan (kolom 11), Setor Terakhir Tahun (kolom 12)
+    sheetAnggota.getRange(targetRowIdx, 11, 1, 2).setValues([[finalBln, finalThn]]);
+
+    var statusStr = (finalThn > 0 && finalBln > 0) ? (getNamaBulan(finalBln) + " " + finalThn) : "Belum Ada Setoran";
 
     return {
       success: true,
-      message: "Setoran kas anggota " + namaAnggota + " berhasil dikembalikan ke posisi: " + statusStr
+      message: "Setoran kas anggota " + namaAnggota + " berhasil dibatalkan dan dikembalikan ke posisi: " + statusStr
     };
   } catch (err) {
     return { success: false, message: "Gagal membatalkan setoran: " + err.toString() };
