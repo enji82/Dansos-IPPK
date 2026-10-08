@@ -2596,8 +2596,8 @@
           '<td><strong class="text-info">Rp ' + (a.saldoDeposit || 0).toLocaleString('id-ID') + '</strong></td>' +
           '<td><span class="badge ' + statusInfo.badgeClass + ' px-2 py-1 fw-semibold">' + statusInfo.label + '</span></td>' +
           '<td class="text-center text-nowrap">' +
-            '<button class="btn btn-outline-primary btn-sm me-1" onclick="openEditAnggotaModal(' + a.id + ')" title="Edit Anggota"><i class="fa-solid fa-pen-to-square"></i> Edit</button>' +
-            '<button class="btn btn-outline-danger btn-sm" onclick="confirmHapusAnggota(' + a.id + ', \'' + escapeQuotes(a.nama) + '\')" title="Hapus Anggota"><i class="fa-solid fa-trash"></i> Hapus</button>' +
+            '<button class="btn btn-outline-primary btn-sm me-1" onclick="openEditAnggotaModal(\'' + escapeQuotes(String(a.id)) + '\')" title="Edit Anggota"><i class="fa-solid fa-pen-to-square"></i> Edit</button>' +
+            '<button class="btn btn-outline-danger btn-sm" onclick="confirmHapusAnggota(\'' + escapeQuotes(String(a.id)) + '\', \'' + escapeQuotes(a.nama) + '\')" title="Hapus Anggota"><i class="fa-solid fa-trash"></i> Hapus</button>' +
           '</td>';
         tbody.appendChild(tr);
       });
