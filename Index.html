@@ -2741,25 +2741,35 @@
             didOpen: function() { Swal.showLoading(); }
           });
 
-          google.script.run.withSuccessHandler(function(res) {
-            if (res.success) {
-              Swal.fire({
-                icon: 'success',
-                title: 'Setoran Berhasil',
-                text: res.message,
-                confirmButtonColor: '#1F4E79'
-              });
-              loadDataInputSetorAdmin();
-              loadPublicAnggotaList();
-            } else {
+          google.script.run
+            .withSuccessHandler(function(res) {
+              if (res.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Setoran Berhasil',
+                  text: res.message,
+                  confirmButtonColor: '#1F4E79'
+                });
+                loadDataInputSetorAdmin();
+                loadPublicAnggotaList();
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Gagal Setor',
+                  text: res.message,
+                  confirmButtonColor: '#1F4E79'
+                });
+              }
+            })
+            .withFailureHandler(function(err) {
               Swal.fire({
                 icon: 'error',
-                title: 'Gagal Setor',
-                text: res.message,
+                title: 'Gagal Memproses Setoran',
+                text: err.message || err.toString(),
                 confirmButtonColor: '#1F4E79'
               });
-            }
-          }).processSetorKasAnggota(currentAdminPin, result.value);
+            })
+            .processSetorKasAnggota(currentAdminPin, result.value);
         }
       });
     }
@@ -2801,25 +2811,35 @@
             didOpen: function() { Swal.showLoading(); }
           });
 
-          google.script.run.withSuccessHandler(function(res) {
-            if (res.success) {
-              Swal.fire({
-                icon: 'success',
-                title: 'Batal Setor Berhasil',
-                text: res.message,
-                confirmButtonColor: '#1F4E79'
-              });
-              loadDataInputSetorAdmin();
-              loadPublicAnggotaList();
-            } else {
+          google.script.run
+            .withSuccessHandler(function(res) {
+              if (res.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Batal Setor Berhasil',
+                  text: res.message,
+                  confirmButtonColor: '#1F4E79'
+                });
+                loadDataInputSetorAdmin();
+                loadPublicAnggotaList();
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Gagal Membatalkan',
+                  text: res.message,
+                  confirmButtonColor: '#1F4E79'
+                });
+              }
+            })
+            .withFailureHandler(function(err) {
               Swal.fire({
                 icon: 'error',
-                title: 'Gagal Membatalkan',
-                text: res.message,
+                title: 'Gagal Membatalkan Setoran',
+                text: err.message || err.toString(),
                 confirmButtonColor: '#1F4E79'
               });
-            }
-          }).batalSetorKasAnggota(currentAdminPin, payload);
+            })
+            .batalSetorKasAnggota(currentAdminPin, payload);
         }
       });
     }

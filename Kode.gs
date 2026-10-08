@@ -1311,20 +1311,16 @@ function getDataInputSetor(pin) {
  * PROSES SETOR KAS ANGGOTA (Setor Seluruhnya / Setor Bulanan)
  */
 function processSetorKasAnggota(pin, payload) {
-  var authCheck = verifyAdminPin(pin);
-  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
-
   try {
-    var ss = getSS();
-    var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
-    var sheetSetor = ss.getSheetByName(SHEET_SETOR);
-    if (!sheetAnggota || !sheetSetor) {
-      return { success: false, message: "Sheet Master_Anggota atau Transaksi_Setor tidak ditemukan!" };
-    }
+    var authCheck = verifyAdminPin(pin);
+    if (!authCheck.success) return { success: false, message: "Akses Ditolak: PIN Admin tidak valid!" };
 
+    payload = payload || {};
     var idAnggota = payload.idAnggota;
-    var targetBln = Number(payload.targetBln);
-    var targetThn = Number(payload.targetThn);
+    if (!idAnggota) return { success: false, message: "ID Anggota tidak valid!" };
+
+    var targetBln = Number(payload.targetBln) || 0;
+    var targetThn = Number(payload.targetThn) || 0;
     var nominalDisetor = Number(payload.nominal) || 0;
     var bDari = Number(payload.bDari) || targetBln;
     var bSampai = Number(payload.bSampai) || targetBln;
@@ -1332,6 +1328,13 @@ function processSetorKasAnggota(pin, payload) {
     var thnSampai = Number(payload.thnSampai) || targetThn;
     var penerima = payload.penerima || "Bendahara";
     var catatan = payload.catatan || "Setoran Kas Anggota";
+
+    var ss = getSS();
+    var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
+    var sheetSetor = ss.getSheetByName(SHEET_SETOR);
+    if (!sheetAnggota || !sheetSetor) {
+      return { success: false, message: "Sheet Master_Anggota atau Transaksi_Setor tidak ditemukan!" };
+    }
 
     var dataAnggota = sheetAnggota.getDataRange().getValues();
     var namaAnggota = "";
@@ -1379,17 +1382,20 @@ function processSetorKasAnggota(pin, payload) {
  * PROSES BATAL SETOR KAS ANGGOTA (MENGEMBALIKAN POSISI SETOR TERAKHIR)
  */
 function batalSetorKasAnggota(pin, payload) {
-  var authCheck = verifyAdminPin(pin);
-  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
-
   try {
+    var authCheck = verifyAdminPin(pin);
+    if (!authCheck.success) return { success: false, message: "Akses Ditolak: PIN Admin tidak valid!" };
+
+    payload = payload || {};
+    var idAnggota = payload.idAnggota;
+    if (!idAnggota) return { success: false, message: "ID Anggota tidak valid!" };
+
+    var targetBln = Number(payload.targetBln) || 0;
+    var targetThn = Number(payload.targetThn) || 0;
+
     var ss = getSS();
     var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
     if (!sheetAnggota) return { success: false, message: "Sheet Master_Anggota tidak ditemukan!" };
-
-    var idAnggota = payload.idAnggota;
-    var targetBln = Number(payload.targetBln) || 0;
-    var targetThn = Number(payload.targetThn) || 0;
 
     var dataAnggota = sheetAnggota.getDataRange().getValues();
     var namaAnggota = "";
