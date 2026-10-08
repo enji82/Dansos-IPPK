@@ -97,9 +97,22 @@
     #adminSection .card-custom {
       padding: 1.25rem !important;
     }
+    @media (max-width: 576px) {
+      #adminSection .card-custom {
+        padding: 0.85rem !important;
+      }
+    }
     #adminSection .nav-pills .nav-link {
-      font-size: 0.88rem !important;
-      padding: 7px 12px !important;
+      font-size: 0.85rem !important;
+      padding: 6px 12px !important;
+      white-space: nowrap;
+    }
+    .admin-tabs-wrapper #adminTabs::-webkit-scrollbar {
+      height: 3px;
+    }
+    .admin-tabs-wrapper #adminTabs::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
     }
     #adminSection table {
       font-size: 0.875rem !important;
@@ -215,15 +228,19 @@
 <body>
 
   <!-- NAVBAR HEADER -->
-  <nav class="navbar navbar-dark navbar-custom mb-4 shadow-sm">
-    <div class="container">
-      <span class="navbar-brand mb-0 h1 fw-bold"><i class="fa-solid fa-wallet me-2"></i> Dana Sosial Setia Kawan Kecamatan Secang</span>
-      <button class="btn btn-outline-light btn-sm fw-semibold" id="btnAdminAuth" onclick="openLoginModal()">
-        <i class="fa-solid fa-lock me-1"></i> Akses Admin
-      </button>
-      <button class="btn btn-danger btn-sm d-none fw-semibold" id="btnLogout" onclick="logoutAdmin()">
-        <i class="fa-solid fa-right-from-bracket me-1"></i> Keluar Admin
-      </button>
+  <nav class="navbar navbar-dark navbar-custom mb-3 mb-md-4 shadow-sm py-2">
+    <div class="container d-flex align-items-center justify-content-between">
+      <span class="navbar-brand mb-0 h1 fw-bold fs-6 fs-md-5 me-2 text-truncate" style="max-width: 68%;">
+        <i class="fa-solid fa-wallet me-1 me-md-2"></i> Dana Sosial Setia Kawan Secang
+      </span>
+      <div class="d-flex align-items-center">
+        <button class="btn btn-outline-light btn-sm fw-semibold py-1 px-2" id="btnAdminAuth" onclick="openLoginModal()">
+          <i class="fa-solid fa-lock me-1"></i> Akses Admin
+        </button>
+        <button class="btn btn-danger btn-sm d-none fw-semibold py-1 px-2" id="btnLogout" onclick="logoutAdmin()">
+          <i class="fa-solid fa-right-from-bracket me-1"></i> Keluar
+        </button>
+      </div>
     </div>
   </nav>
 
@@ -322,49 +339,51 @@
     <!-- SECTION 2: PANEL ADMIN (KHUSUS ADMIN TERAUTENTIKASI) -->
     <div id="adminSection" class="d-none">
       
-      <!-- NAV TABS 6 MENU ADMIN -->
-      <ul class="nav nav-pills nav-fill mb-3 p-1.5 bg-white rounded-3 border shadow-sm" id="adminTabs" role="tablist">
-        <li class="nav-item me-1 mb-1 mb-md-0">
-          <button class="nav-link active fw-bold py-2 px-2" id="tab-cek" data-bs-toggle="tab" data-bs-target="#panelCek" onclick="onSwitchAdminTab('cek')">
-            <i class="fa-solid fa-magnifying-glass me-1 text-primary"></i>Cek Pembayaran
-          </button>
-        </li>
-        <li class="nav-item me-1 mb-1 mb-md-0">
-          <button class="nav-link fw-bold py-2 px-2" id="tab-masuk" data-bs-toggle="tab" data-bs-target="#panelMasuk" onclick="onSwitchAdminTab('masuk')">
-            <i class="fa-solid fa-hand-holding-dollar me-1 text-success"></i>Input Pembayaran
-          </button>
-        </li>
-        <li class="nav-item me-1 mb-1 mb-md-0">
-          <button class="nav-link fw-bold py-2 px-2" id="tab-setor" data-bs-toggle="tab" data-bs-target="#panelSetor" onclick="onSwitchAdminTab('setor')">
-            <i class="fa-solid fa-building-columns me-1 text-warning"></i>Input Setoran
-          </button>
-        </li>
-        <li class="nav-item me-1 mb-1 mb-md-0">
-          <button class="nav-link fw-bold py-2 px-2" id="tab-pembayaran" data-bs-toggle="tab" data-bs-target="#panelPembayaran" onclick="onSwitchAdminTab('pembayaran')">
-            <i class="fa-solid fa-table-list me-1 text-teal" style="color: #0d6efd;"></i>Data Pembayaran
-          </button>
-        </li>
-        <li class="nav-item me-1 mb-1 mb-md-0">
-          <button class="nav-link fw-bold py-2 px-2" id="tab-belum-setor" data-bs-toggle="tab" data-bs-target="#panelBelumSetor" onclick="onSwitchAdminTab('belum-setor')">
-            <i class="fa-solid fa-file-circle-exclamation me-1 text-warning"></i>Data Belum Setor
-          </button>
-        </li>
-        <li class="nav-item me-1 mb-1 mb-md-0">
-          <button class="nav-link fw-bold py-2 px-2" id="tab-riwayat" data-bs-toggle="tab" data-bs-target="#panelRiwayat" onclick="onSwitchAdminTab('riwayat')">
-            <i class="fa-solid fa-clock-rotate-left me-1 text-purple" style="color: #6f42c1;"></i>Riwayat Pembayaran
-          </button>
-        </li>
-        <li class="nav-item me-1 mb-1 mb-md-0">
-          <button class="nav-link fw-bold py-2 px-2" id="tab-anggota" data-bs-toggle="tab" data-bs-target="#panelAnggota" onclick="onSwitchAdminTab('anggota')">
-            <i class="fa-solid fa-users me-1 text-info"></i>Data Anggota
-          </button>
-        </li>
-        <li class="nav-item mb-1 mb-md-0">
-          <button class="nav-link fw-bold py-2 px-2" id="tab-laporan" data-bs-toggle="tab" data-bs-target="#panelLaporan" onclick="onSwitchAdminTab('laporan')">
-            <i class="fa-solid fa-print me-1 text-danger"></i>Cetak Laporan
-          </button>
-        </li>
-      </ul>
+      <!-- NAV TABS 8 MENU ADMIN (Scroll Horizontal Rapi di HP) -->
+      <div class="admin-tabs-wrapper mb-3 shadow-sm rounded-3 bg-white p-1 border">
+        <ul class="nav nav-pills flex-nowrap text-nowrap overflow-auto py-1" id="adminTabs" role="tablist" style="overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;">
+          <li class="nav-item me-1">
+            <button class="nav-link active fw-bold py-2 px-3" id="tab-cek" data-bs-toggle="tab" data-bs-target="#panelCek" onclick="onSwitchAdminTab('cek')">
+              <i class="fa-solid fa-magnifying-glass me-1 text-primary"></i>Cek Pembayaran
+            </button>
+          </li>
+          <li class="nav-item me-1">
+            <button class="nav-link fw-bold py-2 px-3" id="tab-masuk" data-bs-toggle="tab" data-bs-target="#panelMasuk" onclick="onSwitchAdminTab('masuk')">
+              <i class="fa-solid fa-hand-holding-dollar me-1 text-success"></i>Input Pembayaran
+            </button>
+          </li>
+          <li class="nav-item me-1">
+            <button class="nav-link fw-bold py-2 px-3" id="tab-setor" data-bs-toggle="tab" data-bs-target="#panelSetor" onclick="onSwitchAdminTab('setor')">
+              <i class="fa-solid fa-building-columns me-1 text-warning"></i>Input Setoran
+            </button>
+          </li>
+          <li class="nav-item me-1">
+            <button class="nav-link fw-bold py-2 px-3" id="tab-pembayaran" data-bs-toggle="tab" data-bs-target="#panelPembayaran" onclick="onSwitchAdminTab('pembayaran')">
+              <i class="fa-solid fa-table-list me-1" style="color: #0d6efd;"></i>Data Pembayaran
+            </button>
+          </li>
+          <li class="nav-item me-1">
+            <button class="nav-link fw-bold py-2 px-3" id="tab-belum-setor" data-bs-toggle="tab" data-bs-target="#panelBelumSetor" onclick="onSwitchAdminTab('belum-setor')">
+              <i class="fa-solid fa-file-circle-exclamation me-1 text-warning"></i>Data Belum Setor
+            </button>
+          </li>
+          <li class="nav-item me-1">
+            <button class="nav-link fw-bold py-2 px-3" id="tab-riwayat" data-bs-toggle="tab" data-bs-target="#panelRiwayat" onclick="onSwitchAdminTab('riwayat')">
+              <i class="fa-solid fa-clock-rotate-left me-1" style="color: #6f42c1;"></i>Riwayat
+            </button>
+          </li>
+          <li class="nav-item me-1">
+            <button class="nav-link fw-bold py-2 px-3" id="tab-anggota" data-bs-toggle="tab" data-bs-target="#panelAnggota" onclick="onSwitchAdminTab('anggota')">
+              <i class="fa-solid fa-users me-1 text-info"></i>Data Anggota
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-bold py-2 px-3" id="tab-laporan" data-bs-toggle="tab" data-bs-target="#panelLaporan" onclick="onSwitchAdminTab('laporan')">
+              <i class="fa-solid fa-print me-1 text-danger"></i>Cetak Laporan
+            </button>
+          </li>
+        </ul>
+      </div>
 
       <div class="tab-content" id="adminTabsContent">
         
