@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistem Iuran Anggota</title>
+  <title>Dana Sosial Setia Kawan Kecamatan Secang</title>
   <!-- Google Fonts: Plus Jakarta Sans (Ramah Lansia) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -217,7 +217,7 @@
   <!-- NAVBAR HEADER -->
   <nav class="navbar navbar-dark navbar-custom mb-4 shadow-sm">
     <div class="container">
-      <span class="navbar-brand mb-0 h1 fw-bold"><i class="fa-solid fa-wallet me-2"></i> Sistem Iuran Anggota</span>
+      <span class="navbar-brand mb-0 h1 fw-bold"><i class="fa-solid fa-wallet me-2"></i> Dana Sosial Setia Kawan Kecamatan Secang</span>
       <button class="btn btn-outline-light btn-sm fw-semibold" id="btnAdminAuth" onclick="openLoginModal()">
         <i class="fa-solid fa-lock me-1"></i> Akses Admin
       </button>
@@ -275,14 +275,23 @@
                 </button>
               </div>
               <div class="card border-primary shadow-sm" style="border-radius: 14px; overflow: hidden;">
-                <div class="card-header bg-primary text-white p-3 d-flex justify-content-between align-items-center">
-                  <h5 class="mb-0 fw-bold" id="resNama" style="font-size: 1.2rem;">-</h5>
-                  <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-light text-dark px-2.5 py-1.5 fw-semibold" id="resNip" style="font-size: 0.85rem;">NIP: -</span>
-                    <span class="badge bg-light text-dark px-2.5 py-1.5 fw-semibold" id="resTmt" style="font-size: 0.85rem;">TMT: -</span>
-                  </div>
+                <div class="card-header bg-primary text-white p-3">
+                  <h5 class="mb-0 fw-bold" id="resNama" style="font-size: 1.25rem;">-</h5>
                 </div>
                 <div class="card-body p-4">
+                  <!-- Section Identitas Anggota -->
+                  <div class="bg-light p-3 rounded-3 border mb-4">
+                    <h6 class="fw-bold text-navy mb-3"><i class="fa-solid fa-id-card me-2 text-primary"></i> Identitas Anggota</h6>
+                    <div class="row g-2 text-start small">
+                      <div class="col-sm-6"><strong class="text-secondary">No. Kode (No. Kartu):</strong> <span id="resNoKode" class="fw-bold text-dark">-</span></div>
+                      <div class="col-sm-6"><strong class="text-secondary">NIP / ID Pensiun:</strong> <span id="resNipVal" class="fw-bold text-dark">-</span></div>
+                      <div class="col-sm-6"><strong class="text-secondary">Tanggal Lahir:</strong> <span id="resTglLahirVal" class="fw-bold text-dark">-</span></div>
+                      <div class="col-sm-6"><strong class="text-secondary">No. HP / WA:</strong> <span id="resNoHpVal" class="fw-bold text-dark">-</span></div>
+                      <div class="col-sm-6"><strong class="text-secondary">Status Anggota:</strong> <span id="resStatusBadge" class="badge bg-success fw-semibold">-</span></div>
+                      <div class="col-12"><strong class="text-secondary">Alamat Lengkap:</strong> <span id="resAlamatVal" class="fw-bold text-dark">-</span></div>
+                    </div>
+                  </div>
+
                   <div class="row text-center mb-3 g-3">
                     <div class="col-md-6 border-end mb-3 mb-md-0">
                       <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.02em;">Status Pembayaran Terakhir</span>
@@ -297,13 +306,8 @@
                   <!-- Rincian Kekurangan Per Tahun -->
                   <div id="resRincianContainer" class="border-top pt-3">
                     <h6 class="text-muted fw-bold mb-3 fs-6"><i class="fa-solid fa-list-check me-2"></i> Rincian Kekurangan per Tahun:</h6>
-                    <div id="resRincianList" class="list-group list-group-flush mb-3">
+                    <div id="resRincianList" class="list-group list-group-flush mb-1">
                       <!-- Populated by JS -->
-                    </div>
-                    <div class="text-end border-top pt-3">
-                      <button class="btn btn-outline-primary fw-bold px-4 rounded-pill shadow-sm" onclick="cetakRincianTunggakanDirect()">
-                        <i class="fa-solid fa-print me-2"></i> Cetak Rincian Tunggakan
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -1947,8 +1951,29 @@
     function renderDetailResult(data) {
       window.globalCurrentDetailData = data;
       document.getElementById("resNama").textContent = data.nama;
-      document.getElementById("resNip").textContent = "NIP: " + (data.nip || "-");
-      document.getElementById("resTmt").textContent = "TMT: " + (data.tmt || "-");
+      
+      // Populate Identitas fields
+      if (document.getElementById("resNoKode")) document.getElementById("resNoKode").textContent = data.noKode || "-";
+      if (document.getElementById("resNipVal")) document.getElementById("resNipVal").textContent = data.nip || "-";
+      if (document.getElementById("resTglLahirVal")) document.getElementById("resTglLahirVal").textContent = data.tglLahir || "-";
+      if (document.getElementById("resNoHpVal")) document.getElementById("resNoHpVal").textContent = data.noHp || "-";
+      if (document.getElementById("resAlamatVal")) document.getElementById("resAlamatVal").textContent = data.alamat || "-";
+
+      var badgeEl = document.getElementById("resStatusBadge");
+      if (badgeEl) {
+        var statusText = data.statusStr || "Aktif";
+        badgeEl.textContent = statusText;
+        if (statusText === "Wafat") {
+          badgeEl.className = "badge bg-dark text-white fw-semibold";
+        } else if (statusText === "Mengundurkan Diri" || statusText === "Keluar") {
+          badgeEl.className = "badge bg-danger text-white fw-semibold";
+        } else if (statusText.indexOf("Aktif") !== -1) {
+          badgeEl.className = "badge bg-success text-white fw-semibold";
+        } else {
+          badgeEl.className = "badge bg-secondary text-white fw-semibold";
+        }
+      }
+
       document.getElementById("resLunas").textContent = "Lunas s.d " + data.lunasSampai;
       document.getElementById("resBulanIni").textContent = data.bulanIniStr;
 

@@ -47,7 +47,7 @@ function getSS() {
 function doGet(e) {
   var template = HtmlService.createTemplateFromFile('Index');
   return template.evaluate()
-      .setTitle("Sistem Iuran Anggota & Setoran Kas")
+      .setTitle("Dana Sosial Setia Kawan Kecamatan Secang")
       .addMetaTag('viewport', 'width=device-width, initial-scale=1')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
@@ -193,6 +193,20 @@ function buildDetailStatusAnggota(foundRow, paguMap) {
     };
   });
 
+  var tglLahirVal = "-";
+  if (foundRow[3]) {
+    try {
+      var dTgl = (foundRow[3] instanceof Date) ? foundRow[3] : new Date(foundRow[3]);
+      if (!isNaN(dTgl.getTime())) {
+        tglLahirVal = dTgl.getDate() + " " + getNamaBulan(dTgl.getMonth() + 1) + " " + dTgl.getFullYear();
+      } else {
+        tglLahirVal = String(foundRow[3]);
+      }
+    } catch(eTgl) {
+      tglLahirVal = String(foundRow[3]);
+    }
+  }
+
   var tmtVal = "-";
   if (foundRow[5]) {
     try {
@@ -207,11 +221,31 @@ function buildDetailStatusAnggota(foundRow, paguMap) {
     }
   }
 
+  // Calculate status string
+  var statusOverride = foundRow[12] ? String(foundRow[12]).trim() : "";
+  var statusCalculated = "";
+  if (statusOverride === "Wafat" || statusOverride === "Mengundurkan Diri" || statusOverride === "Keluar") {
+    statusCalculated = statusOverride;
+  } else if (cutoffBayarThn >= currentYear) {
+    statusCalculated = "Aktif";
+  } else if (cutoffBayarThn === (currentYear - 1)) {
+    statusCalculated = "Aktif " + cutoffBayarThn;
+  } else if (cutoffBayarThn > 0) {
+    statusCalculated = "Aktif " + cutoffBayarThn;
+  } else {
+    statusCalculated = "Belum Bayar";
+  }
+
   return {
     id: idAnggota,
     nama: namaAnggota,
-    nip: nip,
+    nip: nip ? String(nip) : "-",
+    tglLahir: tglLahirVal,
+    alamat: foundRow[4] ? String(foundRow[4]) : "-",
     tmt: tmtVal,
+    noHp: foundRow[6] ? String(foundRow[6]) : "-",
+    noKode: foundRow[13] ? String(foundRow[13]) : "-",
+    statusStr: statusCalculated,
     lunasSampai: (cutoffBayarBln > 0 && cutoffBayarThn > 0) ? (getNamaBulan(cutoffBayarBln) + " " + cutoffBayarThn) : "Belum Ada Catatan",
     totalTunggakan: totalTunggakan,
     rincianTunggakan: rincianTunggakanList,
