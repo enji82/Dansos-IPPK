@@ -2245,47 +2245,66 @@
         return;
       }
 
-      var area = document.getElementById("printAreaRincian");
-      var previewArea = document.getElementById("modalRincianBodyPreview");
-
       var textBody = "";
-      textBody += '<div style="font-family: \'Courier New\', Courier, monospace; font-size: 13pt; color: #000; max-width: 170mm; margin: 0 auto; line-height: 1.4;">';
-      textBody += '<div style="text-align: center; font-weight: bold; font-size: 14pt;">DAFTAR KEKURANGAN PEMBAYARAN IURAN</div>';
-      textBody += '<div style="text-align: center; font-weight: bold; font-size: 14pt; margin-bottom: 4px;">DANA SOSIAL SETIA KAWAN</div>';
-      textBody += '<div style="text-align: center; margin-bottom: 15px;">#############################</div>';
-      
-      textBody += '<div style="margin-bottom: 4px;"><strong>Nama:</strong> ' + (data.nama || '-') + '</div>';
-      textBody += '<div style="margin-bottom: 4px;"><strong>NIP:</strong> ' + (data.nip || '-') + '</div>';
-      textBody += '<div style="margin-bottom: 15px;"><strong>TMT:</strong> ' + (data.tmt || '-') + '</div>';
+      textBody += '<!DOCTYPE html><html><head><title>Cetak Rincian Iuran - ' + (data.nama || '') + '</title>';
+      textBody += '<style>';
+      textBody += 'body { font-family: "Courier New", Courier, monospace; font-size: 13pt; color: #000; padding: 20px; margin: 0; background: #fff; }';
+      textBody += '.title { text-align: center; font-weight: bold; font-size: 14pt; }';
+      textBody += '.divider { text-align: center; margin-bottom: 15px; }';
+      textBody += '.info-row { margin-bottom: 4px; }';
+      textBody += '.section-title { font-weight: bold; margin-top: 15px; margin-bottom: 10px; }';
+      textBody += '.year-title { font-weight: bold; margin-top: 10px; }';
+      textBody += '.line { margin-top: 4px; margin-bottom: 4px; }';
+      textBody += '.total-box { font-weight: bold; font-size: 15pt; margin-top: 20px; border-top: 2px dashed #000; padding-top: 8px; }';
+      textBody += '@media print { body { padding: 0; } }';
+      textBody += '</style></head><body>';
 
-      textBody += '<div style="font-weight: bold; margin-bottom: 10px;">Rincian Iuran yang Wajib Dibayar:</div>';
+      textBody += '<div style="max-width: 170mm; margin: 0 auto;">';
+      textBody += '<div class="title">DAFTAR KEKURANGAN PEMBAYARAN IURAN</div>';
+      textBody += '<div class="title" style="margin-bottom: 4px;">DANA SOSIAL SETIA KAWAN</div>';
+      textBody += '<div class="divider">#############################</div>';
+      
+      textBody += '<div class="info-row"><strong>Nama:</strong> ' + (data.nama || '-') + '</div>';
+      textBody += '<div class="info-row"><strong>NIP:</strong> ' + (data.nip || '-') + '</div>';
+      textBody += '<div class="info-row" style="margin-bottom: 15px;"><strong>TMT:</strong> ' + (data.tmt || '-') + '</div>';
+
+      textBody += '<div class="section-title">Rincian Iuran yang Wajib Dibayar:</div>';
 
       if (data.rincianTunggakan && data.rincianTunggakan.length > 0) {
         data.rincianTunggakan.forEach(function(r) {
-          textBody += '<div style="font-weight: bold; margin-top: 10px;">Tahun ' + r.tahun + '</div>';
+          textBody += '<div class="year-title">Tahun ' + r.tahun + '</div>';
           if (r.detailBulan && r.detailBulan.length > 0) {
             r.detailBulan.forEach(function(bln) {
-              textBody += '<div>- ' + bln.namaBulan + ': Rp. ' + bln.nominal.toLocaleString('id-ID') + '</div>';
+              textBody += '<div class="line">- ' + bln.namaBulan + ': Rp. ' + bln.nominal.toLocaleString('id-ID') + '</div>';
             });
           }
-          textBody += '<div>==================</div>';
+          textBody += '<div class="line">==================</div>';
           textBody += '<div style="font-weight: bold; margin-bottom: 10px;">Jumlah: Rp. ' + r.total.toLocaleString('id-ID') + '</div>';
         });
 
-        textBody += '<div style="font-weight: bold; font-size: 15pt; margin-top: 20px; border-top: 2px dashed #000; pt-2;">TOTAL: Rp. ' + data.totalTunggakan.toLocaleString('id-ID') + '</div>';
+        textBody += '<div class="total-box">TOTAL: Rp. ' + data.totalTunggakan.toLocaleString('id-ID') + '</div>';
       } else {
         textBody += '<div>(Lunas - Tidak ada kekurangan iuran)</div>';
-        textBody += '<div style="font-weight: bold; font-size: 15pt; margin-top: 20px;">TOTAL: Rp. 0</div>';
+        textBody += '<div class="total-box">TOTAL: Rp. 0</div>';
       }
 
       textBody += '</div>';
+      textBody += '<script>window.onload = function() { window.print(); };<\/script>';
+      textBody += '</body></html>';
 
-      if (area) area.innerHTML = textBody;
-      if (previewArea) previewArea.innerHTML = textBody;
-
-      var modalEl = document.getElementById("modalCetakRincianNota");
-      var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-      modal.show();
+      var printWin = window.open('', '_blank', 'width=800,height=600');
+      if (printWin) {
+        printWin.document.open();
+        printWin.document.write(textBody);
+        printWin.document.close();
+      } else {
+        // Fallback jika pop-up diblokir browser
+        var previewArea = document.getElementById("modalRincianBodyPreview");
+        if (previewArea) previewArea.innerHTML = textBody;
+        var modalEl = document.getElementById("modalCetakRincianNota");
+        var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
+      }
     }
 
     function triggerPrintRincianWindow() {
