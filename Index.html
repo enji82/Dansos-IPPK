@@ -977,6 +977,31 @@
     </div>
   </div>
 
+  <!-- MODAL PRATINJAU NOTA KEKURANGAN PEMBAYARAN IURAN -->
+  <div class="modal fade" id="modalCetakRincianNota" tabindex="-1" aria-labelledby="modalCetakRincianNotaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header bg-navy text-white">
+          <h5 class="modal-title fw-bold" id="modalCetakRincianNotaLabel">
+            <i class="fa-solid fa-print me-2"></i> Pratinjau Cetak Rincian Tunggakan
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4 bg-light">
+          <div class="d-flex justify-content-end mb-3 no-print gap-2">
+            <button type="button" class="btn btn-navy fw-bold shadow-sm" onclick="triggerPrintRincianWindow()">
+              <i class="fa-solid fa-print me-1"></i> Cetak / Print Nota
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+          </div>
+          <div id="modalRincianBodyPreview" class="bg-white p-4 rounded-3 border shadow-sm mx-auto" style="max-width: 650px;">
+            <!-- Content Populated Dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- HIDDEN PRINT AREA UNTUK NOTA RINCIAN KEKURANGAN PEMBAYARAN IURAN -->
   <div id="printAreaRincian" class="d-none"></div>
 
@@ -2221,7 +2246,7 @@
       }
 
       var area = document.getElementById("printAreaRincian");
-      if (!area) return;
+      var previewArea = document.getElementById("modalRincianBodyPreview");
 
       var textBody = "";
       textBody += '<div style="font-family: \'Courier New\', Courier, monospace; font-size: 13pt; color: #000; max-width: 170mm; margin: 0 auto; line-height: 1.4;">';
@@ -2255,7 +2280,19 @@
 
       textBody += '</div>';
 
-      area.innerHTML = textBody;
+      if (area) area.innerHTML = textBody;
+      if (previewArea) previewArea.innerHTML = textBody;
+
+      var modalEl = document.getElementById("modalCetakRincianNota");
+      var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      modal.show();
+    }
+
+    function triggerPrintRincianWindow() {
+      var data = window.globalCurrentDetailData;
+      if (!data) return;
+
+      var area = document.getElementById("printAreaRincian");
       area.classList.remove("d-none");
       document.body.classList.add("printing-rincian-mode");
 
@@ -2265,7 +2302,7 @@
           document.body.classList.remove("printing-rincian-mode");
           area.classList.add("d-none");
         }, 800);
-      }, 100);
+      }, 150);
     }
 
     function toggleYearAccordionAdmin(tahun) {
