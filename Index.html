@@ -709,9 +709,14 @@
                   <h5 class="fw-bold mb-1"><i class="fa-solid fa-address-book text-info me-2"></i> Kelola Data Anggota</h5>
                   <p class="small text-secondary mb-0">Daftar seluruh anggota terdaftar beserta status iuran & saldo deposit.</p>
                 </div>
-                <button class="btn btn-success fw-bold rounded-pill px-3 shadow-sm mt-2 mt-md-0" onclick="openTambahAnggotaModal()">
-                  <i class="fa-solid fa-user-plus me-1"></i> Tambah Anggota Baru
-                </button>
+                <div class="d-flex gap-2 mt-2 mt-md-0">
+                  <button class="btn btn-outline-success fw-bold rounded-pill px-3 shadow-sm" onclick="exportExcelDataAnggota()">
+                    <i class="fa-solid fa-file-excel me-1"></i> Unduh Excel (.xlsx)
+                  </button>
+                  <button class="btn btn-success fw-bold rounded-pill px-3 shadow-sm" onclick="openTambahAnggotaModal()">
+                    <i class="fa-solid fa-user-plus me-1"></i> Tambah Anggota Baru
+                  </button>
+                </div>
               </div>
 
               <!-- CARD 1: PEMBERITAHUAN PERMINTAAN PERSETUJUAN PEMBARUAN DATA -->
@@ -3336,6 +3341,112 @@
       });
 
       renderTableAnggota(filtered);
+    }
+
+    function exportExcelDataAnggota() {
+      if (!globalAnggotaList || globalAnggotaList.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Data Kosong',
+          text: 'Tidak ada data anggota untuk diekspor.',
+          confirmButtonColor: '#1F4E79'
+        });
+        return;
+      }
+
+      var kw = (document.getElementById("filterAnggotaInput").value || "").toLowerCase();
+      var filterStatus = document.getElementById("filterAnggotaStatus").value;
+      var filterKategori = document.getElementById("filterAnggotaKategori") ? document.getElementById("filterAnggotaKategori").value : "semua";
+
+      var filtered = globalAnggotaList.filter(function(a) {
+        var textMatch = String(a.id||'').toLowerCase().includes(kw) || 
+                          String(a.nama||'').toLowerCase().includes(kw) || 
+                          String(a.nip||'').toLowerCase().includes(kw) ||
+                          String(a.noKode||'').toLowerCase().includes(kw) ||
+                          String(a.alamat||'').toLowerCase().includes(kw) ||
+                          String(a.noHp||'').toLowerCase().includes(kw);
+
+        if (!textMatch) return false;
+
+        var info = computeAnggotaStatusInfo(a);
+        if (filterStatus === "aktif") {
+          return info.isAktif;
+        } else if (filterStatus === "tidak_aktif") {
+          if (info.isAktif) return false;
+          if (filterKategori !== "semua") {
+            return info.category === filterKategori;
+          }
+          return true;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Data Tidak Ditemukan',
+          text: 'Hasil pencarian/filter tidak memiliki data untuk diekspor.',
+          confirmButtonColor: '#1F4E79'
+        });
+        return;
+      }
+
+      // 1. Label status sesuai pilihan filter
+      var statusLabel = "Status: Semua Status";
+      if (filterStatus === "aktif") {
+        statusLabel = "Status: Aktif (2025 & 2026)";
+      } else if (filterStatus === "tidak_aktif") {
+        statusLabel = "Status: Tidak Aktif" + (filterKategori !== "semua" ? (" - " + filterKategori) : "");
+      }
+
+      // 2. Buat Array of Arrays (AoA) persis sesuai format gambar user
+      var wsData = [];
+      wsData.push(["", "", "", "", "DATA ANGGOTA PAGUYUBAN DANSOS SETIA KAWAN", "", "", ""]);
+      wsData.push(["", "", "", "", "KECAMATAN SECANG", "", "", ""]);
+      wsData.push(["", "", "", "", "", "", "", ""]);
+      wsData.push([statusLabel, "", "", "", "", "", "", ""]);
+      wsData.push(["", "", "", "", "", "", "", ""]);
+      wsData.push(["NO.", "NAMA", "NIP", "TANGGAL LAHIR", "NO. KODE", "TMT PENSIUN", "NO. HP", "IURAN TERAKHIR"]);
+
+      filtered.forEach(function(item, idx) {
+        var bayarStr = (item.bayarBln > 0 && item.bayarThn > 0) ? (namaBulanList[item.bayarBln] + " " + item.bayarThn) : "-";
+        wsData.push([
+          idx + 1,
+          item.nama || "-",
+          item.nip || "-",
+          item.tglLahir || "-",
+          item.noKode || "-",
+          item.tmt || "-",
+          item.noHp || "-",
+          bayarStr
+        ]);
+      });
+
+      // 3. Buat Sheet
+      var ws = XLSX.utils.aoa_to_sheet(wsData);
+
+      // Merge Title Baris 1 & 2 di Kolom E
+      if (!ws['!merges']) ws['!merges'] = [];
+      ws['!merges'].push({ s: { r: 0, c: 4 }, e: { r: 0, c: 5 } });
+      ws['!merges'].push({ s: { r: 1, c: 4 }, e: { r: 1, c: 5 } });
+
+      // Format Lebar Kolom
+      ws['!cols'] = [
+        { wch: 6 },   // NO.
+        { wch: 30 },  // NAMA
+        { wch: 22 },  // NIP
+        { wch: 16 },  // TANGGAL LAHIR
+        { wch: 26 },  // NO. KODE
+        { wch: 16 },  // TMT PENSIUN
+        { wch: 18 },  // NO. HP
+        { wch: 20 }   // IURAN TERAKHIR
+      ];
+
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Data Anggota");
+
+      var dateStr = new Date().toISOString().slice(0,10);
+      XLSX.writeFile(wb, "Data_Anggota_Dansos_Secang_" + dateStr + ".xlsx");
     }
 
     function openTambahAnggotaModal() {
