@@ -254,7 +254,10 @@
       <span class="navbar-brand mb-0 h1 fw-bold fs-6 fs-md-5 me-2 text-truncate" style="max-width: 68%;">
         <i class="fa-solid fa-wallet me-1 me-md-2"></i> Dana Sosial Setia Kawan Secang
       </span>
-      <div class="d-flex align-items-center">
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-warning btn-sm fw-bold py-1 px-2.5 rounded-pill shadow-sm" onclick="openModalPendaftaran()">
+          <i class="fa-solid fa-user-plus me-1"></i> Daftar Anggota Baru
+        </button>
         <button class="btn btn-outline-light btn-sm fw-semibold py-1 px-2" id="btnAdminAuth" onclick="openLoginModal()">
           <i class="fa-solid fa-lock me-1"></i> Akses Admin
         </button>
@@ -711,8 +714,8 @@
                 </button>
               </div>
 
-              <!-- CARD PEMBERITAHUAN PERMINTAAN PERSETUJUAN PEMBARUAN DATA -->
-              <div class="card border-warning bg-warning bg-opacity-10 mb-4 rounded-4 shadow-sm" id="cardPermohonanKoreksi">
+              <!-- CARD 1: PEMBERITAHUAN PERMINTAAN PERSETUJUAN PEMBARUAN DATA -->
+              <div class="card border-warning bg-warning bg-opacity-10 mb-3 rounded-4 shadow-sm" id="cardPermohonanKoreksi">
                 <div class="card-body p-3">
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-user-clock me-2 text-warning"></i> Permintaan Persetujuan Pembaruan Data (<span id="countKoreksiBadge">0</span>)</h6>
@@ -729,6 +732,28 @@
 
                   <div id="listKoreksiAdmin" class="list-group list-group-flush rounded-3 border bg-white overflow-hidden">
                     <div class="list-group-item text-muted small py-2 text-center">Tidak ada permohonan pembaruan data yang perlu diverifikasi.</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CARD 2: PEMBERITAHUAN PENDAFTARAN ANGGOTA BARU -->
+              <div class="card border-info bg-info bg-opacity-10 mb-4 rounded-4 shadow-sm" id="cardPendaftaranAnggota">
+                <div class="card-body p-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-user-plus me-2 text-primary"></i> Pengajuan Pendaftaran Anggota Baru (<span id="countPendaftaranBadge">0</span>)</h6>
+                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-0.5" onclick="loadPendaftaranAnggotaAdmin()" style="font-size: 0.78rem;">
+                      <i class="fa-solid fa-rotate me-1"></i> Refresh
+                    </button>
+                  </div>
+                  <p class="small text-muted mb-2">Berikut adalah pendaftaran anggota baru dari masyarakat yang memerlukan persetujuan Admin/Pengurus:</p>
+                  
+                  <div id="loaderPendaftaranAdmin" class="text-center py-2 d-none">
+                    <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                    <span class="small text-muted ms-2">Memuat pendaftaran...</span>
+                  </div>
+
+                  <div id="listPendaftaranAdmin" class="list-group list-group-flush rounded-3 border bg-white overflow-hidden">
+                    <div class="list-group-item text-muted small py-2 text-center">Tidak ada pengajuan pendaftaran anggota baru.</div>
                   </div>
                 </div>
               </div>
@@ -1058,6 +1083,64 @@
             </a>
             <button type="button" class="btn btn-sm btn-navy px-3" data-bs-dismiss="modal">Tutup</button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PENDAFTARAN ANGGOTA BARU (PUBLIK) -->
+  <div class="modal fade" id="modalPendaftaranAnggota" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+        <div class="modal-header bg-navy text-white p-3">
+          <h5 class="modal-title fw-bold mb-0"><i class="fa-solid fa-user-plus me-2 text-warning"></i> Formulir Pendaftaran Anggota Baru</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-info py-2 px-3 small border-0 shadow-sm rounded-3 mb-3">
+            <i class="fa-solid fa-circle-info me-1"></i> Silakan isi data calon anggota di bawah ini. Pengurus akan memverifikasi pendaftaran Anda sebelum resmi terdaftar.
+          </div>
+
+          <form id="formPendaftaranAnggota">
+            <div class="row g-2 text-start">
+              <div class="col-12 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">Nama Lengkap <span class="text-danger">*</span></label>
+                <input type="text" id="regNama" class="form-control fw-semibold" placeholder="Contoh: SITI AMINAH">
+              </div>
+              <div class="col-12 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">NIP / ID Pensiun</label>
+                <input type="text" id="regNip" class="form-control" placeholder="Contoh: 196805141992031002">
+              </div>
+              <div class="col-12 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">Tanggal Lahir</label>
+                <input type="date" id="regTglLahir" class="form-control">
+              </div>
+              <div class="col-12 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">No. Kode (No. Kartu Dansos)</label>
+                <input type="text" id="regNoKode" class="form-control" placeholder="Contoh: KAB. MGL/SEC/PENS/123">
+              </div>
+              <div class="col-12 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">TMT Menjadi Peserta / Pensiun</label>
+                <input type="date" id="regTmt" class="form-control">
+              </div>
+              <div class="col-12 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">No. HP / WA Aktif</label>
+                <input type="text" id="regNoHp" class="form-control" placeholder="Contoh: 08123456789">
+              </div>
+              <div class="col-12 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">Alamat Lengkap</label>
+                <input type="text" id="regAlamat" class="form-control" placeholder="Contoh: Jl. Pemuda No. 12 Secang">
+              </div>
+            </div>
+
+            <div id="regAlert" class="alert d-none py-2 small mb-0 mt-2"></div>
+          </form>
+        </div>
+        <div class="modal-footer bg-light p-3">
+          <button type="button" class="btn btn-secondary px-3 rounded-pill" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-navy fw-bold px-4 rounded-pill" id="btnSubmitPendaftaran" onclick="submitPendaftaranData()">
+            <i class="fa-solid fa-paper-plane me-1 text-warning"></i> Kirim Pendaftaran
+          </button>
         </div>
       </div>
     </div>
@@ -2337,6 +2420,74 @@
       }
     }
 
+    function openModalPendaftaran() {
+      document.getElementById("regNama").value = "";
+      document.getElementById("regNip").value = "";
+      document.getElementById("regTglLahir").value = "";
+      document.getElementById("regNoKode").value = "";
+      document.getElementById("regTmt").value = "";
+      document.getElementById("regNoHp").value = "";
+      document.getElementById("regAlamat").value = "";
+
+      var alertEl = document.getElementById("regAlert");
+      alertEl.classList.add("d-none");
+      alertEl.className = "alert d-none py-2 small mb-0";
+
+      var modal = new bootstrap.Modal(document.getElementById('modalPendaftaranAnggota'));
+      modal.show();
+    }
+
+    function submitPendaftaranData() {
+      var nama = document.getElementById("regNama").value;
+      var nip = document.getElementById("regNip").value;
+      var tglLahir = document.getElementById("regTglLahir").value;
+      var noKode = document.getElementById("regNoKode").value;
+      var tmt = document.getElementById("regTmt").value;
+      var noHp = document.getElementById("regNoHp").value;
+      var alamat = document.getElementById("regAlamat").value;
+
+      var alertEl = document.getElementById("regAlert");
+      if (!nama.trim()) {
+        alertEl.textContent = "Silakan isi Nama Lengkap!";
+        alertEl.className = "alert alert-danger py-2 small mb-0 mt-2";
+        alertEl.classList.remove("d-none");
+        return;
+      }
+
+      var btn = document.getElementById("btnSubmitPendaftaran");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mengirim...';
+
+      var form = {
+        nama: nama,
+        nip: nip,
+        tglLahir: tglLahir,
+        noKode: noKode,
+        tmt: tmt,
+        noHp: noHp,
+        alamat: alamat
+      };
+
+      google.script.run.withSuccessHandler(function(res) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1 text-warning"></i> Kirim Pendaftaran';
+
+        if (res && res.success) {
+          alertEl.textContent = res.message;
+          alertEl.className = "alert alert-success py-2 small mb-0 mt-2";
+          alertEl.classList.remove("d-none");
+          setTimeout(function() {
+            var instance = bootstrap.Modal.getInstance(document.getElementById('modalPendaftaranAnggota'));
+            if (instance) instance.hide();
+          }, 2000);
+        } else {
+          alertEl.textContent = res ? res.message : "Gagal mengirim pendaftaran.";
+          alertEl.className = "alert alert-danger py-2 small mb-0 mt-2";
+          alertEl.classList.remove("d-none");
+        }
+      }).submitPendaftaranAnggota(form);
+    }
+
     function openModalKoreksiData() {
       var d = window.globalCurrentDetailData;
       if (!d) return;
@@ -3091,8 +3242,111 @@
       });
     }
 
+    function loadPendaftaranAnggotaAdmin() {
+      var loader = document.getElementById("loaderPendaftaranAdmin");
+      var listEl = document.getElementById("listPendaftaranAdmin");
+      var badge = document.getElementById("countPendaftaranBadge");
+
+      if (loader) loader.classList.remove("d-none");
+
+      google.script.run.withSuccessHandler(function(res) {
+        if (loader) loader.classList.add("d-none");
+        if (res && res.success && res.data) {
+          var pendingList = res.data.filter(function(item) { return item.status === "Menunggu Verifikasi"; });
+          if (badge) badge.textContent = pendingList.length;
+
+          if (pendingList.length === 0) {
+            listEl.innerHTML = '<div class="list-group-item text-muted small py-3 text-center"><i class="fa-solid fa-circle-check text-success me-1"></i> Tidak ada pengajuan pendaftaran anggota baru.</div>';
+            return;
+          }
+
+          var html = "";
+          pendingList.forEach(function(p) {
+            var details = [];
+            if (p.nip && p.nip !== "-") details.push("NIP: " + escapeQuotes(p.nip));
+            if (p.tglLahir) details.push("Tgl Lahir: " + escapeQuotes(p.tglLahir));
+            if (p.noKode && p.noKode !== "-") details.push("No. Kode: " + escapeQuotes(p.noKode));
+            if (p.tmt) details.push("TMT: " + escapeQuotes(p.tmt));
+            if (p.noHp && p.noHp !== "-") details.push("No. HP: " + escapeQuotes(p.noHp));
+            if (p.alamat && p.alamat !== "-") details.push("Alamat: " + escapeQuotes(p.alamat));
+
+            html += 
+              '<div class="list-group-item p-3 align-middle border-bottom">' +
+                '<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center g-2">' +
+                  '<div class="me-md-3">' +
+                    '<div class="fw-bold text-navy fs-6 mb-1"><i class="fa-solid fa-user-plus text-primary me-2"></i>' + escapeQuotes(p.nama) + 
+                      ' <span class="badge bg-light text-secondary border fw-normal ms-2" style="font-size: 0.75rem;"><i class="fa-regular fa-clock me-1"></i>' + p.tanggal + '</span>' +
+                    '</div>' +
+                    '<div class="small text-dark lh-base">' + (details.length > 0 ? details.join(" | ") : "Calon Anggota Baru") + '</div>' +
+                  '</div>' +
+                  '<div class="d-flex align-items-center gap-2 mt-2 mt-md-0 flex-shrink-0">' +
+                    '<button type="button" class="btn btn-success btn-sm fw-bold px-3 py-1.5 rounded-pill shadow-sm" onclick="setujuiPendaftaranAdmin(\'' + p.idTrx + '\', \'' + escapeQuotes(p.nama) + '\')">' +
+                      '<i class="fa-solid fa-check me-1"></i> Setujui & Tambah' +
+                    '</button>' +
+                    '<button type="button" class="btn btn-outline-danger btn-sm fw-bold px-3 py-1.5 rounded-pill" onclick="tolakPendaftaranAdmin(\'' + p.idTrx + '\', \'' + escapeQuotes(p.nama) + '\')">' +
+                      '<i class="fa-solid fa-xmark me-1"></i> Tolak' +
+                    '</button>' +
+                  '</div>' +
+                '</div>' +
+              '</div>';
+          });
+          listEl.innerHTML = html;
+        }
+      }).getPendaftaranAnggotaList(currentAdminPin);
+    }
+
+    function setujuiPendaftaranAdmin(idTrx, nama) {
+      Swal.fire({
+        title: 'Setujui Pendaftaran Anggota?',
+        text: "Calon anggota '" + nama + "' akan otomatis ditambahkan ke Master Anggota.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#198754',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Setujui'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.showLoading();
+          google.script.run.withSuccessHandler(function(res) {
+            if (res && res.success) {
+              Swal.fire('Berhasil!', res.message, 'success');
+              loadPendaftaranAnggotaAdmin();
+              loadTableAdminAnggota();
+            } else {
+              Swal.fire('Gagal', res ? res.message : 'Terjadi kesalahan', 'error');
+            }
+          }).setujuiPendaftaranAnggota(currentAdminPin, idTrx);
+        }
+      });
+    }
+
+    function tolakPendaftaranAdmin(idTrx, nama) {
+      Swal.fire({
+        title: 'Tolak Pendaftaran?',
+        input: 'text',
+        inputLabel: 'Alasan Penolakan (Opsional)',
+        inputPlaceholder: 'Tuliskan alasan penolakan...',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        confirmButtonText: 'Tolak Pendaftaran'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.showLoading();
+          google.script.run.withSuccessHandler(function(res) {
+            if (res && res.success) {
+              Swal.fire('Ditolak', res.message, 'info');
+              loadPendaftaranAnggotaAdmin();
+            } else {
+              Swal.fire('Gagal', res ? res.message : 'Terjadi kesalahan', 'error');
+            }
+          }).tolakPendaftaranAnggota(currentAdminPin, idTrx, result.value || "");
+        }
+      });
+    }
+
     function loadTableAdminAnggota() {
       loadPermohonanKoreksiAdmin();
+      loadPendaftaranAnggotaAdmin();
       var tbody = document.getElementById("tbodyAnggota");
       tbody.innerHTML = '<tr><td colspan="11" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm me-2"></div>Memuat data anggota...</td></tr>';
 

@@ -2083,3 +2083,230 @@ function tolakPermohonanKoreksi(pin, idTrx, alasan) {
     return { success: false, message: "Gagal menolak permohonan: " + err.message };
   }
 }
+
+/**
+ * 14. PENDAFTARAN ANGGOTA BARU OLEH PUBLIK (MEMERLUKAN PERSETUJUAN ADMIN)
+ */
+function submitPendaftaranAnggota(form) {
+  try {
+    form = form || {};
+    var nama = form.nama || "";
+    var nip = form.nip || "";
+    var tglLahir = form.tglLahir || "";
+    var noKode = form.noKode || "";
+    var tmt = form.tmt || "";
+    var noHp = form.noHp || "";
+    var alamat = form.alamat || "";
+
+    if (!nama.trim()) {
+      return { success: false, message: "Nama Lengkap wajib diisi!" };
+    }
+
+    var ss = getSS();
+    var sheetPendaftaran = ss.getSheetByName("Pendaftaran_Anggota");
+
+    if (!sheetPendaftaran) {
+      sheetPendaftaran = ss.insertSheet("Pendaftaran_Anggota");
+      sheetPendaftaran.appendRow([
+        "ID Trx", "Tanggal", "Nama Lengkap", "NIP / ID Pensiun", "Tanggal Lahir",
+        "No Kode", "TMT Peserta", "No HP / WA", "Alamat", "Status", "Catatan Admin"
+      ]);
+      sheetPendaftaran.getRange(1, 1, 1, 11).setFontWeight("bold").setBackground("#e2e8f0");
+    }
+
+    var tgl = new Date();
+    var tglStr = Utilities.formatDate(tgl, ss.getSpreadsheetTimeZone(), "yyyy-MM-dd HH:mm");
+    var idTrx = "REG-" + Utilities.formatDate(tgl, ss.getSpreadsheetTimeZone(), "yyyyMMdd") + "-" + Math.floor(100 + Math.random() * 900);
+
+    sheetPendaftaran.appendRow([
+      idTrx,
+      tglStr,
+      nama,
+      nip,
+      tglLahir,
+      noKode,
+      tmt,
+      noHp,
+      alamat,
+      "Menunggu Verifikasi",
+      "-"
+    ]);
+
+    return {
+      success: true,
+      message: "Pendaftaran berhasil dikirim! Pengurus akan memverifikasi pendaftaran Anda."
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal memproses pendaftaran: " + err.message };
+  }
+}
+
+/**
+ * AMBIL LIST PENDAFTARAN ANGGOTA (KHUSUS ADMIN)
+ */
+function getPendaftaranAnggotaList(pin) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheet = ss.getSheetByName("Pendaftaran_Anggota");
+    if (!sheet) return { success: true, data: [] };
+
+    var data = sheet.getDataRange().getValues();
+    var list = [];
+
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      if (!row[0]) continue;
+
+      var tglStr = "-";
+      if (row[1]) {
+        try {
+          var dTgl = (row[1] instanceof Date) ? row[1] : new Date(row[1]);
+          if (!isNaN(dTgl.getTime())) {
+            tglStr = Utilities.formatDate(dTgl, ss.getSpreadsheetTimeZone(), "dd/MM/yyyy HH:mm");
+          } else {
+            tglStr = String(row[1]);
+          }
+        } catch(e1) { tglStr = String(row[1]); }
+      }
+
+      var tglLahirStr = "";
+      if (row[4]) {
+        try {
+          var dTL = (row[4] instanceof Date) ? row[4] : new Date(row[4]);
+          if (!isNaN(dTL.getTime())) {
+            tglLahirStr = Utilities.formatDate(dTL, ss.getSpreadsheetTimeZone(), "dd/MM/yyyy");
+          } else { tglLahirStr = String(row[4]); }
+        } catch(eTL) { tglLahirStr = String(row[4]); }
+      }
+
+      var tmtStr = "";
+      if (row[6]) {
+        try {
+          var dTmt = (row[6] instanceof Date) ? row[6] : new Date(row[6]);
+          if (!isNaN(dTmt.getTime())) {
+            tmtStr = Utilities.formatDate(dTmt, ss.getSpreadsheetTimeZone(), "dd/MM/yyyy");
+          } else { tmtStr = String(row[6]); }
+        } catch(eTmt) { tmtStr = String(row[6]); }
+      }
+
+      list.push({
+        idTrx: row[0],
+        tanggal: tglStr,
+        nama: row[2],
+        nip: row[3] ? String(row[3]) : "-",
+        tglLahir: tglLahirStr,
+        noKode: row[5] ? String(row[5]) : "-",
+        tmt: tmtStr,
+        noHp: row[7] ? String(row[7]) : "-",
+        alamat: row[8] ? String(row[8]) : "-",
+        status: row[9] ? String(row[9]).trim() : "Menunggu Verifikasi",
+        catatanAdmin: row[10] ? String(row[10]) : "-"
+      });
+    }
+
+    return { success: true, data: list.reverse() };
+  } catch (err) {
+    return { success: false, message: "Gagal mengambil daftar pendaftaran: " + err.message };
+  }
+}
+
+/**
+ * SETUJUI PENDAFTARAN ANGGOTA BARU (TAMBAHKAN KE MASTER ANGGOTA)
+ */
+function setujuiPendaftaranAnggota(pin, idTrx) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheetPendaftaran = ss.getSheetByName("Pendaftaran_Anggota");
+    var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
+
+    if (!sheetPendaftaran || !sheetAnggota) {
+      return { success: false, message: "Sheet Master_Anggota atau Pendaftaran_Anggota tidak ditemukan!" };
+    }
+
+    var dataP = sheetPendaftaran.getDataRange().getValues();
+    var targetRow = -1;
+    var rowP = null;
+
+    for (var i = 1; i < dataP.length; i++) {
+      if (String(dataP[i][0]) === String(idTrx)) {
+        targetRow = i + 1;
+        rowP = dataP[i];
+        break;
+      }
+    }
+
+    if (targetRow === -1 || !rowP) {
+      return { success: false, message: "Pendaftaran tidak ditemukan!" };
+    }
+
+    var dataA = sheetAnggota.getDataRange().getValues();
+    var maxId = 0;
+    for (var j = 1; j < dataA.length; j++) {
+      var valId = parseInt(dataA[j][0], 10);
+      if (!isNaN(valId) && valId > maxId) maxId = valId;
+    }
+    var newId = maxId + 1;
+
+    // Append ke Master_Anggota
+    sheetAnggota.appendRow([
+      newId,
+      rowP[2] || "",  // Nama
+      rowP[3] || "",  // NIP
+      rowP[4] || "",  // Tgl Lahir
+      rowP[8] || "",  // Alamat
+      rowP[6] || "",  // TMT
+      rowP[7] || "",  // No HP
+      0, 0, 0, 0, 0,  // Saldo, BayarBln, BayarThn, SetorBln, SetorThn
+      "",             // Status Override
+      rowP[5] || ""   // No Kode
+    ]);
+
+    sheetPendaftaran.getRange(targetRow, 10).setValue("Disetujui");
+    sheetPendaftaran.getRange(targetRow, 11).setValue("Disetujui & ditambahkan ke Master Anggota (ID: " + newId + ")");
+
+    return { success: true, message: "Pendaftaran " + rowP[2] + " berhasil disetujui! Anggota baru terdaftar dengan ID: " + newId };
+  } catch (err) {
+    return { success: false, message: "Gagal menyetujui pendaftaran: " + err.message };
+  }
+}
+
+/**
+ * TOLAK PENDAFTARAN ANGGOTA BARU
+ */
+function tolakPendaftaranAnggota(pin, idTrx, alasan) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheetPendaftaran = ss.getSheetByName("Pendaftaran_Anggota");
+    if (!sheetPendaftaran) return { success: false, message: "Sheet Pendaftaran_Anggota tidak ditemukan!" };
+
+    var dataP = sheetPendaftaran.getDataRange().getValues();
+    var targetRow = -1;
+
+    for (var i = 1; i < dataP.length; i++) {
+      if (String(dataP[i][0]) === String(idTrx)) {
+        targetRow = i + 1;
+        break;
+      }
+    }
+
+    if (targetRow === -1) {
+      return { success: false, message: "Pendaftaran tidak ditemukan!" };
+    }
+
+    sheetPendaftaran.getRange(targetRow, 10).setValue("Ditolak");
+    sheetPendaftaran.getRange(targetRow, 11).setValue(alasan || "Ditolak oleh Admin");
+
+    return { success: true, message: "Pendaftaran berhasil ditolak." };
+  } catch (err) {
+    return { success: false, message: "Gagal menolak pendaftaran: " + err.message };
+  }
+}
