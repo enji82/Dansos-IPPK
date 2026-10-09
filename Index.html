@@ -319,7 +319,12 @@
                 <div class="card-body p-4">
                   <!-- Section Identitas Anggota -->
                   <div class="bg-light p-3 rounded-3 border mb-4">
-                    <h6 class="fw-bold text-navy mb-3"><i class="fa-solid fa-id-card me-2 text-primary"></i> Identitas Anggota</h6>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h6 class="fw-bold text-navy mb-0"><i class="fa-solid fa-id-card me-2 text-primary"></i> Identitas Anggota</h6>
+                      <button type="button" class="btn btn-outline-warning btn-sm fw-bold px-2.5 py-1 rounded-pill" style="font-size: 0.8rem;" onclick="openModalKoreksiData()">
+                        <i class="fa-solid fa-user-pen me-1"></i> Perbarui Identitas
+                      </button>
+                    </div>
                     <div class="row g-2.5 text-start small">
                       <div class="col-12"><strong class="text-secondary">No. Kode (No. Kartu):</strong> <span id="resNoKode" class="fw-bold text-dark">-</span></div>
                       <div class="col-12"><strong class="text-secondary">NIP / ID Pensiun:</strong> <span id="resNipVal" class="fw-bold text-dark">-</span></div>
@@ -1031,6 +1036,50 @@
             </a>
             <button type="button" class="btn btn-sm btn-navy px-3" data-bs-dismiss="modal">Tutup</button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PERMOHONAN KOREKSI / PERBAIKAN DATA ANGGOTA -->
+  <div class="modal fade" id="modalKoreksiData" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+        <div class="modal-header bg-warning text-dark p-3">
+          <h5 class="modal-title fw-bold mb-0"><i class="fa-solid fa-user-pen me-2"></i> Perbarui / Koreksi Identitas Anggota</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-info py-2 px-3 small border-0 shadow-sm rounded-3 mb-3">
+            <i class="fa-solid fa-circle-info me-1"></i> Data permohonan akan dikirimkan ke <strong>Pengurus / Admin</strong> untuk diverifikasi sebelum data resmi diubah.
+          </div>
+
+          <form id="formKoreksiData">
+            <input type="hidden" id="korIdAnggota">
+            
+            <div class="mb-3 text-start">
+              <label class="form-label small fw-bold text-secondary mb-1">Nama Anggota</label>
+              <input type="text" id="korNamaAnggota" class="form-control bg-light fw-bold text-navy" readonly>
+            </div>
+
+            <div class="mb-3 text-start">
+              <label class="form-label small fw-bold text-secondary mb-1">No. HP / WA Aktif (Untuk Konfirmasi)</label>
+              <input type="text" id="korNoHp" class="form-control" placeholder="Contoh: 08123456789">
+            </div>
+
+            <div class="mb-3 text-start">
+              <label class="form-label small fw-bold text-secondary mb-1">Catatan / Rincian Perubahan Data <span class="text-danger">*</span></label>
+              <textarea id="korPesan" class="form-control" rows="4" placeholder="Tuliskan data yang salah dan perbaikannya. Contoh:&#10;- Alamat sebenarnya: Jl. Pemuda No. 12 Secang&#10;- Tanggal lahir yang benar: 14 Mei 1968&#10;- No. Kode Kartu: 045"></textarea>
+            </div>
+
+            <div id="korAlert" class="alert d-none py-2 small mb-0"></div>
+          </form>
+        </div>
+        <div class="modal-footer bg-light p-3">
+          <button type="button" class="btn btn-secondary px-3 rounded-pill" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-warning fw-bold px-4 rounded-pill" id="btnSubmitKoreksi" onclick="submitKoreksiData()">
+            <i class="fa-solid fa-paper-plane me-1"></i> Kirim Permohonan
+          </button>
         </div>
       </div>
     </div>
@@ -2244,6 +2293,68 @@
           icon.className = "fa-solid fa-chevron-right text-primary me-2 transition-icon";
         }
       }
+    }
+
+    function openModalKoreksiData() {
+      var d = window.globalCurrentDetailData;
+      if (!d) return;
+
+      document.getElementById("korIdAnggota").value = d.id || "";
+      document.getElementById("korNamaAnggota").value = d.nama || "";
+      document.getElementById("korNoHp").value = (d.noHp && d.noHp !== "-") ? d.noHp : "";
+      document.getElementById("korPesan").value = "";
+
+      var alertEl = document.getElementById("korAlert");
+      alertEl.classList.add("d-none");
+      alertEl.className = "alert d-none py-2 small mb-0";
+
+      var modal = new bootstrap.Modal(document.getElementById('modalKoreksiData'));
+      modal.show();
+    }
+
+    function submitKoreksiData() {
+      var idAnggota = document.getElementById("korIdAnggota").value;
+      var namaAnggota = document.getElementById("korNamaAnggota").value;
+      var noHp = document.getElementById("korNoHp").value;
+      var pesanKoreksi = document.getElementById("korPesan").value;
+
+      var alertEl = document.getElementById("korAlert");
+      if (!pesanKoreksi.trim()) {
+        alertEl.textContent = "Silakan tuliskan rincian perbaikan atau data yang ingin disesuaikan!";
+        alertEl.className = "alert alert-danger py-2 small mb-0";
+        alertEl.classList.remove("d-none");
+        return;
+      }
+
+      var btn = document.getElementById("btnSubmitKoreksi");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mengirim...';
+
+      var form = {
+        idAnggota: idAnggota,
+        namaAnggota: namaAnggota,
+        noHp: noHp,
+        pesanKoreksi: pesanKoreksi
+      };
+
+      google.script.run.withSuccessHandler(function(res) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Kirim Permohonan';
+
+        if (res && res.success) {
+          alertEl.textContent = res.message;
+          alertEl.className = "alert alert-success py-2 small mb-0";
+          alertEl.classList.remove("d-none");
+          setTimeout(function() {
+            var instance = bootstrap.Modal.getInstance(document.getElementById('modalKoreksiData'));
+            if (instance) instance.hide();
+          }, 2000);
+        } else {
+          alertEl.textContent = res.message || "Gagal mengirim permohonan koreksi.";
+          alertEl.className = "alert alert-danger py-2 small mb-0";
+          alertEl.classList.remove("d-none");
+        }
+      }).submitPermohonanKoreksi(form);
     }
 
     // AUTH ADMIN

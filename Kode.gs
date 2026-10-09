@@ -1811,3 +1811,52 @@ function getDashboardStats(pin) {
     return { success: false, message: "Gagal mengambil data dashboard: " + err.message };
   }
 }
+
+/**
+ * 13. PERMOHONAN KOREKSI / PERBAIKAN DATA OLEH ANGGOTA
+ */
+function submitPermohonanKoreksi(form) {
+  try {
+    form = form || {};
+    var idAnggota = form.idAnggota;
+    var namaAnggota = form.namaAnggota || "-";
+    var noHpForm = form.noHp || "-";
+    var pesanKoreksi = form.pesanKoreksi || "";
+
+    if (!idAnggota || !pesanKoreksi.trim()) {
+      return { success: false, message: "Pesan permohonan koreksi harus diisi!" };
+    }
+
+    var ss = getSS();
+    var sheetKoreksi = ss.getSheetByName("Permohonan_Koreksi");
+    
+    // Auto-create tab if not exists
+    if (!sheetKoreksi) {
+      sheetKoreksi = ss.insertSheet("Permohonan_Koreksi");
+      sheetKoreksi.appendRow(["ID Trx", "Tanggal", "ID Anggota", "Nama Anggota", "No HP / WA", "Rincian Permohonan Koreksi", "Status", "Catatan Admin"]);
+      sheetKoreksi.getRange(1, 1, 1, 8).setFontWeight("bold").setBackground("#e2e8f0");
+    }
+
+    var tgl = new Date();
+    var tglStr = Utilities.formatDate(tgl, ss.getSpreadsheetTimeZone(), "yyyy-MM-dd HH:mm");
+    var idTrx = "KOR-" + Utilities.formatDate(tgl, ss.getSpreadsheetTimeZone(), "yyyyMMdd") + "-" + Math.floor(100 + Math.random() * 900);
+
+    sheetKoreksi.appendRow([
+      idTrx,
+      tglStr,
+      idAnggota,
+      namaAnggota,
+      noHpForm,
+      pesanKoreksi,
+      "Menunggu Verifikasi",
+      "-"
+    ]);
+
+    return {
+      success: true,
+      message: "Permohonan perbaikan data berhasil dikirim! Pengurus/Admin akan memverifikasi permohonan Anda."
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal mengirim permohonan koreksi: " + err.message };
+  }
+}
