@@ -3084,7 +3084,7 @@
           if (badge) badge.textContent = pendingList.length;
 
           if (pendingList.length === 0) {
-            listEl.innerHTML = '<div class="list-group-item text-muted small py-3 text-center"><i class="fa-solid fa-circle-check text-success me-1"></i> Tidak ada permintaan pembaruan data yang perlu diverifikasi.</div>';
+            if (listEl) listEl.innerHTML = '<div class="list-group-item text-muted small py-3 text-center"><i class="fa-solid fa-circle-check text-success me-1"></i> Tidak ada permintaan pembaruan data yang perlu diverifikasi.</div>';
             return;
           }
 
@@ -3120,7 +3120,7 @@
                 '</div>' +
               '</div>';
           });
-          listEl.innerHTML = html;
+          if (listEl) listEl.innerHTML = html;
         }
       }).getPermohonanKoreksiList(currentAdminPin);
     }
@@ -3188,7 +3188,7 @@
           if (badge) badge.textContent = pendingList.length;
 
           if (pendingList.length === 0) {
-            listEl.innerHTML = '<div class="list-group-item text-muted small py-3 text-center"><i class="fa-solid fa-circle-check text-success me-1"></i> Tidak ada pengajuan pendaftaran anggota baru.</div>';
+            if (listEl) listEl.innerHTML = '<div class="list-group-item text-muted small py-3 text-center"><i class="fa-solid fa-circle-check text-success me-1"></i> Tidak ada pengajuan pendaftaran anggota baru.</div>';
             return;
           }
 
@@ -3222,7 +3222,7 @@
                 '</div>' +
               '</div>';
           });
-          listEl.innerHTML = html;
+          if (listEl) listEl.innerHTML = html;
         }
       }).getPendaftaranAnggotaList(currentAdminPin);
     }
