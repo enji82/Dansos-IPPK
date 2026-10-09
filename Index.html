@@ -711,6 +711,28 @@
                 </button>
               </div>
 
+              <!-- CARD PEMBERITAHUAN PERMINTAAN PERSETUJUAN PEMBARUAN DATA -->
+              <div class="card border-warning bg-warning bg-opacity-10 mb-4 rounded-4 shadow-sm" id="cardPermohonanKoreksi">
+                <div class="card-body p-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-user-clock me-2 text-warning"></i> Permintaan Persetujuan Pembaruan Data (<span id="countKoreksiBadge">0</span>)</h6>
+                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-0.5" onclick="loadPermohonanKoreksiAdmin()" style="font-size: 0.78rem;">
+                      <i class="fa-solid fa-rotate me-1"></i> Refresh
+                    </button>
+                  </div>
+                  <p class="small text-muted mb-2">Berikut adalah pengajuan perubahan data mandiri dari anggota yang memerlukan verifikasi Admin/Pengurus:</p>
+                  
+                  <div id="loaderKoreksiAdmin" class="text-center py-2 d-none">
+                    <span class="spinner-border spinner-border-sm text-warning" role="status"></span>
+                    <span class="small text-muted ms-2">Memuat permohonan...</span>
+                  </div>
+
+                  <div id="listKoreksiAdmin" class="list-group list-group-flush rounded-3 border bg-white overflow-hidden">
+                    <div class="list-group-item text-muted small py-2 text-center">Tidak ada permohonan pembaruan data yang perlu diverifikasi.</div>
+                  </div>
+                </div>
+              </div>
+
               <div class="row g-2 mb-3 align-items-center">
                 <div class="col-md-5">
                   <div class="input-group">
@@ -1057,22 +1079,38 @@
           <form id="formKoreksiData">
             <input type="hidden" id="korIdAnggota">
             
-            <div class="mb-3 text-start">
-              <label class="form-label small fw-bold text-secondary mb-1">Nama Anggota</label>
-              <input type="text" id="korNamaAnggota" class="form-control bg-light fw-bold text-navy" readonly>
+            <div class="row g-2 text-start">
+              <div class="col-12 col-md-6 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">Nama Lengkap</label>
+                <input type="text" id="korNamaAnggota" class="form-control fw-semibold" placeholder="Nama Lengkap">
+              </div>
+              <div class="col-12 col-md-6 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">NIP / ID Pensiun</label>
+                <input type="text" id="korNip" class="form-control" placeholder="Contoh: 196805141992031002">
+              </div>
+              <div class="col-12 col-md-6 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">No. Kode (No. Kartu Dansos)</label>
+                <input type="text" id="korNoKode" class="form-control" placeholder="Contoh: 045">
+              </div>
+              <div class="col-12 col-md-6 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">TMT Menjadi Peserta / Pensiun</label>
+                <input type="date" id="korTmt" class="form-control">
+              </div>
+              <div class="col-12 col-md-6 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">No. HP / WA Aktif</label>
+                <input type="text" id="korNoHp" class="form-control" placeholder="Contoh: 08123456789">
+              </div>
+              <div class="col-12 col-md-6 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">Alamat Lengkap</label>
+                <input type="text" id="korAlamat" class="form-control" placeholder="Contoh: Jl. Pemuda No. 12 Secang">
+              </div>
+              <div class="col-12 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">Catatan Tambahan / Alasan Koreksi (Opsional)</label>
+                <textarea id="korPesan" class="form-control" rows="2" placeholder="Tuliskan catatan perbaikan jika ada..."></textarea>
+              </div>
             </div>
 
-            <div class="mb-3 text-start">
-              <label class="form-label small fw-bold text-secondary mb-1">No. HP / WA Aktif (Untuk Konfirmasi)</label>
-              <input type="text" id="korNoHp" class="form-control" placeholder="Contoh: 08123456789">
-            </div>
-
-            <div class="mb-3 text-start">
-              <label class="form-label small fw-bold text-secondary mb-1">Catatan / Rincian Perubahan Data <span class="text-danger">*</span></label>
-              <textarea id="korPesan" class="form-control" rows="4" placeholder="Tuliskan data yang salah dan perbaikannya. Contoh:&#10;- Alamat sebenarnya: Jl. Pemuda No. 12 Secang&#10;- Tanggal lahir yang benar: 14 Mei 1968&#10;- No. Kode Kartu: 045"></textarea>
-            </div>
-
-            <div id="korAlert" class="alert d-none py-2 small mb-0"></div>
+            <div id="korAlert" class="alert d-none py-2 small mb-0 mt-2"></div>
           </form>
         </div>
         <div class="modal-footer bg-light p-3">
@@ -2301,7 +2339,17 @@
 
       document.getElementById("korIdAnggota").value = d.id || "";
       document.getElementById("korNamaAnggota").value = d.nama || "";
+      document.getElementById("korNip").value = (d.nip && d.nip !== "-") ? d.nip : "";
+      document.getElementById("korNoKode").value = (d.noKode && d.noKode !== "-") ? d.noKode : "";
+      
+      // Parse TMT if valid date
+      var tmtFormatted = "";
+      if (d.tmtRaw) {
+        tmtFormatted = d.tmtRaw;
+      }
+      document.getElementById("korTmt").value = tmtFormatted;
       document.getElementById("korNoHp").value = (d.noHp && d.noHp !== "-") ? d.noHp : "";
+      document.getElementById("korAlamat").value = (d.alamat && d.alamat !== "-") ? d.alamat : "";
       document.getElementById("korPesan").value = "";
 
       var alertEl = document.getElementById("korAlert");
@@ -2314,26 +2362,28 @@
 
     function submitKoreksiData() {
       var idAnggota = document.getElementById("korIdAnggota").value;
-      var namaAnggota = document.getElementById("korNamaAnggota").value;
+      var namaBaru = document.getElementById("korNamaAnggota").value;
+      var nip = document.getElementById("korNip").value;
+      var noKode = document.getElementById("korNoKode").value;
+      var tmt = document.getElementById("korTmt").value;
       var noHp = document.getElementById("korNoHp").value;
+      var alamat = document.getElementById("korAlamat").value;
       var pesanKoreksi = document.getElementById("korPesan").value;
 
       var alertEl = document.getElementById("korAlert");
-      if (!pesanKoreksi.trim()) {
-        alertEl.textContent = "Silakan tuliskan rincian perbaikan atau data yang ingin disesuaikan!";
-        alertEl.className = "alert alert-danger py-2 small mb-0";
-        alertEl.classList.remove("d-none");
-        return;
-      }
-
       var btn = document.getElementById("btnSubmitKoreksi");
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mengirim...';
 
       var form = {
         idAnggota: idAnggota,
-        namaAnggota: namaAnggota,
+        namaAnggota: (window.globalCurrentDetailData ? window.globalCurrentDetailData.nama : namaBaru),
+        namaBaru: namaBaru,
+        nip: nip,
+        noKode: noKode,
+        tmt: tmt,
         noHp: noHp,
+        alamat: alamat,
         pesanKoreksi: pesanKoreksi
       };
 
@@ -2343,7 +2393,7 @@
 
         if (res && res.success) {
           alertEl.textContent = res.message;
-          alertEl.className = "alert alert-success py-2 small mb-0";
+          alertEl.className = "alert alert-success py-2 small mb-0 mt-2";
           alertEl.classList.remove("d-none");
           setTimeout(function() {
             var instance = bootstrap.Modal.getInstance(document.getElementById('modalKoreksiData'));
@@ -2351,7 +2401,7 @@
           }, 2000);
         } else {
           alertEl.textContent = res.message || "Gagal mengirim permohonan koreksi.";
-          alertEl.className = "alert alert-danger py-2 small mb-0";
+          alertEl.className = "alert alert-danger py-2 small mb-0 mt-2";
           alertEl.classList.remove("d-none");
         }
       }).submitPermohonanKoreksi(form);
@@ -2925,7 +2975,109 @@
       filterTableAnggota();
     }
 
+    function loadPermohonanKoreksiAdmin() {
+      var loader = document.getElementById("loaderKoreksiAdmin");
+      var listEl = document.getElementById("listKoreksiAdmin");
+      var badge = document.getElementById("countKoreksiBadge");
+
+      if (loader) loader.classList.remove("d-none");
+
+      google.script.run.withSuccessHandler(function(res) {
+        if (loader) loader.classList.add("d-none");
+        if (res && res.success && res.data) {
+          var pendingList = res.data.filter(function(item) { return item.status === "Menunggu Verifikasi"; });
+          if (badge) badge.textContent = pendingList.length;
+
+          if (pendingList.length === 0) {
+            listEl.innerHTML = '<div class="list-group-item text-muted small py-3 text-center"><i class="fa-solid fa-circle-check text-success me-1"></i> Tidak ada permintaan pembaruan data yang perlu diverifikasi.</div>';
+            return;
+          }
+
+          var html = "";
+          pendingList.forEach(function(k) {
+            var changes = [];
+            if (k.namaBaru && k.namaBaru !== k.namaAsli) changes.push("<b>Nama:</b> " + k.namaAsli + " &rarr; <span class='text-primary fw-bold'>" + k.namaBaru + "</span>");
+            if (k.nipBaru) changes.push("<b>NIP:</b> <span class='text-primary fw-bold'>" + k.nipBaru + "</span>");
+            if (k.noKodeBaru) changes.push("<b>No. Kode:</b> <span class='text-primary fw-bold'>" + k.noKodeBaru + "</span>");
+            if (k.tmtBaru) changes.push("<b>TMT:</b> <span class='text-primary fw-bold'>" + k.tmtBaru + "</span>");
+            if (k.noHpBaru) changes.push("<b>No HP:</b> <span class='text-primary fw-bold'>" + k.noHpBaru + "</span>");
+            if (k.alamatBaru) changes.push("<b>Alamat:</b> <span class='text-primary fw-bold'>" + k.alamatBaru + "</span>");
+            if (k.catatanAnggota) changes.push("<i>Catatan: " + k.catatanAnggota + "</i>");
+
+            html += 
+              '<div class="list-group-item p-3 align-middle border-bottom">' +
+                '<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center g-2">' +
+                  '<div>' +
+                    '<div class="fw-bold text-navy fs-6"><i class="fa-solid fa-user-pen text-warning me-2"></i>' + k.namaAsli + ' <span class="badge bg-light text-dark border ms-1">' + k.tanggal + '</span></div>' +
+                    '<div class="small text-dark mt-1">' + (changes.length > 0 ? changes.join(" | ") : "Pengajuan pembaruan data") + '</div>' +
+                  '</div>' +
+                  '<div class="d-flex align-items-center gap-2 mt-2 mt-md-0">' +
+                    '<button type="button" class="btn btn-success btn-sm fw-bold px-3 rounded-pill" onclick="setujuiKoreksiAdmin(\'' + k.idTrx + '\', \'' + escapeQuotes(k.namaAsli) + '\')">' +
+                      '<i class="fa-solid fa-check me-1"></i> Setujui' +
+                    '</button>' +
+                    '<button type="button" class="btn btn-outline-danger btn-sm fw-semibold px-2.5 rounded-pill" onclick="tolakKoreksiAdmin(\'' + k.idTrx + '\', \'' + escapeQuotes(k.namaAsli) + '\')">' +
+                      '<i class="fa-solid fa-xmark me-1"></i> Tolak' +
+                    '</button>' +
+                  '</div>' +
+                '</div>' +
+              '</div>';
+          });
+          listEl.innerHTML = html;
+        }
+      }).getPermohonanKoreksiList(currentAdminPin);
+    }
+
+    function setujuiKoreksiAdmin(idTrx, namaAsli) {
+      Swal.fire({
+        title: 'Setujui Pembaruan Data?',
+        text: "Data anggota '" + namaAsli + "' di Master Anggota akan otomatis diperbarui sesuai pengajuan.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#198754',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Setujui Data'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.showLoading();
+          google.script.run.withSuccessHandler(function(res) {
+            if (res && res.success) {
+              Swal.fire('Berhasil!', res.message, 'success');
+              loadPermohonanKoreksiAdmin();
+              loadTableAdminAnggota();
+            } else {
+              Swal.fire('Gagal', res ? res.message : 'Terjadi kesalahan', 'error');
+            }
+          }).setujuiPermohonanKoreksi(currentAdminPin, idTrx);
+        }
+      });
+    }
+
+    function tolakKoreksiAdmin(idTrx, namaAsli) {
+      Swal.fire({
+        title: 'Tolak Permohonan?',
+        input: 'text',
+        inputLabel: 'Alasan Penolakan (Opsional)',
+        inputPlaceholder: 'Tuliskan alasan penolakan...',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        confirmButtonText: 'Tolak Permohonan'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.showLoading();
+          google.script.run.withSuccessHandler(function(res) {
+            if (res && res.success) {
+              Swal.fire('Ditolak', res.message, 'info');
+              loadPermohonanKoreksiAdmin();
+            } else {
+              Swal.fire('Gagal', res ? res.message : 'Terjadi kesalahan', 'error');
+            }
+          }).tolakPermohonanKoreksi(currentAdminPin, idTrx, result.value || "");
+        }
+      });
+    }
+
     function loadTableAdminAnggota() {
+      loadPermohonanKoreksiAdmin();
       var tbody = document.getElementById("tbodyAnggota");
       tbody.innerHTML = '<tr><td colspan="11" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm me-2"></div>Memuat data anggota...</td></tr>';
 

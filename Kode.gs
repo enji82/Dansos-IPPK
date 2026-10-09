@@ -243,6 +243,7 @@ function buildDetailStatusAnggota(foundRow, paguMap) {
     tglLahir: tglLahirVal,
     alamat: foundRow[4] ? String(foundRow[4]) : "-",
     tmt: tmtVal,
+    tmtRaw: (foundRow[5] ? (foundRow[5] instanceof Date ? Utilities.formatDate(foundRow[5], ss.getSpreadsheetTimeZone(), "yyyy-MM-dd") : String(foundRow[5])) : ""),
     noHp: foundRow[6] ? String(foundRow[6]) : "-",
     noKode: foundRow[13] ? String(foundRow[13]) : "-",
     statusStr: statusCalculated,
@@ -1820,11 +1821,15 @@ function submitPermohonanKoreksi(form) {
     form = form || {};
     var idAnggota = form.idAnggota;
     var namaAnggota = form.namaAnggota || "-";
-    var noHpForm = form.noHp || "-";
+    var nipForm = form.nip || "";
+    var noKodeForm = form.noKode || "";
+    var tmtForm = form.tmt || "";
+    var noHpForm = form.noHp || "";
+    var alamatForm = form.alamat || "";
     var pesanKoreksi = form.pesanKoreksi || "";
 
-    if (!idAnggota || !pesanKoreksi.trim()) {
-      return { success: false, message: "Pesan permohonan koreksi harus diisi!" };
+    if (!idAnggota) {
+      return { success: false, message: "ID Anggota tidak valid!" };
     }
 
     var ss = getSS();
@@ -1833,8 +1838,22 @@ function submitPermohonanKoreksi(form) {
     // Auto-create tab if not exists
     if (!sheetKoreksi) {
       sheetKoreksi = ss.insertSheet("Permohonan_Koreksi");
-      sheetKoreksi.appendRow(["ID Trx", "Tanggal", "ID Anggota", "Nama Anggota", "No HP / WA", "Rincian Permohonan Koreksi", "Status", "Catatan Admin"]);
-      sheetKoreksi.getRange(1, 1, 1, 8).setFontWeight("bold").setBackground("#e2e8f0");
+      sheetKoreksi.appendRow([
+        "ID Trx", "Tanggal", "ID Anggota", "Nama Asli", "Nama Baru", "NIP Baru",
+        "No Kode Baru", "TMT Baru", "No HP Baru", "Alamat Baru", "Catatan Anggota", "Status", "Catatan Admin"
+      ]);
+      sheetKoreksi.getRange(1, 1, 1, 13).setFontWeight("bold").setBackground("#e2e8f0");
+    } else {
+      // Pastikan struktur header jika sheet baru dibuat dari versi sebelumnya
+      var headers = sheetKoreksi.getRange(1, 1, 1, Math.max(13, sheetKoreksi.getLastColumn())).getValues()[0];
+      if (headers.length < 13 || headers[4] !== "Nama Baru") {
+        sheetKoreksi.clear();
+        sheetKoreksi.appendRow([
+          "ID Trx", "Tanggal", "ID Anggota", "Nama Asli", "Nama Baru", "NIP Baru",
+          "No Kode Baru", "TMT Baru", "No HP Baru", "Alamat Baru", "Catatan Anggota", "Status", "Catatan Admin"
+        ]);
+        sheetKoreksi.getRange(1, 1, 1, 13).setFontWeight("bold").setBackground("#e2e8f0");
+      }
     }
 
     var tgl = new Date();
@@ -1846,7 +1865,12 @@ function submitPermohonanKoreksi(form) {
       tglStr,
       idAnggota,
       namaAnggota,
+      form.namaBaru || namaAnggota,
+      nipForm,
+      noKodeForm,
+      tmtForm,
       noHpForm,
+      alamatForm,
       pesanKoreksi,
       "Menunggu Verifikasi",
       "-"
@@ -1858,5 +1882,155 @@ function submitPermohonanKoreksi(form) {
     };
   } catch (err) {
     return { success: false, message: "Gagal mengirim permohonan koreksi: " + err.message };
+  }
+}
+
+/**
+ * AMBIL LIST PERMOHONAN KOREKSI (KHUSUS ADMIN)
+ */
+function getPermohonanKoreksiList(pin) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheet = ss.getSheetByName("Permohonan_Koreksi");
+    if (!sheet) return { success: true, data: [] };
+
+    var data = sheet.getDataRange().getValues();
+    var list = [];
+
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      if (!row[0]) continue;
+      
+      list.push({
+        idTrx: row[0],
+        tanggal: row[1] ? String(row[1]) : "-",
+        idAnggota: row[2],
+        namaAsli: row[3],
+        namaBaru: row[4],
+        nipBaru: row[5] ? String(row[5]) : "",
+        noKodeBaru: row[6] ? String(row[6]) : "",
+        tmtBaru: row[7] ? String(row[7]) : "",
+        noHpBaru: row[8] ? String(row[8]) : "",
+        alamatBaru: row[9] ? String(row[9]) : "",
+        catatanAnggota: row[10] ? String(row[10]) : "",
+        status: row[11] ? String(row[11]).trim() : "Menunggu Verifikasi",
+        catatanAdmin: row[12] ? String(row[12]) : "-"
+      });
+    }
+
+    return { success: true, data: list.reverse() }; // Paling baru di atas
+  } catch (err) {
+    return { success: false, message: "Gagal mengambil daftar permohonan koreksi: " + err.message };
+  }
+}
+
+/**
+ * PROSES SETUJUI PERMOHONAN KOREKSI DATA (SETUJUI & UPDATE MASTER ANGGOTA)
+ */
+function setujuiPermohonanKoreksi(pin, idTrx) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheetKoreksi = ss.getSheetByName("Permohonan_Koreksi");
+    var sheetAnggota = ss.getSheetByName(SHEET_ANGGOTA);
+
+    if (!sheetKoreksi || !sheetAnggota) {
+      return { success: false, message: "Sheet Master_Anggota atau Permohonan_Koreksi tidak ditemukan!" };
+    }
+
+    var dataK = sheetKoreksi.getDataRange().getValues();
+    var targetKRow = -1;
+    var rowK = null;
+
+    for (var i = 1; i < dataK.length; i++) {
+      if (String(dataK[i][0]) === String(idTrx)) {
+        targetKRow = i + 1;
+        rowK = dataK[i];
+        break;
+      }
+    }
+
+    if (targetKRow === -1 || !rowK) {
+      return { success: false, message: "Permohonan koreksi tidak ditemukan!" };
+    }
+
+    var idAnggota = rowK[2];
+    var namaBaru = rowK[4];
+    var nipBaru = rowK[5];
+    var noKodeBaru = rowK[6];
+    var tmtBaru = rowK[7];
+    var noHpBaru = rowK[8];
+    var alamatBaru = rowK[9];
+
+    var dataA = sheetAnggota.getDataRange().getValues();
+    var targetARow = -1;
+
+    for (var j = 1; j < dataA.length; j++) {
+      if (String(dataA[j][0]) === String(idAnggota)) {
+        targetARow = j + 1;
+        break;
+      }
+    }
+
+    if (targetARow === -1) {
+      return { success: false, message: "Data Anggota tidak ditemukan di Master_Anggota!" };
+    }
+
+    // Apply updates ke Master_Anggota
+    // Col B (2): Nama, C (3): NIP, E (5): Alamat, F (6): TMT, G (7): No HP, N (14): No Kode
+    if (namaBaru) sheetAnggota.getRange(targetARow, 2).setValue(namaBaru);
+    if (nipBaru !== undefined && nipBaru !== "") sheetAnggota.getRange(targetARow, 3).setValue(nipBaru);
+    if (alamatBaru !== undefined && alamatBaru !== "") sheetAnggota.getRange(targetARow, 5).setValue(alamatBaru);
+    if (tmtBaru !== undefined && tmtBaru !== "") sheetAnggota.getRange(targetARow, 6).setValue(tmtBaru);
+    if (noHpBaru !== undefined && noHpBaru !== "") sheetAnggota.getRange(targetARow, 7).setValue(noHpBaru);
+    if (noKodeBaru !== undefined && noKodeBaru !== "") sheetAnggota.getRange(targetARow, 14).setValue(noKodeBaru);
+
+    // Update status di Permohonan_Koreksi
+    sheetKoreksi.getRange(targetKRow, 12).setValue("Disetujui");
+    sheetKoreksi.getRange(targetKRow, 13).setValue("Data telah diperbarui di Master Anggota");
+
+    return { success: true, message: "Permohonan perbaikan data berhasil disetujui & data anggota telah diperbarui!" };
+  } catch (err) {
+    return { success: false, message: "Gagal menyetujui permohonan: " + err.message };
+  }
+}
+
+/**
+ * PROSES TOLAK PERMOHONAN KOREKSI DATA
+ */
+function tolakPermohonanKoreksi(pin, idTrx, alasan) {
+  var authCheck = verifyAdminPin(pin);
+  if (!authCheck.success) return { success: false, message: "Akses Ditolak!" };
+
+  try {
+    var ss = getSS();
+    var sheetKoreksi = ss.getSheetByName("Permohonan_Koreksi");
+    if (!sheetKoreksi) return { success: false, message: "Sheet Permohonan_Koreksi tidak ditemukan!" };
+
+    var dataK = sheetKoreksi.getDataRange().getValues();
+    var targetKRow = -1;
+
+    for (var i = 1; i < dataK.length; i++) {
+      if (String(dataK[i][0]) === String(idTrx)) {
+        targetKRow = i + 1;
+        break;
+      }
+    }
+
+    if (targetKRow === -1) {
+      return { success: false, message: "Permohonan koreksi tidak ditemukan!" };
+    }
+
+    sheetKoreksi.getRange(targetKRow, 12).setValue("Ditolak");
+    sheetKoreksi.getRange(targetKRow, 13).setValue(alasan || "Ditolak oleh Admin");
+
+    return { success: true, message: "Permohonan perbaikan data telah ditolak." };
+  } catch (err) {
+    return { success: false, message: "Gagal menolak permohonan: " + err.message };
   }
 }
