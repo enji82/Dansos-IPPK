@@ -3415,10 +3415,27 @@
         statusLabel = "Status: Tidak Aktif" + (filterKategori !== "semua" ? (" - " + filterKategori) : "");
       }
 
+      // Helper format tanggal ke DD-MM-YYYY
+      function formatTanggalIndo(val) {
+        if (!val || val === "-" || val === " - ") return "-";
+        var str = String(val).trim();
+        // format YYYY-MM-DD
+        if (str.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          var p = str.split("-");
+          return p[2] + "-" + p[1] + "-" + p[0];
+        }
+        // format YYYY/MM/DD
+        if (str.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
+          var p2 = str.split("/");
+          return p2[2] + "-" + p2[1] + "-" + p2[0];
+        }
+        return str;
+      }
+
       // 2. Buat Array of Arrays (AoA) persis sesuai format gambar user
       var wsData = [];
-      wsData.push(["", "", "", "", "DATA ANGGOTA PAGUYUBAN DANSOS SETIA KAWAN", "", "", ""]);
-      wsData.push(["", "", "", "", "KECAMATAN SECANG", "", "", ""]);
+      wsData.push(["DATA ANGGOTA PAGUYUBAN DANSOS SETIA KAWAN", "", "", "", "", "", "", ""]);
+      wsData.push(["KECAMATAN SECANG", "", "", "", "", "", "", ""]);
       wsData.push(["", "", "", "", "", "", "", ""]);
       wsData.push([statusLabel, "", "", "", "", "", "", ""]);
       wsData.push(["", "", "", "", "", "", "", ""]);
@@ -3430,9 +3447,9 @@
           idx + 1,
           item.nama || "-",
           item.nip || "-",
-          item.tglLahir || "-",
+          formatTanggalIndo(item.tglLahir),
           item.noKode || "-",
-          item.tmt || "-",
+          formatTanggalIndo(item.tmt),
           item.noHp || "-",
           bayarStr
         ]);
@@ -3441,19 +3458,20 @@
       // 3. Buat Sheet
       var ws = XLSX.utils.aoa_to_sheet(wsData);
 
-      // Merge Title Baris 1 & 2 di Kolom E
+      // Merge Title Baris 1 & 2 (A1:H1, A2:H2) dan Status Baris 4 (A4:H4)
       if (!ws['!merges']) ws['!merges'] = [];
-      ws['!merges'].push({ s: { r: 0, c: 4 }, e: { r: 0, c: 5 } });
-      ws['!merges'].push({ s: { r: 1, c: 4 }, e: { r: 1, c: 5 } });
+      ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }); // Baris 1 A1:H1
+      ws['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: 7 } }); // Baris 2 A2:H2
+      ws['!merges'].push({ s: { r: 3, c: 0 }, e: { r: 3, c: 7 } }); // Baris 4 A4:H4 (agar status tidak terpotong)
 
       // Format Lebar Kolom
       ws['!cols'] = [
         { wch: 6 },   // NO.
         { wch: 30 },  // NAMA
         { wch: 22 },  // NIP
-        { wch: 16 },  // TANGGAL LAHIR
+        { wch: 18 },  // TANGGAL LAHIR
         { wch: 26 },  // NO. KODE
-        { wch: 16 },  // TMT PENSIUN
+        { wch: 18 },  // TMT PENSIUN
         { wch: 18 },  // NO. HP
         { wch: 20 }   // IURAN TERAKHIR
       ];
