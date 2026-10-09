@@ -1080,27 +1080,31 @@
             <input type="hidden" id="korIdAnggota">
             
             <div class="row g-2 text-start">
-              <div class="col-12 col-md-6 mb-2">
+              <div class="col-12 mb-2">
                 <label class="form-label small fw-bold text-secondary mb-1">Nama Lengkap</label>
                 <input type="text" id="korNamaAnggota" class="form-control fw-semibold" placeholder="Nama Lengkap">
               </div>
-              <div class="col-12 col-md-6 mb-2">
+              <div class="col-12 mb-2">
                 <label class="form-label small fw-bold text-secondary mb-1">NIP / ID Pensiun</label>
                 <input type="text" id="korNip" class="form-control" placeholder="Contoh: 196805141992031002">
               </div>
-              <div class="col-12 col-md-6 mb-2">
+              <div class="col-12 mb-2">
+                <label class="form-label small fw-bold text-secondary mb-1">Tanggal Lahir</label>
+                <input type="date" id="korTglLahir" class="form-control">
+              </div>
+              <div class="col-12 mb-2">
                 <label class="form-label small fw-bold text-secondary mb-1">No. Kode (No. Kartu Dansos)</label>
                 <input type="text" id="korNoKode" class="form-control" placeholder="Contoh: 045">
               </div>
-              <div class="col-12 col-md-6 mb-2">
+              <div class="col-12 mb-2">
                 <label class="form-label small fw-bold text-secondary mb-1">TMT Menjadi Peserta / Pensiun</label>
                 <input type="date" id="korTmt" class="form-control">
               </div>
-              <div class="col-12 col-md-6 mb-2">
+              <div class="col-12 mb-2">
                 <label class="form-label small fw-bold text-secondary mb-1">No. HP / WA Aktif</label>
                 <input type="text" id="korNoHp" class="form-control" placeholder="Contoh: 08123456789">
               </div>
-              <div class="col-12 col-md-6 mb-2">
+              <div class="col-12 mb-2">
                 <label class="form-label small fw-bold text-secondary mb-1">Alamat Lengkap</label>
                 <input type="text" id="korAlamat" class="form-control" placeholder="Contoh: Jl. Pemuda No. 12 Secang">
               </div>
@@ -2340,6 +2344,12 @@
       document.getElementById("korIdAnggota").value = d.id || "";
       document.getElementById("korNamaAnggota").value = d.nama || "";
       document.getElementById("korNip").value = (d.nip && d.nip !== "-") ? d.nip : "";
+      
+      var tglLahirFormatted = "";
+      if (d.tglLahirRaw) {
+        tglLahirFormatted = d.tglLahirRaw;
+      }
+      document.getElementById("korTglLahir").value = tglLahirFormatted;
       document.getElementById("korNoKode").value = (d.noKode && d.noKode !== "-") ? d.noKode : "";
       
       // Parse TMT if valid date
@@ -2364,6 +2374,7 @@
       var idAnggota = document.getElementById("korIdAnggota").value;
       var namaBaru = document.getElementById("korNamaAnggota").value;
       var nip = document.getElementById("korNip").value;
+      var tglLahir = document.getElementById("korTglLahir").value;
       var noKode = document.getElementById("korNoKode").value;
       var tmt = document.getElementById("korTmt").value;
       var noHp = document.getElementById("korNoHp").value;
@@ -2380,6 +2391,7 @@
         namaAnggota: (window.globalCurrentDetailData ? window.globalCurrentDetailData.nama : namaBaru),
         namaBaru: namaBaru,
         nip: nip,
+        tglLahir: tglLahir,
         noKode: noKode,
         tmt: tmt,
         noHp: noHp,
@@ -2998,6 +3010,7 @@
             var changes = [];
             if (k.namaBaru && k.namaBaru !== k.namaAsli) changes.push("<b>Nama:</b> " + escapeQuotes(k.namaAsli) + " &rarr; <span class='text-primary fw-bold'>" + escapeQuotes(k.namaBaru) + "</span>");
             if (k.nipBaru) changes.push("<b>NIP:</b> <span class='text-primary fw-bold'>" + escapeQuotes(String(k.nipBaru)) + "</span>");
+            if (k.tglLahirBaru) changes.push("<b>Tgl Lahir:</b> <span class='text-primary fw-bold'>" + escapeQuotes(String(k.tglLahirBaru)) + "</span>");
             if (k.noKodeBaru) changes.push("<b>No. Kode:</b> <span class='text-primary fw-bold'>" + escapeQuotes(String(k.noKodeBaru)) + "</span>");
             if (k.tmtBaru) changes.push("<b>TMT:</b> <span class='text-primary fw-bold'>" + escapeQuotes(String(k.tmtBaru)) + "</span>");
             if (k.noHpBaru) changes.push("<b>No HP:</b> <span class='text-primary fw-bold'>" + escapeQuotes(String(k.noHpBaru)) + "</span>");

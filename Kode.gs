@@ -241,6 +241,7 @@ function buildDetailStatusAnggota(foundRow, paguMap) {
     nama: namaAnggota,
     nip: nip ? String(nip) : "-",
     tglLahir: tglLahirVal,
+    tglLahirRaw: (foundRow[3] ? (foundRow[3] instanceof Date ? Utilities.formatDate(foundRow[3], ss.getSpreadsheetTimeZone(), "yyyy-MM-dd") : String(foundRow[3])) : ""),
     alamat: foundRow[4] ? String(foundRow[4]) : "-",
     tmt: tmtVal,
     tmtRaw: (foundRow[5] ? (foundRow[5] instanceof Date ? Utilities.formatDate(foundRow[5], ss.getSpreadsheetTimeZone(), "yyyy-MM-dd") : String(foundRow[5])) : ""),
@@ -1840,19 +1841,19 @@ function submitPermohonanKoreksi(form) {
       sheetKoreksi = ss.insertSheet("Permohonan_Koreksi");
       sheetKoreksi.appendRow([
         "ID Trx", "Tanggal", "ID Anggota", "Nama Asli", "Nama Baru", "NIP Baru",
-        "No Kode Baru", "TMT Baru", "No HP Baru", "Alamat Baru", "Catatan Anggota", "Status", "Catatan Admin"
+        "Tgl Lahir Baru", "No Kode Baru", "TMT Baru", "No HP Baru", "Alamat Baru", "Catatan Anggota", "Status", "Catatan Admin"
       ]);
-      sheetKoreksi.getRange(1, 1, 1, 13).setFontWeight("bold").setBackground("#e2e8f0");
+      sheetKoreksi.getRange(1, 1, 1, 14).setFontWeight("bold").setBackground("#e2e8f0");
     } else {
       // Pastikan struktur header jika sheet baru dibuat dari versi sebelumnya
-      var headers = sheetKoreksi.getRange(1, 1, 1, Math.max(13, sheetKoreksi.getLastColumn())).getValues()[0];
-      if (headers.length < 13 || headers[4] !== "Nama Baru") {
+      var headers = sheetKoreksi.getRange(1, 1, 1, Math.max(14, sheetKoreksi.getLastColumn())).getValues()[0];
+      if (headers.length < 14 || headers[6] !== "Tgl Lahir Baru") {
         sheetKoreksi.clear();
         sheetKoreksi.appendRow([
           "ID Trx", "Tanggal", "ID Anggota", "Nama Asli", "Nama Baru", "NIP Baru",
-          "No Kode Baru", "TMT Baru", "No HP Baru", "Alamat Baru", "Catatan Anggota", "Status", "Catatan Admin"
+          "Tgl Lahir Baru", "No Kode Baru", "TMT Baru", "No HP Baru", "Alamat Baru", "Catatan Anggota", "Status", "Catatan Admin"
         ]);
-        sheetKoreksi.getRange(1, 1, 1, 13).setFontWeight("bold").setBackground("#e2e8f0");
+        sheetKoreksi.getRange(1, 1, 1, 14).setFontWeight("bold").setBackground("#e2e8f0");
       }
     }
 
@@ -1866,11 +1867,12 @@ function submitPermohonanKoreksi(form) {
       idAnggota,
       namaAnggota,
       form.namaBaru || namaAnggota,
-      nipForm,
-      noKodeForm,
-      tmtForm,
-      noHpForm,
-      alamatForm,
+      form.nip || "",
+      form.tglLahir || "",
+      form.noKode || "",
+      form.tmt || "",
+      form.noHp || "",
+      form.alamat || "",
       pesanKoreksi,
       "Menunggu Verifikasi",
       "-"
@@ -1918,17 +1920,31 @@ function getPermohonanKoreksiList(pin) {
         }
       }
 
-      var tmtStr = "";
-      if (row[7]) {
+      var tglLahirStr = "";
+      if (row[6]) {
         try {
-          var dTmt = (row[7] instanceof Date) ? row[7] : new Date(row[7]);
+          var dTL = (row[6] instanceof Date) ? row[6] : new Date(row[6]);
+          if (!isNaN(dTL.getTime())) {
+            tglLahirStr = Utilities.formatDate(dTL, ss.getSpreadsheetTimeZone(), "dd/MM/yyyy");
+          } else {
+            tglLahirStr = String(row[6]);
+          }
+        } catch(eTL) {
+          tglLahirStr = String(row[6]);
+        }
+      }
+
+      var tmtStr = "";
+      if (row[8]) {
+        try {
+          var dTmt = (row[8] instanceof Date) ? row[8] : new Date(row[8]);
           if (!isNaN(dTmt.getTime())) {
             tmtStr = Utilities.formatDate(dTmt, ss.getSpreadsheetTimeZone(), "dd/MM/yyyy");
           } else {
-            tmtStr = String(row[7]);
+            tmtStr = String(row[8]);
           }
         } catch(e2) {
-          tmtStr = String(row[7]);
+          tmtStr = String(row[8]);
         }
       } else {
         tmtStr = "";
@@ -1941,13 +1957,14 @@ function getPermohonanKoreksiList(pin) {
         namaAsli: row[3],
         namaBaru: row[4],
         nipBaru: row[5] ? String(row[5]) : "",
-        noKodeBaru: row[6] ? String(row[6]) : "",
+        tglLahirBaru: tglLahirStr,
+        noKodeBaru: row[7] ? String(row[7]) : "",
         tmtBaru: tmtStr,
-        noHpBaru: row[8] ? String(row[8]) : "",
-        alamatBaru: row[9] ? String(row[9]) : "",
-        catatanAnggota: row[10] ? String(row[10]) : "",
-        status: row[11] ? String(row[11]).trim() : "Menunggu Verifikasi",
-        catatanAdmin: row[12] ? String(row[12]) : "-"
+        noHpBaru: row[9] ? String(row[9]) : "",
+        alamatBaru: row[10] ? String(row[10]) : "",
+        catatanAnggota: row[11] ? String(row[11]) : "",
+        status: row[12] ? String(row[12]).trim() : "Menunggu Verifikasi",
+        catatanAdmin: row[13] ? String(row[13]) : "-"
       });
     }
 
@@ -1992,10 +2009,11 @@ function setujuiPermohonanKoreksi(pin, idTrx) {
     var idAnggota = rowK[2];
     var namaBaru = rowK[4];
     var nipBaru = rowK[5];
-    var noKodeBaru = rowK[6];
-    var tmtBaru = rowK[7];
-    var noHpBaru = rowK[8];
-    var alamatBaru = rowK[9];
+    var tglLahirBaru = rowK[6];
+    var noKodeBaru = rowK[7];
+    var tmtBaru = rowK[8];
+    var noHpBaru = rowK[9];
+    var alamatBaru = rowK[10];
 
     var dataA = sheetAnggota.getDataRange().getValues();
     var targetARow = -1;
@@ -2012,17 +2030,18 @@ function setujuiPermohonanKoreksi(pin, idTrx) {
     }
 
     // Apply updates ke Master_Anggota
-    // Col B (2): Nama, C (3): NIP, E (5): Alamat, F (6): TMT, G (7): No HP, N (14): No Kode
+    // Col B (2): Nama, C (3): NIP, D (4): Tgl Lahir, E (5): Alamat, F (6): TMT, G (7): No HP, N (14): No Kode
     if (namaBaru) sheetAnggota.getRange(targetARow, 2).setValue(namaBaru);
     if (nipBaru !== undefined && nipBaru !== "") sheetAnggota.getRange(targetARow, 3).setValue(nipBaru);
+    if (tglLahirBaru !== undefined && tglLahirBaru !== "") sheetAnggota.getRange(targetARow, 4).setValue(tglLahirBaru);
     if (alamatBaru !== undefined && alamatBaru !== "") sheetAnggota.getRange(targetARow, 5).setValue(alamatBaru);
     if (tmtBaru !== undefined && tmtBaru !== "") sheetAnggota.getRange(targetARow, 6).setValue(tmtBaru);
     if (noHpBaru !== undefined && noHpBaru !== "") sheetAnggota.getRange(targetARow, 7).setValue(noHpBaru);
     if (noKodeBaru !== undefined && noKodeBaru !== "") sheetAnggota.getRange(targetARow, 14).setValue(noKodeBaru);
 
     // Update status di Permohonan_Koreksi
-    sheetKoreksi.getRange(targetKRow, 12).setValue("Disetujui");
-    sheetKoreksi.getRange(targetKRow, 13).setValue("Data telah diperbarui di Master Anggota");
+    sheetKoreksi.getRange(targetKRow, 13).setValue("Disetujui");
+    sheetKoreksi.getRange(targetKRow, 14).setValue("Data telah diperbarui di Master Anggota");
 
     return { success: true, message: "Permohonan perbaikan data berhasil disetujui & data anggota telah diperbarui!" };
   } catch (err) {
