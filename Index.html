@@ -715,7 +715,7 @@
               </div>
 
               <!-- CARD 1: PEMBERITAHUAN PERMINTAAN PERSETUJUAN PEMBARUAN DATA -->
-              <div class="card border-warning bg-warning bg-opacity-10 mb-3 rounded-4 shadow-sm" id="cardPermohonanKoreksi">
+              <div class="card border-warning bg-warning bg-opacity-10 mb-4 rounded-4 shadow-sm" id="cardPermohonanKoreksi">
                 <div class="card-body p-3">
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-user-clock me-2 text-warning"></i> Permintaan Persetujuan Pembaruan Data (<span id="countKoreksiBadge">0</span>)</h6>
@@ -732,28 +732,6 @@
 
                   <div id="listKoreksiAdmin" class="list-group list-group-flush rounded-3 border bg-white overflow-hidden">
                     <div class="list-group-item text-muted small py-2 text-center">Tidak ada permohonan pembaruan data yang perlu diverifikasi.</div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- CARD 2: PEMBERITAHUAN PENDAFTARAN ANGGOTA BARU -->
-              <div class="card border-info bg-info bg-opacity-10 mb-4 rounded-4 shadow-sm" id="cardPendaftaranAnggota">
-                <div class="card-body p-3">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-user-plus me-2 text-primary"></i> Pengajuan Pendaftaran Anggota Baru (<span id="countPendaftaranBadge">0</span>)</h6>
-                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-0.5" onclick="loadPendaftaranAnggotaAdmin()" style="font-size: 0.78rem;">
-                      <i class="fa-solid fa-rotate me-1"></i> Refresh
-                    </button>
-                  </div>
-                  <p class="small text-muted mb-2">Berikut adalah pendaftaran anggota baru dari masyarakat yang memerlukan persetujuan Admin/Pengurus:</p>
-                  
-                  <div id="loaderPendaftaranAdmin" class="text-center py-2 d-none">
-                    <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
-                    <span class="small text-muted ms-2">Memuat pendaftaran...</span>
-                  </div>
-
-                  <div id="listPendaftaranAdmin" class="list-group list-group-flush rounded-3 border bg-white overflow-hidden">
-                    <div class="list-group-item text-muted small py-2 text-center">Tidak ada pengajuan pendaftaran anggota baru.</div>
                   </div>
                 </div>
               </div>
@@ -1088,58 +1066,81 @@
     </div>
   </div>
 
-  <!-- MODAL PENDAFTARAN ANGGOTA BARU (PUBLIK) -->
+  <!-- MODAL INFORMASI KEPESERTAAN & PENDAFTARAN ANGGOTA BARU (PUBLIK) -->
   <div class="modal fade" id="modalPendaftaranAnggota" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
         <div class="modal-header bg-navy text-white p-3">
-          <h5 class="modal-title fw-bold mb-0"><i class="fa-solid fa-user-plus me-2 text-warning"></i> Formulir Pendaftaran Anggota Baru</h5>
+          <h5 class="modal-title fw-bold mb-0"><i class="fa-solid fa-circle-info me-2 text-warning"></i> Informasi Kepesertaan Anggota Baru</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body p-4">
-          <div class="alert alert-info py-2 px-3 small border-0 shadow-sm rounded-3 mb-3">
-            <i class="fa-solid fa-circle-info me-1"></i> Silakan isi data calon anggota di bawah ini. Pengurus akan memverifikasi pendaftaran Anda sebelum resmi terdaftar.
+        <div class="modal-body p-4 text-dark text-start" style="font-size: 0.93rem; line-height: 1.6;">
+          
+          <!-- HEADER INFORMASI -->
+          <div class="text-center pb-3 mb-3 border-bottom">
+            <h5 class="fw-bold text-navy mb-1" style="font-size: 1.15rem; letter-spacing: 0.02em;">INFORMASI KEPESERTAAN</h5>
+            <h6 class="fw-bold text-dark mb-1" style="font-size: 1.05rem;">PAGUYUBAN SETIA KAWAN PENGELOLA DANA SOSIAL</h6>
+            <h6 class="fw-bold text-secondary mb-0" style="font-size: 0.95rem;">JAJARAN PENDIDIKAN JAWA TENGAH</h6>
           </div>
 
-          <form id="formPendaftaranAnggota">
-            <div class="row g-2 text-start">
-              <div class="col-12 mb-2">
-                <label class="form-label small fw-bold text-secondary mb-1">Nama Lengkap <span class="text-danger">*</span></label>
-                <input type="text" id="regNama" class="form-control fw-semibold" placeholder="Contoh: SITI AMINAH">
-              </div>
-              <div class="col-12 mb-2">
-                <label class="form-label small fw-bold text-secondary mb-1">NIP / ID Pensiun</label>
-                <input type="text" id="regNip" class="form-control" placeholder="Contoh: 196805141992031002">
-              </div>
-              <div class="col-12 mb-2">
-                <label class="form-label small fw-bold text-secondary mb-1">Tanggal Lahir</label>
-                <input type="date" id="regTglLahir" class="form-control">
-              </div>
-              <div class="col-12 mb-2">
-                <label class="form-label small fw-bold text-secondary mb-1">No. Kode (No. Kartu Dansos)</label>
-                <input type="text" id="regNoKode" class="form-control" placeholder="Contoh: KAB. MGL/SEC/PENS/123">
-              </div>
-              <div class="col-12 mb-2">
-                <label class="form-label small fw-bold text-secondary mb-1">TMT Menjadi Peserta / Pensiun</label>
-                <input type="date" id="regTmt" class="form-control">
-              </div>
-              <div class="col-12 mb-2">
-                <label class="form-label small fw-bold text-secondary mb-1">No. HP / WA Aktif</label>
-                <input type="text" id="regNoHp" class="form-control" placeholder="Contoh: 08123456789">
-              </div>
-              <div class="col-12 mb-2">
-                <label class="form-label small fw-bold text-secondary mb-1">Alamat Lengkap</label>
-                <input type="text" id="regAlamat" class="form-control" placeholder="Contoh: Jl. Pemuda No. 12 Secang">
-              </div>
-            </div>
+          <p class="mb-3 text-secondary">
+            Diberitahukan kepada Bapak/Ibu Guru dan Tenaga Kependidikan di lingkungan dinas pendidikan, khususnya yang akan memasuki masa pensiun, bahwa terdapat ketentuan mengenai kelanjutan kepesertaan Paguyuban Setia Kawan Pengelola Dana Sosial Jajaran Dinas Pendidikan Jawa Tengah.
+          </p>
+          <p class="mb-3 text-secondary fw-semibold">
+            Bagi Bapak/Ibu yang akan memasuki masa pensiun, dimohon memperhatikan pilihan dan persyaratan berikut:
+          </p>
 
-            <div id="regAlert" class="alert d-none py-2 small mb-0 mt-2"></div>
-          </form>
+          <!-- SEKSI A -->
+          <div class="card border-0 bg-light p-3 mb-3 rounded-3 border-start border-4 border-primary shadow-sm">
+            <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-user-check me-2"></i>A. Melanjutkan Kepesertaan</h6>
+            <p class="small text-muted mb-2">Bagi peserta yang ingin melanjutkan kembali kepesertaan Paguyuban Dana Sosial Setia Kawan, untuk mengumpulkan:</p>
+            <ol class="small text-dark mb-0 ps-3 fw-medium">
+              <li class="mb-1">Surat Pernyataan Menjadi Peserta (rangkap 4)</li>
+              <li class="mb-1">Fotokopi SK Pensiun yang telah disahkan</li>
+              <li class="mb-1">Pas foto ukuran 3 &times; 4 sebanyak 2 lembar</li>
+              <li class="mb-0">Bukti/kuitansi pembayaran terhitung mulai bulan pensiun</li>
+            </ol>
+          </div>
+
+          <!-- SEKSI B -->
+          <div class="card border-0 bg-light p-3 mb-3 rounded-3 border-start border-4 border-warning shadow-sm">
+            <h6 class="fw-bold text-warning-emphasis mb-2"><i class="fa-solid fa-file-invoice-dollar me-2"></i>B. Membayar Sumbangan yang Terputus Secara Mengangsur</h6>
+            <p class="small text-muted mb-2">Bagi peserta yang memiliki sumbangan terputus dan ingin melunasinya dengan cara mengangsur, agar mengisi <strong>Surat Pernyataan Kesanggupan Membayar Sumbangan yang Terputus Secara Mengangsur</strong>.</p>
+            <div class="small text-dark fw-medium">
+              <span class="d-block mb-1">&bull; Jumlah sumbangan yang terputus dicantumkan dalam surat pernyataan.</span>
+              <span class="d-block mb-1">&bull; Jangka waktu angsuran maksimal 36 kali.</span>
+              <span class="d-block mb-1">&bull; Besaran angsuran bulanan dan periode pembayaran dicantumkan dalam surat pernyataan.</span>
+              <span class="d-block mb-0">&bull; Surat pernyataan diketahui oleh Kepala Unit Kerja.</span>
+            </div>
+          </div>
+
+          <!-- SEKSI C -->
+          <div class="card border-0 bg-light p-3 mb-3 rounded-3 border-start border-4 border-danger shadow-sm">
+            <h6 class="fw-bold text-danger mb-2"><i class="fa-solid fa-user-xmark me-2"></i>C. Tidak Melanjutkan Kepesertaan</h6>
+            <p class="small text-dark mb-0 fw-medium">
+              Bagi peserta yang memutuskan tidak melanjutkan kepesertaan, agar mengisi <strong>Surat Pernyataan bagi Peserta Tidak Melanjutkan</strong>. Dalam dokumen tersebut dinyatakan bahwa kewajiban dan hak sebagai peserta yang terputus/hapus sesuai pernyataan tersebut.
+            </p>
+          </div>
+
+          <!-- PENGUMPULAN BERKAS & KONTAK -->
+          <div class="p-3 bg-navy bg-opacity-10 border border-navy border-opacity-25 rounded-3 mb-2">
+            <p class="small text-dark mb-2">
+              <i class="fa-solid fa-folder-open me-1 text-primary"></i> <strong>Pengumpulan Berkas:</strong> Berkas dapat dikumpulkan ke Pengurus IPPK Kecamatan Secang atau ke kantor Korwil Disdikbud Kecamatan Secang. Berkas tersebut selanjutnya akan dikirimkan ke pengurus dansos kabupaten guna pengusulan kartu anggota.
+            </p>
+            <hr class="my-2">
+            <p class="small mb-0 text-dark">
+              <strong><i class="fa-solid fa-headset me-1 text-success"></i> Informasi Lebih Lengkap Kontak Pengurus:</strong>
+            </p>
+            <ul class="small mb-0 ps-3 text-dark fw-semibold mt-1">
+              <li>Pengurus IPPK Kecamatan Secang</li>
+              <li>Kantor Korwil Disdikbud Kecamatan Secang</li>
+            </ul>
+          </div>
+
         </div>
-        <div class="modal-footer bg-light p-3">
-          <button type="button" class="btn btn-secondary px-3 rounded-pill" data-bs-dismiss="modal">Batal</button>
-          <button type="button" class="btn btn-navy fw-bold px-4 rounded-pill" id="btnSubmitPendaftaran" onclick="submitPendaftaranData()">
-            <i class="fa-solid fa-paper-plane me-1 text-warning"></i> Kirim Pendaftaran
+        <div class="modal-footer bg-light p-3 justify-content-center">
+          <button type="button" class="btn btn-navy fw-bold px-5 rounded-pill" data-bs-dismiss="modal">
+            <i class="fa-solid fa-check me-1"></i> Saya Mengerti
           </button>
         </div>
       </div>
@@ -2421,71 +2422,8 @@
     }
 
     function openModalPendaftaran() {
-      document.getElementById("regNama").value = "";
-      document.getElementById("regNip").value = "";
-      document.getElementById("regTglLahir").value = "";
-      document.getElementById("regNoKode").value = "";
-      document.getElementById("regTmt").value = "";
-      document.getElementById("regNoHp").value = "";
-      document.getElementById("regAlamat").value = "";
-
-      var alertEl = document.getElementById("regAlert");
-      alertEl.classList.add("d-none");
-      alertEl.className = "alert d-none py-2 small mb-0";
-
       var modal = new bootstrap.Modal(document.getElementById('modalPendaftaranAnggota'));
       modal.show();
-    }
-
-    function submitPendaftaranData() {
-      var nama = document.getElementById("regNama").value;
-      var nip = document.getElementById("regNip").value;
-      var tglLahir = document.getElementById("regTglLahir").value;
-      var noKode = document.getElementById("regNoKode").value;
-      var tmt = document.getElementById("regTmt").value;
-      var noHp = document.getElementById("regNoHp").value;
-      var alamat = document.getElementById("regAlamat").value;
-
-      var alertEl = document.getElementById("regAlert");
-      if (!nama.trim()) {
-        alertEl.textContent = "Silakan isi Nama Lengkap!";
-        alertEl.className = "alert alert-danger py-2 small mb-0 mt-2";
-        alertEl.classList.remove("d-none");
-        return;
-      }
-
-      var btn = document.getElementById("btnSubmitPendaftaran");
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mengirim...';
-
-      var form = {
-        nama: nama,
-        nip: nip,
-        tglLahir: tglLahir,
-        noKode: noKode,
-        tmt: tmt,
-        noHp: noHp,
-        alamat: alamat
-      };
-
-      google.script.run.withSuccessHandler(function(res) {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1 text-warning"></i> Kirim Pendaftaran';
-
-        if (res && res.success) {
-          alertEl.textContent = res.message;
-          alertEl.className = "alert alert-success py-2 small mb-0 mt-2";
-          alertEl.classList.remove("d-none");
-          setTimeout(function() {
-            var instance = bootstrap.Modal.getInstance(document.getElementById('modalPendaftaranAnggota'));
-            if (instance) instance.hide();
-          }, 2000);
-        } else {
-          alertEl.textContent = res ? res.message : "Gagal mengirim pendaftaran.";
-          alertEl.className = "alert alert-danger py-2 small mb-0 mt-2";
-          alertEl.classList.remove("d-none");
-        }
-      }).submitPendaftaranAnggota(form);
     }
 
     function openModalKoreksiData() {
