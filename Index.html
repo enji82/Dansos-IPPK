@@ -2996,26 +2996,28 @@
           var html = "";
           pendingList.forEach(function(k) {
             var changes = [];
-            if (k.namaBaru && k.namaBaru !== k.namaAsli) changes.push("<b>Nama:</b> " + k.namaAsli + " &rarr; <span class='text-primary fw-bold'>" + k.namaBaru + "</span>");
-            if (k.nipBaru) changes.push("<b>NIP:</b> <span class='text-primary fw-bold'>" + k.nipBaru + "</span>");
-            if (k.noKodeBaru) changes.push("<b>No. Kode:</b> <span class='text-primary fw-bold'>" + k.noKodeBaru + "</span>");
-            if (k.tmtBaru) changes.push("<b>TMT:</b> <span class='text-primary fw-bold'>" + k.tmtBaru + "</span>");
-            if (k.noHpBaru) changes.push("<b>No HP:</b> <span class='text-primary fw-bold'>" + k.noHpBaru + "</span>");
-            if (k.alamatBaru) changes.push("<b>Alamat:</b> <span class='text-primary fw-bold'>" + k.alamatBaru + "</span>");
-            if (k.catatanAnggota) changes.push("<i>Catatan: " + k.catatanAnggota + "</i>");
+            if (k.namaBaru && k.namaBaru !== k.namaAsli) changes.push("<b>Nama:</b> " + escapeQuotes(k.namaAsli) + " &rarr; <span class='text-primary fw-bold'>" + escapeQuotes(k.namaBaru) + "</span>");
+            if (k.nipBaru) changes.push("<b>NIP:</b> <span class='text-primary fw-bold'>" + escapeQuotes(String(k.nipBaru)) + "</span>");
+            if (k.noKodeBaru) changes.push("<b>No. Kode:</b> <span class='text-primary fw-bold'>" + escapeQuotes(String(k.noKodeBaru)) + "</span>");
+            if (k.tmtBaru) changes.push("<b>TMT:</b> <span class='text-primary fw-bold'>" + escapeQuotes(String(k.tmtBaru)) + "</span>");
+            if (k.noHpBaru) changes.push("<b>No HP:</b> <span class='text-primary fw-bold'>" + escapeQuotes(String(k.noHpBaru)) + "</span>");
+            if (k.alamatBaru) changes.push("<b>Alamat:</b> <span class='text-primary fw-bold'>" + escapeQuotes(String(k.alamatBaru)) + "</span>");
+            if (k.catatanAnggota) changes.push("<i>Catatan: " + escapeQuotes(String(k.catatanAnggota)) + "</i>");
 
             html += 
               '<div class="list-group-item p-3 align-middle border-bottom">' +
                 '<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center g-2">' +
-                  '<div>' +
-                    '<div class="fw-bold text-navy fs-6"><i class="fa-solid fa-user-pen text-warning me-2"></i>' + k.namaAsli + ' <span class="badge bg-light text-dark border ms-1">' + k.tanggal + '</span></div>' +
-                    '<div class="small text-dark mt-1">' + (changes.length > 0 ? changes.join(" | ") : "Pengajuan pembaruan data") + '</div>' +
+                  '<div class="me-md-3">' +
+                    '<div class="fw-bold text-navy fs-6 mb-1"><i class="fa-solid fa-user-pen text-warning me-2"></i>' + escapeQuotes(k.namaAsli) + 
+                      ' <span class="badge bg-light text-secondary border fw-normal ms-2" style="font-size: 0.75rem;"><i class="fa-regular fa-clock me-1"></i>' + k.tanggal + '</span>' +
+                    '</div>' +
+                    '<div class="small text-dark lh-base">' + (changes.length > 0 ? changes.join(" | ") : "Pengajuan pembaruan data") + '</div>' +
                   '</div>' +
-                  '<div class="d-flex align-items-center gap-2 mt-2 mt-md-0">' +
-                    '<button type="button" class="btn btn-success btn-sm fw-bold px-3 rounded-pill" onclick="setujuiKoreksiAdmin(\'' + k.idTrx + '\', \'' + escapeQuotes(k.namaAsli) + '\')">' +
+                  '<div class="d-flex align-items-center gap-2 mt-2 mt-md-0 flex-shrink-0">' +
+                    '<button type="button" class="btn btn-success btn-sm fw-bold px-3 py-1.5 rounded-pill shadow-sm" onclick="setujuiKoreksiAdmin(\'' + k.idTrx + '\', \'' + escapeQuotes(k.namaAsli) + '\')">' +
                       '<i class="fa-solid fa-check me-1"></i> Setujui' +
                     '</button>' +
-                    '<button type="button" class="btn btn-outline-danger btn-sm fw-semibold px-2.5 rounded-pill" onclick="tolakKoreksiAdmin(\'' + k.idTrx + '\', \'' + escapeQuotes(k.namaAsli) + '\')">' +
+                    '<button type="button" class="btn btn-outline-danger btn-sm fw-bold px-3 py-1.5 rounded-pill" onclick="tolakKoreksiAdmin(\'' + k.idTrx + '\', \'' + escapeQuotes(k.namaAsli) + '\')">' +
                       '<i class="fa-solid fa-xmark me-1"></i> Tolak' +
                     '</button>' +
                   '</div>' +

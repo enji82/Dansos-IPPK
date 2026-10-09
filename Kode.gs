@@ -1904,15 +1904,45 @@ function getPermohonanKoreksiList(pin) {
       var row = data[i];
       if (!row[0]) continue;
       
+      var tglStr = "-";
+      if (row[1]) {
+        try {
+          var dTgl = (row[1] instanceof Date) ? row[1] : new Date(row[1]);
+          if (!isNaN(dTgl.getTime())) {
+            tglStr = Utilities.formatDate(dTgl, ss.getSpreadsheetTimeZone(), "dd/MM/yyyy HH:mm");
+          } else {
+            tglStr = String(row[1]);
+          }
+        } catch(e1) {
+          tglStr = String(row[1]);
+        }
+      }
+
+      var tmtStr = "";
+      if (row[7]) {
+        try {
+          var dTmt = (row[7] instanceof Date) ? row[7] : new Date(row[7]);
+          if (!isNaN(dTmt.getTime())) {
+            tmtStr = Utilities.formatDate(dTmt, ss.getSpreadsheetTimeZone(), "dd/MM/yyyy");
+          } else {
+            tmtStr = String(row[7]);
+          }
+        } catch(e2) {
+          tmtStr = String(row[7]);
+        }
+      } else {
+        tmtStr = "";
+      }
+
       list.push({
         idTrx: row[0],
-        tanggal: row[1] ? String(row[1]) : "-",
+        tanggal: tglStr,
         idAnggota: row[2],
         namaAsli: row[3],
         namaBaru: row[4],
         nipBaru: row[5] ? String(row[5]) : "",
         noKodeBaru: row[6] ? String(row[6]) : "",
-        tmtBaru: row[7] ? String(row[7]) : "",
+        tmtBaru: tmtStr,
         noHpBaru: row[8] ? String(row[8]) : "",
         alamatBaru: row[9] ? String(row[9]) : "",
         catatanAnggota: row[10] ? String(row[10]) : "",
