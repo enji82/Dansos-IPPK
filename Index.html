@@ -2570,19 +2570,35 @@
         if (loader) loader.classList.add("d-none");
         if (res && res.success) {
           if (content) content.classList.remove("d-none");
-          document.getElementById("dashTotalBelumSetor").textContent = "Rp " + (res.totalBelumSetorAkurat || 0).toLocaleString('id-ID');
-          document.getElementById("dashCountBelumSetor").innerHTML = '<i class="fa-solid fa-user-clock me-1"></i>' + (res.countAnggotaBelumSetor || 0) + ' Anggota Belum Disetorkan';
+          var elTotalBelumSetor = document.getElementById("dashTotalBelumSetor");
+          if (elTotalBelumSetor) elTotalBelumSetor.textContent = "Rp " + (res.totalBelumSetorAkurat || 0).toLocaleString('id-ID');
+          
+          var elCountBelumSetor = document.getElementById("dashCountBelumSetor");
+          if (elCountBelumSetor) elCountBelumSetor.innerHTML = '<i class="fa-solid fa-user-clock me-1"></i>' + (res.countAnggotaBelumSetor || 0) + ' Anggota Belum Disetorkan';
 
-          document.getElementById("dashTotalMasuk").textContent = "Rp " + res.totalKasMasuk.toLocaleString('id-ID');
-          document.getElementById("dashCountMasuk").innerHTML = '<i class="fa-solid fa-receipt me-1"></i>' + res.countTrxMasuk + ' Transaksi Masuk Baru';
+          var elTotalMasuk = document.getElementById("dashTotalMasuk");
+          if (elTotalMasuk) elTotalMasuk.textContent = "Rp " + (res.totalKasMasuk || 0).toLocaleString('id-ID');
 
-          document.getElementById("dashTotalSetor").textContent = "Rp " + res.totalKasSetor.toLocaleString('id-ID');
-          document.getElementById("dashCountSetor").innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i>' + res.countTrxSetor + ' Penyetoran Baru';
+          var elCountMasuk = document.getElementById("dashCountMasuk");
+          if (elCountMasuk) elCountMasuk.innerHTML = '<i class="fa-solid fa-receipt me-1"></i>' + (res.countTrxMasuk || 0) + ' Transaksi Masuk Baru';
 
-          document.getElementById("dashTotalAnggota").textContent = res.totalAnggota;
-          document.getElementById("dashTotalAktif").textContent = res.totalAktif;
-          document.getElementById("dashTotalWafat").textContent = res.totalWafat;
-          document.getElementById("dashTotalKeluar").textContent = res.totalKeluar;
+          var elTotalSetor = document.getElementById("dashTotalSetor");
+          if (elTotalSetor) elTotalSetor.textContent = "Rp " + (res.totalKasSetor || 0).toLocaleString('id-ID');
+
+          var elCountSetor = document.getElementById("dashCountSetor");
+          if (elCountSetor) elCountSetor.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i>' + (res.countTrxSetor || 0) + ' Penyetoran Baru';
+
+          var elTotalAnggota = document.getElementById("dashTotalAnggota");
+          if (elTotalAnggota) elTotalAnggota.textContent = res.totalAnggota || 0;
+
+          var elTotalAktif = document.getElementById("dashTotalAktif");
+          if (elTotalAktif) elTotalAktif.textContent = res.totalAktif || 0;
+
+          var elTotalWafat = document.getElementById("dashTotalWafat");
+          if (elTotalWafat) elTotalWafat.textContent = res.totalWafat || 0;
+
+          var elTotalKeluar = document.getElementById("dashTotalKeluar");
+          if (elTotalKeluar) elTotalKeluar.textContent = res.totalKeluar || 0;
         }
       }).getDashboardStats(currentAdminPin);
     }
