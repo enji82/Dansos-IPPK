@@ -1376,7 +1376,7 @@
 
               <!-- Field Isian (Posisi Absolut) -->
               <div id="kwValNo" class="kw-val kw-pos-no">TRX-20261007-001</div>
-              <div id="kwValNamaNip" class="kw-val kw-pos-diterima fw-bold fs-6">Ibu Ning Minarni - NIP: 19850112</div>
+              <div id="kwValNamaNip" class="kw-val kw-pos-diterima fw-bold fs-6">Ibu Ning Minarni</div>
               <div id="kwValTerbilangTeks" class="kw-val kw-pos-uang fst-italic">Sembilan puluh ribu rupiah</div>
               
               <!-- Guna Membayar Block Absolut Dynamic Wrap -->
@@ -4387,7 +4387,7 @@
     function showKuitansiModal(data) {
       currentKuitansiData = data;
       document.getElementById("kwValNo").textContent = data.idTrx;
-      document.getElementById("kwValNamaNip").textContent = data.nama + (data.nip && data.nip !== "-" ? (" - NIP: " + data.nip) : "");
+      document.getElementById("kwValNamaNip").textContent = data.nama;
       document.getElementById("kwValTerbilangTeks").textContent = terbilang(data.nominal) + " rupiah";
       document.getElementById("kwValRincian").textContent = data.rincianBulan;
       document.getElementById("kwValNominalRp").textContent = data.nominal.toLocaleString('id-ID') + ",-";

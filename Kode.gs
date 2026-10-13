@@ -609,7 +609,7 @@ function simpanTransaksiMasuk(form) {
         tgl: tglStr,
         nama: namaAnggota,
         nip: nipAnggota,
-        nominal: nominalDiterima,
+        nominal: (iuranTerpakai > 0 ? iuranTerpakai : nominalDiterima),
         rincianBulan: rincianBulanStr
       }
     };
@@ -731,7 +731,8 @@ function getAdminRekapLaporan(pin, filterTahun) {
         if (!r[0]) continue;
         var thn = Number(r[5]);
         if (!filterTahun || filterTahun === "semua" || thn === Number(filterTahun)) {
-          var nom = Number(r[4]) || 0;
+          // r[8] adalah iuranTerpakai (nominal riil iuran), r[4] adalah nominal uang diterima
+          var nom = (Number(r[8]) > 0) ? Number(r[8]) : (Number(r[4]) || 0);
           totalIuranMasuk += nom;
           var bDari = Number(r[6]);
           var bSampai = Number(r[7]);
@@ -851,7 +852,8 @@ function getRiwayatPembayaranAdmin(pin, filterTahun) {
         if (!r[0]) continue;
         var thn = Number(r[5]);
         if (!filterTahun || filterTahun === "semua" || thn === Number(filterTahun)) {
-          var nom = Number(r[4]) || 0;
+          // r[8] adalah iuranTerpakai (nominal riil iuran), r[4] adalah nominal uang diterima
+          var nom = (Number(r[8]) > 0) ? Number(r[8]) : (Number(r[4]) || 0);
           totalNominal += nom;
           var bDari = Number(r[6]);
           var bSampai = Number(r[7]);
@@ -1222,7 +1224,7 @@ function generateAndSaveKuitansiPDF(data) {
 
         <!-- Values positioned absolutely -->
         <div class="kw-pos-no">${idTrx}</div>
-        <div class="kw-pos-diterima">${nama} ${nip && nip !== '-' ? (' - NIP: ' + nip) : ''}</div>
+        <div class="kw-pos-diterima">${nama}</div>
         <div class="kw-pos-uang">${terbilangTeks}</div>
         <div class="kw-pos-guna">${rincianTeks}</div>
         <div class="kw-pos-tanggal">Secang, ${tglFormatted}</div>
